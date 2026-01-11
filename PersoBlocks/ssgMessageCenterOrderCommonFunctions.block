@@ -1,0 +1,99 @@
+<%
+  // ***********************************************************************
+  // This perso block contains useful common functions for use in order
+  // Message Center Templates
+  // ***********************************************************************
+
+  // Returns HTML for basic information for all lineItems for passed in to the function
+  // Currently assumes that there can be more than one CONTACT_LENSES line item
+  // If so, we assume that there are two entries for any given name, one for
+  // Right Eye quantity, one for Left Eye quantity.
+  function getLineItemsSummary(lineItems) {
+    // Arrays of grouped Contact Lens items
+    // name -> { leftQuantity: number, rightQuantity: number, seenLeft: bool, seenRight: bool }
+    var clByName = {};
+    // Preserve the order of first CL name
+    var clOrder = [];
+
+    // Build an array of output blocks (non-CL)
+    var nonClSections = [];
+
+    // Iterate all resolved line items
+    for each (var lineItem in lineItems) {
+
+      // We're only interested in physical products
+      var category = lineItem.itemCategory;
+      if (category == "LENS_ELEMENTS" || category == "LENS_TREATMENTS" || category == "LENSES") {
+        continue;
+      }
+
+      if (category == "CONTACT_LENSES") {
+        var name = lineItem.name;
+        var eye = lineItem.eye;
+        if(lineItem.deliveryQuantity != undefined) {
+          var quantity = parseInt(String(lineItem.deliveryQuantity), 10);
+        } else {
+          var quantity = parseInt(String(lineItem.quantity), 10);
+        }
+        // If the name is not already in the array, then add it
+        if (!clByName[name]) {
+          clByName[name] = { leftQuantity: 0, rightQuantity: 0, seenLeft: false, seenRight: false };
+          clOrder.push(name);
+        }
+        // Update the array for each of Left and Right eye, based on name found
+        if (eye == "L") {
+          clByName[name].leftQuantity += quantity;
+          clByName[name].seenLeft = true;
+        } else if (eye == "R") {
+          clByName[name].rightQuantity += quantity;
+          clByName[name].seenRight = true;
+        } else if (eye == "LR") {
+          clByName[name].leftQuantity += quantity;
+          clByName[name].rightQuantity += quantity;
+          clByName[name].seenLeft = true;
+          clByName[name].seenRight = true;
+        } else {
+          // If eye is missing/unknown, assume its an LR (both).
+          clByName[name].leftQuantity += quantity;
+          clByName[name].rightQuantity += quantity;
+          clByName[name].seenLeft = true;
+          clByName[name].seenRight = true;
+        }
+        // Contact Lens arrays will be processed afterwards
+        continue;
+      }
+
+      // Non-contact-lens item: add a block string to the buffer
+      if(lineItem.deliveryQuantity != undefined) {
+        var quantity = parseInt(String(lineItem.deliveryQuantity), 10);
+      } else {
+        var quantity = parseInt(String(lineItem.quantity), 10);
+      }
+      nonClSections.push(
+        "<strong>Item:</strong> " + lineItem.name + "<br/>" +
+        "<strong>Quantity:</strong> " + lineItem.quantity
+      );
+    } // end for each
+
+    // Join non-CL blocks with a <br/><br/> separator
+    var nonClCopy = nonClSections.join("<br/><br/>");
+
+    // Build CL sections
+    var clSections = [];
+    for (var i = 0; i < clOrder.length; i++) {
+      var name = clOrder[i];
+      var arrayItem = clByName[name];
+
+      clSections.push(
+        "<strong>Item:</strong> " + name + "<br/>" +
+        "<strong>Quantity:</strong> Left " + arrayItem.leftQuantity + ", " +
+        "Right " + arrayItem.rightQuantity
+      );
+    }
+    // Join CL blocks (if any) with the same separator
+    var clCopy = clSections.join("<br/><br/>");
+
+    return {nonClCopy: nonClCopy, clCopy: clCopy};
+  }
+
+%>
