@@ -1,5 +1,6 @@
 package com.campaignworkbench.test;
 
+import com.campaignworkbench.campaignrenderer.TemplateRenderResult;
 import com.campaignworkbench.campaignrenderer.TemplateRenderer;
 import com.campaignworkbench.util.FileUtil;
 import org.mozilla.javascript.Context;
@@ -32,8 +33,8 @@ public class TemplateRenderTest {
             );
 
             // Render template
-            String output = TemplateRenderer.render(template, cx, scope, templatePath.toString());
-            System.out.println(output);
+            TemplateRenderResult renderResult = TemplateRenderer.render(template, cx, scope, templatePath.toString());
+            System.out.println(renderResult.getRenderedOutput());
 
         } finally {
             Context.exit();

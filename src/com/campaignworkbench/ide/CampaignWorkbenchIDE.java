@@ -1,5 +1,6 @@
 package com.campaignworkbench.ide;
 
+import com.campaignworkbench.campaignrenderer.TemplateRenderResult;
 import com.campaignworkbench.campaignrenderer.TemplateRenderer;
 import javafx.application.Application;
 import javafx.application.Platform;
@@ -187,12 +188,14 @@ public class CampaignWorkbenchIDE extends Application {
 
             scope.put("xmlContext", scope, xmlContextContent);
 
-            String resultHtml = TemplateRenderer.render(
+            TemplateRenderResult renderResult = TemplateRenderer.render(
                     templateSource,
                     cx,
                     scope,
                     editorTab.getFile().getFileName().toString()
             );
+
+            String resultHtml = renderResult.getRenderedOutput();
 
             Platform.runLater(() ->
                     preview.getEngine().loadContent(resultHtml)

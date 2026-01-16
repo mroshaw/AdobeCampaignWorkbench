@@ -19,7 +19,7 @@ public final class TemplateRenderer {
      * @param sourceName     File name for error reporting
      * @return Rendered HTML/Text
      */
-    public static String render(String templateSource, Context cx, Scriptable scope, String sourceName) {
+    public static TemplateRenderResult render(String templateSource, Context cx, Scriptable scope, String sourceName) {
 
         try {
             // Expose CampaignFunctions using Packages
@@ -40,9 +40,9 @@ public final class TemplateRenderer {
                     "jsImports.js", 1, null
             );
 
-            final String js;
+            final String transformedJavaScript;
             try {
-                js = transformToJavaScript(templateSource, cx, scope);
+                transformedJavaScript = transformToJavaScript(templateSource, cx, scope);
             }
             catch (Exception e) {
                 throw new TemplateGenerationException(
@@ -53,11 +53,12 @@ public final class TemplateRenderer {
                 );
             }
 
-            System.out.println(js);
+            // System.out.println(transformedJavaScript);
 
             try {
-                Object result = cx.evaluateString(scope, js, sourceName, 1, null);
-                return Context.toString(result);
+                Object result = cx.evaluateString(scope, transformedJavaScript, sourceName, 1, null);
+                TemplateRenderResult renderResult = new TemplateRenderResult(transformedJavaScript, Context.toString(result));
+                return renderResult;
             }
             catch (org.mozilla.javascript.EvaluatorException e) {
                 String message =
