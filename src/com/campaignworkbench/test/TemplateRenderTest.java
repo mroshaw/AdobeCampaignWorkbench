@@ -20,6 +20,17 @@ public class TemplateRenderTest {
             Path templatePath = Path.of("Workspaces/Test Workspace/Templates/ETMModuleTestTemplate.template");
             String template = FileUtil.read(templatePath);
 
+            // Load XML context
+            Path contextPath = Path.of("Workspaces/Test Workspace/XmlContext/SalesReceipt.xml");
+            String xml = FileUtil.read(contextPath);
+            cx.evaluateString(
+                    scope,
+                    "var rtEvent = new XML(`" + xml + "`);",
+                    contextPath.toString(),
+                    1,
+                    null
+            );
+
             // Render template
             String output = TemplateRenderer.render(template, cx, scope, templatePath.toString());
             System.out.println(output);
