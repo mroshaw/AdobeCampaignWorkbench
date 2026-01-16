@@ -1,6 +1,7 @@
 <%@ include view='testFunctions' %>
 <%@ include view='ssgDateFormatted' %>
 <%@ include view='ssgOrderShipmentFunctions' %>
+
 Hello <%= rtEvent.ctx.customer.name %> <%= test() %> <BR>
 <%
     var orderDate = formatDateMC(rtEvent.ctx.order.createdAt, 'com.specsavers.delivery.added-gb');

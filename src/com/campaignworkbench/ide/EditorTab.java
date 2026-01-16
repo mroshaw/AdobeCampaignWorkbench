@@ -3,9 +3,13 @@ package com.campaignworkbench.ide;
 import com.campaignworkbench.ide.editor.CodeEditor;
 import com.campaignworkbench.ide.editor.RSyntaxEditor;
 import com.campaignworkbench.ide.editor.SyntaxType;
+import javafx.application.Platform;
 import javafx.scene.control.Tab;
 import javafx.scene.layout.BorderPane;
+import org.fife.ui.rsyntaxtextarea.Theme;
 
+import java.io.IOException;
+import java.io.InputStream;
 import java.nio.file.Path;
 
 public final class EditorTab extends Tab {
@@ -34,6 +38,8 @@ public final class EditorTab extends Tab {
     public String getEditorText() {
         return editor.getText();
     }
+
+    public CodeEditor getEditor() { return editor ; }
 
     private SyntaxType determineSyntax(Path file) {
         String name = file.getFileName().toString().toLowerCase();

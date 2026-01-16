@@ -14,4 +14,6 @@ public interface CodeEditor {
     void setEditable(boolean editable);
 
     void requestFocus();
+
+    void applyDarkTheme(boolean isDark);
 }

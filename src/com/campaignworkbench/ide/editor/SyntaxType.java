@@ -4,5 +4,6 @@ public enum SyntaxType {
     TEMPLATE,   // JSP-like
     BLOCK,      // JavaScript
     XML,
+    SOURCE_PREVIEW,
     PLAIN
 }

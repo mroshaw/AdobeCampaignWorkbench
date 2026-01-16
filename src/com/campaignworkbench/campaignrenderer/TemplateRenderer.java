@@ -91,13 +91,20 @@ public final class TemplateRenderer {
         }
     }
 
+    private static String transformToJavaScript(String templateSource, Context cx, Scriptable scope) {
+        return transformToJavaScript(templateSource, cx, scope, true);
+    }
+
     /**
      * Converts template text into valid JavaScript that appends to a StringBuilder.
      * Includes are resolved recursively at transformation time.
      */
-    private static String transformToJavaScript(String templateSource, Context cx, Scriptable scope) {
+    private static String transformToJavaScript(String templateSource, Context cx, Scriptable scope, boolean isRoot) {
         StringBuilder js = new StringBuilder();
-        js.append("var out = new java.lang.StringBuilder();\n");
+        if(isRoot)
+        {
+            js.append("var out = new java.lang.StringBuilder();\n");
+        }
 
         int pos = 0;
         while (pos < templateSource.length()) {
@@ -124,7 +131,7 @@ public final class TemplateRenderer {
                 if (includedFile != null) {
                     Path path = Path.of("Workspaces/Test Workspace/PersoBlocks", includedFile + ".block");
                     String blockSource = FileUtil.read(path);
-                    js.append(transformToJavaScript(blockSource, cx, scope));
+                    js.append(transformToJavaScript(blockSource, cx, scope, false));
                 }
             }
             // Expression block: <%= ... %>

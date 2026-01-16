@@ -7,6 +7,9 @@ import javafx.scene.Node;
 import org.fife.ui.rsyntaxtextarea.*;
 import org.fife.ui.rtextarea.RTextScrollPane;
 
+import java.io.IOException;
+import java.io.InputStream;
+
 public final class RSyntaxEditor implements CodeEditor {
 
     private final SwingNode swingNode = new SwingNode();
@@ -24,11 +27,17 @@ public final class RSyntaxEditor implements CodeEditor {
         textArea.setAutoIndentEnabled(true);
         textArea.setMarkOccurrences(true);
         textArea.setClearWhitespaceLinesEnabled(false);
+        textArea.setCursor(java.awt.Cursor.getPredefinedCursor(java.awt.Cursor.TEXT_CURSOR));
+        // textArea.setFont(new java.awt.Font("JetBrains Mono", java.awt.Font.PLAIN, 11));
+        // textArea.setFont(new java.awt.Font("Fira Code", java.awt.Font.PLAIN, 11));
+        // textArea.setFont(new java.awt.Font("Consolas", java.awt.Font.PLAIN, 11));
+        textArea.setFont(new java.awt.Font("Source Code Pro", java.awt.Font.PLAIN, 14));
 
         RTextScrollPane scrollPane = new RTextScrollPane(textArea);
         scrollPane.setFoldIndicatorEnabled(true);
 
         swingNode.setContent(scrollPane);
+        swingNode.setCursor(javafx.scene.Cursor.TEXT);
     }
 
     @Override
@@ -57,6 +66,29 @@ public final class RSyntaxEditor implements CodeEditor {
     }
 
     @Override
+    public void applyDarkTheme(boolean isDark) {
+        Platform.runLater(() -> {
+            if (isDark) {
+                try (InputStream themeStream = getClass().getResourceAsStream(
+                        "/rsyntaxtextarea/themes/dark.xml")) {
+                    if (themeStream != null) {
+                        org.fife.ui.rsyntaxtextarea.Theme theme = org.fife.ui.rsyntaxtextarea.Theme.load(themeStream);
+                        theme.apply(textArea);
+                    } else {
+                        System.err.println("Dark theme not found on classpath!");
+                    }
+                } catch (IOException e) {
+                    e.printStackTrace();
+                }
+            } else {
+                // Optional: Reset to default theme (light)
+                textArea.setBackground(java.awt.Color.WHITE);
+                textArea.setForeground(java.awt.Color.BLACK);
+            }
+        });
+    }
+
+    @Override
     public void setSyntax(SyntaxType syntax) {
         Platform.runLater(() -> {
             switch (syntax) {
@@ -67,6 +99,7 @@ public final class RSyntaxEditor implements CodeEditor {
                     break;
 
                 case BLOCK:
+                case SOURCE_PREVIEW:
                     textArea.setSyntaxEditingStyle(
                             SyntaxConstants.SYNTAX_STYLE_JAVASCRIPT
                     );
@@ -77,7 +110,6 @@ public final class RSyntaxEditor implements CodeEditor {
                             SyntaxConstants.SYNTAX_STYLE_XML
                     );
                     break;
-
                 case PLAIN:
                 default:
                     textArea.setSyntaxEditingStyle(
@@ -87,5 +119,7 @@ public final class RSyntaxEditor implements CodeEditor {
             }
         });
     }
+
+
 
 }
