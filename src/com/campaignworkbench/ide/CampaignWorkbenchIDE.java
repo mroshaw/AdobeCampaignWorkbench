@@ -22,6 +22,8 @@ import java.nio.file.Path;
 
 public class CampaignWorkbenchIDE extends Application {
 
+    private String workspacePath = "Workspaces/Test Workspace";
+
     private TabPane tabPane;
     private WebView preview;
     private File xmlContextFile;
@@ -55,15 +57,15 @@ public class CampaignWorkbenchIDE extends Application {
         runButton = new Button("Run Template");
         runButton.setDisable(true);
 
-        openTemplateButton.setOnAction(e -> openFile("Templates"));
-        openBlockButton.setOnAction(e -> openFile("PersoBlocks"));
-        openXmlButton.setOnAction(e -> openFile("XmlContext"));
+        openTemplateButton.setOnAction(e -> openFile(workspacePath + "/Templates"));
+        openBlockButton.setOnAction(e -> openFile(workspacePath + "/PersoBlocks"));
+        openXmlButton.setOnAction(e -> openFile(workspacePath + "/XmlContext"));
+        setXmlButton.setOnAction(e -> setXmlContext());
 
         tabPane.getSelectionModel().selectedItemProperty().addListener(
                 (obs, oldTab, newTab) -> updateRunButtonState(newTab)
         );
 
-        setXmlButton.setOnAction(e -> setXmlContext());
         runButton.setOnAction(e -> runTemplate());
 
         HBox topBar = new HBox(
@@ -81,9 +83,6 @@ public class CampaignWorkbenchIDE extends Application {
         root.setCenter(splitPane);
 
         Scene scene = new Scene(root, 1000, 600);
-        scene.getStylesheets().add(
-                getClass().getResource("template-style.css").toExternalForm()
-        );
 
         primaryStage.setScene(scene);
         primaryStage.show();
@@ -106,7 +105,7 @@ public class CampaignWorkbenchIDE extends Application {
         FileChooser fileChooser = new FileChooser();
         fileChooser.setTitle("Open File");
         fileChooser.setInitialDirectory(
-                new File(System.getProperty("user.dir"), "XmlContext")
+                new File(System.getProperty("user.dir"), workspacePath + "/XmlContext")
         );
         fileChooser.getExtensionFilters().addAll(
                 new FileChooser.ExtensionFilter("All Files", "*.*"),
