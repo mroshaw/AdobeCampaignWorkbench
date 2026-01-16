@@ -1,3 +1,6 @@
+package com.campaignworkbench.campaignrenderer;
+
+import com.campaignworkbench.util.FileUtil;
 import org.mozilla.javascript.Context;
 import org.mozilla.javascript.Scriptable;
 
@@ -18,26 +21,73 @@ public final class TemplateRenderer {
      */
     public static String render(String templateSource, Context cx, Scriptable scope, String sourceName) {
 
-        // Expose CampaignFunctions using Packages
-        cx.evaluateString(scope,
-                "var formatDate = function(dateObj, formatStr) {" +
-                        "    return Packages.com.myapp.CampaignFunctions.formatDate(dateObj, formatStr);" +
-                        "};",
-                "campaignFunctions.js", 1, null);
+        try {
+            // Expose CampaignFunctions using Packages
+            cx.evaluateString(scope,
+                    "var formatDate = function(dateObj, formatStr) {" +
+                            "    return com.campaignworkbench.campaignrenderer.CampaignFunctions.formatDate(dateObj, formatStr);" +
+                            "};",
+                    "campaignFunctions.js", 1, null);
 
-        cx.evaluateString(
-                scope,
-                "var parseTimeStamp = function(strTime) {" +
-                        "    return Packages.com.myapp.CampaignFunctions.parseTime(strTime);" +
-                        "};",
-                "campaignFunctions.js",
-                1,
-                null
-        );
+            cx.evaluateString(scope,
+                    "var parseTimeStamp = function(strTime) {" +
+                            "    return com.campaignworkbench.campaignrenderer.CampaignFunctions.parseTimeStamp(strTime);" +
+                            "};",
+                    "campaignFunctions.js", 1, null);
 
-        String js = transformToJavaScript(templateSource, cx, scope);
-        Object result = cx.evaluateString(scope, js, sourceName, 1, null);
-        return Context.toString(result);
+            cx.evaluateString(scope,
+                    "var System = Packages.java.lang.System;",
+                    "jsImports.js", 1, null
+            );
+
+            final String js;
+            try {
+                js = transformToJavaScript(templateSource, cx, scope);
+            }
+            catch (Exception e) {
+                throw new TemplateGenerationException(
+                        "Failed to generate JavaScript from template",
+                        sourceName,
+                        -1,
+                        e
+                );
+            }
+
+            System.out.println(js);
+
+            try {
+                Object result = cx.evaluateString(scope, js, sourceName, 1, null);
+                return Context.toString(result);
+            }
+            catch (org.mozilla.javascript.EvaluatorException e) {
+                String message =
+                        "JavaScript syntax error" +
+                                (e.lineSource() != null ? ":\n" + e.lineSource() : "");
+
+                throw new TemplateParseException(
+                        message,
+                        sourceName,
+                        e.lineNumber(),
+                        e
+                );
+            }
+            catch (org.mozilla.javascript.JavaScriptException e) {
+                throw new TemplateExecutionException(
+                        "JavaScript execution error: " + e.getMessage(),
+                        sourceName,
+                        e.lineNumber(),
+                        e
+                );
+            }
+        }
+        catch (org.mozilla.javascript.RhinoException e) {
+            throw new TemplateExecutionException(
+                    "Rhino error: " + e.getMessage(),
+                    sourceName,
+                    e.lineNumber(),
+                    e
+            );
+        }
     }
 
     /**
@@ -71,9 +121,8 @@ public final class TemplateRenderer {
             if (trimmed.matches("@\\s*include.*")) {
                 String includedFile = extractIncludeFile(trimmed);
                 if (includedFile != null) {
-                    Path path = Path.of("PersoBlocks", includedFile + ".block");
+                    Path path = Path.of("Workspaces/Test Workspace/PersoBlocks", includedFile + ".block");
                     String blockSource = FileUtil.read(path);
-                    // Recursively transform the block content now
                     js.append(transformToJavaScript(blockSource, cx, scope));
                 }
             }
@@ -97,9 +146,7 @@ public final class TemplateRenderer {
     /** Appends static text safely */
     private static void appendText(StringBuilder js, String text) {
         if (text.isEmpty()) return;
-        // Normalize line endings
         text = text.replace("\r\n", "\n").replace("\r", "\n");
-        // Escape quotes and backslashes
         text = text.replace("\\", "\\\\").replace("\"", "\\\"").replace("\n", "\\n");
         js.append("out.append(\"").append(text).append("\");\n");
     }

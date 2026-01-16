@@ -1,0 +1,14 @@
+<component name="libraryTable">
+  <library name="cat.inspiracio.rhino.js.engine" type="repository">
+    <properties maven-id="cat.inspiracio:rhino-js-engine:1.7.14" />
+    <CLASSES>
+      <root url="jar://$MAVEN_REPOSITORY$/cat/inspiracio/rhino-js-engine/1.7.14/rhino-js-engine-1.7.14.jar!/" />
+      <root url="jar://$MAVEN_REPOSITORY$/org/mozilla/rhino/1.7.14/rhino-1.7.14.jar!/" />
+    </CLASSES>
+    <JAVADOC>
+      <root url="jar://$MAVEN_REPOSITORY$/cat/inspiracio/rhino-js-engine/1.7.14/rhino-js-engine-1.7.14-javadoc.jar!/" />
+      <root url="jar://$MAVEN_REPOSITORY$/org/mozilla/rhino/1.7.14/rhino-1.7.14-javadoc.jar!/" />
+    </JAVADOC>
+    <SOURCES />
+  </library>
+</component>

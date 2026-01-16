@@ -16,7 +16,7 @@
       if (delivery.state != "SHIPPED") {
         continue;
       }
-      var deliveryDate = getXmlDate(delivery.createdAt);
+      var deliveryDate = parseTimeStamp(delivery.createdAt);
       if (deliveryDate > latestDeliveryDate) {
         latestDeliveryDate = deliveryDate;
         latestDelivery = delivery;

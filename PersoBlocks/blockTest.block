@@ -1,8 +1,0 @@
-<% function test() {
-        return "Test";
-   }
- %>
-
- This is a personalisation block!
-
- <%= test() %>

@@ -9,6 +9,6 @@
     <orderEntry type="inheritedJdk" />
     <orderEntry type="sourceFolder" forTests="false" />
     <orderEntry type="library" name="cat.inspiracio.rhino.js.engine" level="project" />
-    <orderEntry type="library" name="fxmisc.richtext.richtextfx" level="project" />
+    <orderEntry type="library" name="fifesoft.rsyntaxtextarea" level="project" />
   </component>
 </module>

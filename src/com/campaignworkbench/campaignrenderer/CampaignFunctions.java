@@ -1,31 +1,30 @@
-package com.myapp;
+package com.campaignworkbench.campaignrenderer;
 
-import java.time.OffsetDateTime;
-import java.time.ZoneId;
-import java.time.ZonedDateTime;
+import org.mozilla.javascript.Context;
+
+import java.time.*;
 import java.time.format.DateTimeFormatter;
-import java.util.Calendar;
+import java.time.format.DateTimeParseException;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 public class CampaignFunctions {
 
-    public static Calendar parseTime(String strTime) throws IllegalArgumentException {
-        if (strTime == null || strTime.length() == 0)
-            return null;
+    /**
+     * Parses an Adobe Campaign timestamp string into a Calendar.
+     * Accepts a simplified ISO 8601 style string with optional time/timezone.
+     *
+     * @return Calendar with corresponding instant (UTC based)
+     */
+
+    public static Object parseTimeStamp(String timestamp) {
         try {
-            Calendar cal = Calendar.getInstance();
-            int iIndex = strTime.indexOf(':');
-            int iHour = Integer.parseInt(strTime.substring(0, iIndex));
-            strTime = strTime.substring(iIndex + 1);
-            iIndex = strTime.indexOf(':');
-            int iMin = Integer.parseInt(strTime.substring(0, iIndex));
-            strTime = strTime.substring(iIndex + 1);
-            int iSec = (int)Double.parseDouble(strTime);
-            cal.set(0, 0, 1, iHour, iMin, iSec);
-            return cal;
-        } catch (Exception e) {
-            throw new IllegalArgumentException("Error formatting date: " + strTime, e);
+            Instant instant = Instant.parse(timestamp); // parse ISO-8601
+            // Convert to JS Date in Rhino
+            Context cx = Context.getCurrentContext();
+            return cx.newObject(cx.initStandardObjects(), "Date", new Object[]{instant.toEpochMilli()});
+        } catch (DateTimeParseException ex) {
+            throw new IllegalArgumentException("Error parsing timestamp: " + timestamp, ex);
         }
     }
 
@@ -41,29 +40,31 @@ public class CampaignFunctions {
         try {
             String dateStr = dateObj.toString().trim();
 
-            // Normalize fractional seconds to 3 digits (milliseconds)
-            Pattern pattern = Pattern.compile("\\.(\\d{1,3})Z$");
-            Matcher matcher = pattern.matcher(dateStr);
+            // --- Normalize fractional seconds to 3 digits ---
+            Pattern fracPattern = Pattern.compile("\\.(\\d{1,3})Z$");
+            Matcher matcher = fracPattern.matcher(dateStr);
             if (matcher.find()) {
                 String frac = matcher.group(1);
-                if (frac.length() == 1) frac += "00";
-                else if (frac.length() == 2) frac += "0";
+                while (frac.length() < 3) {
+                    frac += "0"; // pad to 3 digits
+                }
+                // replace only the matched part with normalized fraction
                 dateStr = matcher.replaceFirst("." + frac + "Z");
             }
 
-            // Parse the date string
+            // Parse the date
             OffsetDateTime odt = OffsetDateTime.parse(dateStr);
-            ZonedDateTime zdt = odt.toZonedDateTime(); // convert to system default zone
+            ZonedDateTime zdt = odt.toZonedDateTime(); // system default zone
 
-            // Translate ACC format to Java pattern
+            // Translate Adobe Campaign format to Java pattern
             String javaFormat = translateACCFormat(formatStr);
-
             return zdt.format(DateTimeFormatter.ofPattern(javaFormat));
 
         } catch (Exception ex) {
-            throw new IllegalArgumentException("Error formatting date: " + dateObj, ex);
+            throw new IllegalArgumentException("Error in formatDate: " + dateObj, ex);
         }
     }
+
 
     /**
      * Convert Adobe Campaign date format strings into Java DateTimeFormatter patterns.
