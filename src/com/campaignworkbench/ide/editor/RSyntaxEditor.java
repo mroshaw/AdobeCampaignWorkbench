@@ -1,5 +1,8 @@
 package com.campaignworkbench.ide.editor;
 
+import com.campaignworkbench.ide.IThemeable;
+import com.campaignworkbench.ide.IDETheme;
+import com.campaignworkbench.ide.ThemeManager;
 import javafx.application.Platform;
 import javafx.embed.swing.SwingNode;
 import javafx.scene.Node;
@@ -7,16 +10,22 @@ import javafx.scene.Node;
 import org.fife.ui.rsyntaxtextarea.*;
 import org.fife.ui.rtextarea.RTextScrollPane;
 
+import java.awt.*;
 import java.io.IOException;
-import java.io.InputStream;
 
-public final class RSyntaxEditor implements CodeEditor {
+public class RSyntaxEditor implements ICodeEditor, IThemeable {
 
     private final SwingNode swingNode = new SwingNode();
     private RSyntaxTextArea textArea;
 
+    private IDETheme pendingTheme;
+
+
     public RSyntaxEditor() {
-        Platform.runLater(this::initSwing);
+        Platform.runLater(() -> {
+            initSwing();               // create the RSyntaxTextArea
+            ThemeManager.register(this); // now register it and apply current theme
+        });
     }
 
     private void initSwing() {
@@ -66,29 +75,6 @@ public final class RSyntaxEditor implements CodeEditor {
     }
 
     @Override
-    public void applyDarkTheme(boolean isDark) {
-        Platform.runLater(() -> {
-            if (isDark) {
-                try (InputStream themeStream = getClass().getResourceAsStream(
-                        "/rsyntaxtextarea/themes/dark.xml")) {
-                    if (themeStream != null) {
-                        org.fife.ui.rsyntaxtextarea.Theme theme = org.fife.ui.rsyntaxtextarea.Theme.load(themeStream);
-                        theme.apply(textArea);
-                    } else {
-                        System.err.println("Dark theme not found on classpath!");
-                    }
-                } catch (IOException e) {
-                    e.printStackTrace();
-                }
-            } else {
-                // Optional: Reset to default theme (light)
-                textArea.setBackground(java.awt.Color.WHITE);
-                textArea.setForeground(java.awt.Color.BLACK);
-            }
-        });
-    }
-
-    @Override
     public void setSyntax(SyntaxType syntax) {
         Platform.runLater(() -> {
             switch (syntax) {
@@ -121,5 +107,31 @@ public final class RSyntaxEditor implements CodeEditor {
     }
 
 
+    @Override
+    public void applyTheme(IDETheme ideTheme) {
+        try {
+            Theme themeToApply;
 
+            switch (ideTheme) {
+                case LIGHT:
+                    themeToApply = Theme.load(getClass().getResourceAsStream(
+                            "/rsyntaxtextarea/themes/default.xml"));
+                    break;
+                case DARK:
+                    themeToApply = Theme.load(getClass().getResourceAsStream(
+                            "/rsyntaxtextarea/themes/dark.xml"));
+                    break;
+                default:
+                    themeToApply = Theme.load(getClass().getResourceAsStream(
+                            "/rsyntaxtextarea/themes/default.xml"));
+                    break;
+            }
+            themeToApply.apply(textArea);
+
+        } catch(NullPointerException npe) {
+
+        } catch (IOException ioe) { // Never happens
+            ioe.printStackTrace();
+        }
+    }
 }

@@ -9,3 +9,4 @@ Hello <%= rtEvent.ctx.customer.name %> <%= test() %> <BR>
 %>
 Order Created: <%= orderDate %>
 Latest Delivery Date: <%= latestDelivery.createdAt %>
+

@@ -1,21 +1,17 @@
 package com.campaignworkbench.ide;
 
-import com.campaignworkbench.ide.editor.CodeEditor;
+import com.campaignworkbench.ide.editor.ICodeEditor;
 import com.campaignworkbench.ide.editor.RSyntaxEditor;
 import com.campaignworkbench.ide.editor.SyntaxType;
-import javafx.application.Platform;
 import javafx.scene.control.Tab;
 import javafx.scene.layout.BorderPane;
-import org.fife.ui.rsyntaxtextarea.Theme;
 
-import java.io.IOException;
-import java.io.InputStream;
 import java.nio.file.Path;
 
 public final class EditorTab extends Tab {
 
     private final Path file;
-    private final CodeEditor editor;
+    private final ICodeEditor editor;
 
     public EditorTab(Path file, String initialText) {
         this.file = file;
@@ -39,7 +35,7 @@ public final class EditorTab extends Tab {
         return editor.getText();
     }
 
-    public CodeEditor getEditor() { return editor ; }
+    public ICodeEditor getEditor() { return editor ; }
 
     private SyntaxType determineSyntax(Path file) {
         String name = file.getFileName().toString().toLowerCase();

@@ -1,32 +1,87 @@
+/* General Scene Background */
 .root {
     -fx-base: #2b2b2b;
-    -fx-background: #2b2b2b;
-    -fx-control-inner-background: #313335;
-    -fx-text-fill: #dcdcdc;
-    -fx-highlight-fill: #3c3f41;
-    -fx-highlight-text-fill: #ffffff;
-    -fx-accent: #009688;
-    -fx-focus-color: #009688;
+    -fx-background-color: #2b2b2b;
+    -fx-text-fill: #cccccc;
 }
 
+/* MenuBar */
+.menu-bar {
+    -fx-background-color: #2b2b2b;
+}
+
+.menu-bar .menu {
+    -fx-text-fill: #dddddd;
+}
+
+.menu-bar .menu:hover {
+    -fx-background-color: #3a3a3a;
+}
+
+.menu-bar .menu-item {
+    -fx-text-fill: #dddddd;
+    -fx-background-color: #2b2b2b;
+}
+
+.menu-bar .menu-item:hover {
+    -fx-background-color: #3a3a3a;
+    -fx-text-fill: #ffffff;
+}
+
+/* ToolBar Buttons */
+.tool-bar button {
+    -fx-background-color: #3a3a3a;
+    -fx-text-fill: #cccccc;
+    -fx-border-color: #555555;
+    -fx-border-radius: 4;
+}
+
+.tool-bar button:hover {
+    -fx-background-color: #505050;
+}
+
+.tool-bar button:pressed {
+    -fx-background-color: #606060;
+}
+
+/* TabPane */
+.tab-pane {
+    -fx-background-color: #2b2b2b;
+}
+
+.tab-pane .tab-header-background {
+    -fx-background-color: #2b2b2b;
+}
+
+.tab-pane .tab {
+    -fx-background-color: #3a3a3a;
+    -fx-text-base-color: #cccccc;
+}
+
+.tab-pane .tab:selected {
+    -fx-background-color: #505050;
+    -fx-text-base-color: #ffffff;
+}
+
+/* TextArea / Log Panel */
 .text-area {
-    -fx-control-inner-background: #313335;
-    -fx-text-fill: #dcdcdc;
-    -fx-highlight-fill: #3c3f41;
+    -fx-control-inner-background: #1e1e1e;
+    -fx-text-fill: #cccccc;
+    -fx-highlight-fill: #555555;
     -fx-highlight-text-fill: #ffffff;
     -fx-font-family: "Source Code Pro";
 }
 
+/* Labels */
 .label {
-    -fx-text-fill: #dcdcdc;
+    -fx-text-fill: #cccccc;
 }
 
-.button {
-    -fx-background-color: #3c3f41;
-    -fx-text-fill: #dcdcdc;
+/* ScrollBars (optional, subtle styling) */
+.scroll-bar .thumb {
+    -fx-background-color: #555555;
 }
 
-.menu-bar {
-    -fx-background-color: #3c3f41;
-    -fx-text-fill: #dcdcdc;
+.scroll-bar .track {
+    -fx-background-color: #2b2b2b;
 }

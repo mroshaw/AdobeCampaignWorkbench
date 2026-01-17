@@ -2,7 +2,7 @@ package com.campaignworkbench.ide.editor;
 
 import javafx.scene.Node;
 
-public interface CodeEditor {
+public interface ICodeEditor {
 
     Node getNode();
 
@@ -15,5 +15,4 @@ public interface CodeEditor {
 
     void requestFocus();
 
-    void applyDarkTheme(boolean isDark);
 }
