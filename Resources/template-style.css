@@ -1,5 +1,0 @@
-.keyword { -fx-fill: #0000ff; -fx-font-weight: bold; }
-.string { -fx-fill: #008000; }
-.comment { -fx-fill: #808080; -fx-font-style: italic; }
-.paren, .brace, .bracket { -fx-fill: #800000; }
-.semicolon { -fx-fill: #000000; }

@@ -1,12 +1,11 @@
 package com.campaignworkbench.ide.editor;
 
 import com.campaignworkbench.ide.IDETheme;
-import com.campaignworkbench.ide.IThemeable;
 import javafx.scene.Node;
 import javafx.scene.control.Label;
 import javafx.scene.layout.VBox;
 
-public class SourcePreviewPanel extends RSyntaxEditor implements IJavaFxNode, IThemeable {
+public class SourcePreviewPanel extends RSyntaxEditor implements IJavaFxNode {
 
     VBox bottomPreviewBox;
     Label jsLabel;
@@ -17,21 +16,6 @@ public class SourcePreviewPanel extends RSyntaxEditor implements IJavaFxNode, IT
         bottomPreviewBox = new VBox(5, jsLabel, super.getNode());
         super.setEditable(true);
         super.setSyntax(SyntaxType.SOURCE_PREVIEW);
-    }
-
-    public void applyTheme(IDETheme theme) {
-        super.applyTheme(theme);
-        switch (theme) {
-            case DARK:
-                bottomPreviewBox.setStyle("-fx-background-color: #2b2b2b;");
-                jsLabel.setStyle("-fx-text-fill: white;");
-                break;
-            case LIGHT:
-            default:
-                bottomPreviewBox.setStyle("-fx-background-color: #ececec;");
-                jsLabel.setStyle("-fx-text-fill: black;");
-                break;
-        }
     }
 
     public Node getNode() {

@@ -1,5 +1,7 @@
 package com.campaignworkbench.ide;
 
+import atlantafx.base.theme.CupertinoDark;
+import atlantafx.base.theme.CupertinoLight;
 import com.campaignworkbench.campaignrenderer.TemplateParseException;
 import com.campaignworkbench.campaignrenderer.TemplateRenderResult;
 import com.campaignworkbench.campaignrenderer.TemplateRenderer;
@@ -103,6 +105,8 @@ public class CampaignWorkbenchIDE extends Application {
         primaryStage.setScene(scene);
         primaryStage.show();
 
+        ThemeManager.applyCurrentTheme();
+
         appendLog("Welcome to Campaign workbench! Load a template, select an XML context, and hit run!");
     }
 
@@ -123,9 +127,22 @@ public class CampaignWorkbenchIDE extends Application {
     }
 
     private void applyTheme(IDETheme theme) {
-        ThemeManager.setTheme(theme, scene);
+        ThemeManager.setTheme(theme);
     }
 
+    public static void setTheme(IDETheme ideTheme) {
+        switch(ideTheme)
+        {
+            case DARK:
+                Application.setUserAgentStylesheet(new CupertinoDark().getUserAgentStylesheet());
+                break;
+
+            case LIGHT:
+            default:
+                Application.setUserAgentStylesheet(new CupertinoLight().getUserAgentStylesheet());
+                break;
+        }
+    }
 
     private void updateRunButtonState(Tab tab) {
         if (tab instanceof EditorTab) {

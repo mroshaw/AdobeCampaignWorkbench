@@ -10,5 +10,6 @@
     <orderEntry type="sourceFolder" forTests="false" />
     <orderEntry type="library" name="cat.inspiracio.rhino.js.engine" level="project" />
     <orderEntry type="library" name="fifesoft.rsyntaxtextarea" level="project" />
+    <orderEntry type="library" name="atlantafx-base-2.1.0" level="project" />
   </component>
 </module>

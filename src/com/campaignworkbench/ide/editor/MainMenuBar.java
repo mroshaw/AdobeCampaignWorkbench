@@ -1,7 +1,4 @@
 package com.campaignworkbench.ide.editor;
-
-import com.campaignworkbench.ide.IThemeable;
-import com.campaignworkbench.ide.IDETheme;
 import com.campaignworkbench.ide.ThemeManager;
 import javafx.application.Platform;
 import javafx.event.ActionEvent;
@@ -15,7 +12,7 @@ import javafx.scene.input.KeyCode;
 import javafx.scene.input.KeyCodeCombination;
 import javafx.scene.input.KeyCombination;
 
-public class MainMenuBar implements IThemeable, IJavaFxNode  {
+public class MainMenuBar implements IJavaFxNode  {
 
     MenuBar menuBar;
 
@@ -93,35 +90,9 @@ public class MainMenuBar implements IThemeable, IJavaFxNode  {
 
         // --- Add menus to menu bar ---
         menuBar.getMenus().addAll(fileMenu, viewMenu, helpMenu);
-
-        ThemeManager.register(this);
     }
 
     private void dummyHandler(String action) {
-
-    }
-
-    @Override
-    public void applyTheme(IDETheme theme) {
-        switch (theme) {
-            case DARK:
-                menuBar.setStyle(
-                        "-fx-background-color: #2b2b2b; " +
-                                "-fx-text-fill: #dddddd;"
-                );
-                // Optional: recursively style menu items
-                menuBar.getMenus().forEach(this::applyDarkToMenu);
-                break;
-
-            case LIGHT:
-            default:
-                menuBar.setStyle(
-                        "-fx-background-color: white; " +
-                                "-fx-text-fill: black;"
-                );
-                menuBar.getMenus().forEach(this::applyLightToMenu);
-                break;
-        }
     }
 
     @Override

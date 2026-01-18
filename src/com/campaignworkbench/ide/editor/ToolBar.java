@@ -1,6 +1,5 @@
 package com.campaignworkbench.ide.editor;
 
-import com.campaignworkbench.ide.IThemeable;
 import com.campaignworkbench.ide.IDETheme;
 import com.campaignworkbench.ide.ThemeManager;
 import javafx.event.ActionEvent;
@@ -12,7 +11,7 @@ import javafx.scene.control.Label;
 import javafx.scene.control.Tooltip;
 import javafx.scene.layout.HBox;
 
-public class ToolBar implements IThemeable, IJavaFxNode {
+public class ToolBar implements IJavaFxNode {
 
     HBox toolBar;
     Button runButton;
@@ -62,7 +61,6 @@ public class ToolBar implements IThemeable, IJavaFxNode {
         );
         toolBar.setAlignment(Pos.CENTER_LEFT);
         toolBar.getStyleClass().add("tool-bar");
-        ThemeManager.register(this);
     }
 
     public void setXmlContextLabel(String labelText) {
@@ -71,10 +69,6 @@ public class ToolBar implements IThemeable, IJavaFxNode {
 
     public void setRunButtonState(boolean state) {
         runButton.setDisable(state);
-    }
-
-    @Override
-    public void applyTheme(IDETheme theme) {
     }
 
     @Override
