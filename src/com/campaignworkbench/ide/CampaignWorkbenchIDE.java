@@ -5,9 +5,6 @@ import atlantafx.base.theme.CupertinoLight;
 import com.campaignworkbench.campaignrenderer.TemplateParseException;
 import com.campaignworkbench.campaignrenderer.TemplateRenderResult;
 import com.campaignworkbench.campaignrenderer.TemplateRenderer;
-import com.campaignworkbench.ide.editor.*;
-import com.campaignworkbench.ide.editor.MainMenuBar;
-import com.campaignworkbench.ide.editor.ToolBar;
 import javafx.application.Application;
 import javafx.application.Platform;
 import javafx.geometry.Orientation;
@@ -25,11 +22,13 @@ import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
 
+/**
+ * Builds a User Interface for the Campaign Workbench IDE
+ */
 public class CampaignWorkbenchIDE extends Application {
 
-    private String workspacePath = "Workspaces/Test Workspace";
+    private final String workspacePath = "Workspaces/Test Workspace";
 
-    private MainMenuBar menuBar;
     private ToolBar toolBar;
     private EditorTabPanel editorTabPanel;
     private LogPanel logPanel;
@@ -39,9 +38,7 @@ public class CampaignWorkbenchIDE extends Application {
     private File xmlContextFile;
     private String xmlContextContent;
 
-    private Scene scene;
-
-    public static void main(String[] args) {
+    static void main(String[] args) {
         launch(args);
     }
 
@@ -49,23 +46,30 @@ public class CampaignWorkbenchIDE extends Application {
     public void start(Stage primaryStage) {
         primaryStage.setTitle("Campaign Workbench");
 
-        // Menu and toolbar
-        menuBar = new MainMenuBar(e -> openFile(getWorkspaceTemplatePath()),
-                    e ->openFile(getWorkspaceBlockPath()),
-                    e -> openFile(getWorkspaceXmlPath()),
-                    e -> saveCurrent(),
-                e-> applyTheme(IDETheme.LIGHT),
-                e-> applyTheme(IDETheme.DARK)
-                );
+        // Handle close request
+        primaryStage.setOnCloseRequest(event -> {
+            shutDown();
+            Platform.exit();
+            // System.exit(0); // optional, see below
+        });
 
-        toolBar = new ToolBar(e -> openFile(getWorkspaceTemplatePath()),
-                e ->openFile(getWorkspaceBlockPath()),
-                e -> openFile(getWorkspaceXmlPath()),
-                e -> setXmlContext(),
-                e -> runTemplate());
+
+        // Menu and toolbar
+        MainMenuBar menuBar = new MainMenuBar(_ -> openFile(getWorkspaceTemplatePath()),
+                _ -> openFile(getWorkspaceBlockPath()),
+                _ -> openFile(getWorkspaceXmlPath()),
+                _ -> saveCurrent(),
+                _ -> applyTheme(IDETheme.LIGHT),
+                _ -> applyTheme(IDETheme.DARK)
+        );
+
+        toolBar = new ToolBar(_ -> openFile(getWorkspaceTemplatePath()),
+                _ -> setXmlContext(),
+                _ -> clearXmlContext(),
+                _ -> runTemplate());
 
         // Editor tabs
-        editorTabPanel = new EditorTabPanel((obs, oldTab, newTab) -> updateRunButtonState(newTab));
+        editorTabPanel = new EditorTabPanel((_, _, newTab) -> updateRunButtonState(newTab));
 
         // Output panes
         previewPanel = new OutputPreviewPanel();
@@ -101,13 +105,17 @@ public class CampaignWorkbenchIDE extends Application {
         BorderPane root = new BorderPane();
         root.setTop(topBar);
         root.setCenter(rootSplitPane);
-        scene = new Scene(root, 1000, 600);
+        Scene scene = new Scene(root, 1200, 800);
         primaryStage.setScene(scene);
         primaryStage.show();
 
         ThemeManager.applyCurrentTheme();
 
         appendLog("Welcome to Campaign workbench! Load a template, select an XML context, and hit run!");
+    }
+
+    private void shutDown() {
+
     }
 
     private void appendLog(String logMessage) {
@@ -130,6 +138,10 @@ public class CampaignWorkbenchIDE extends Application {
         ThemeManager.setTheme(theme);
     }
 
+    /**
+     * Sets the IDE theme
+     * @param ideTheme theme, LIGHT or DARK, to apply to the IDE
+     */
     public static void setTheme(IDETheme ideTheme) {
         switch(ideTheme)
         {
@@ -179,6 +191,12 @@ public class CampaignWorkbenchIDE extends Application {
                 throw new RuntimeException(ex);
             }
         }
+    }
+
+    private void clearXmlContext() {
+        xmlContextFile = null;
+        xmlContextContent = "";
+        toolBar.clearXmlContextLabel();
     }
 
     private void openFile(String defaultSubfolder) {
@@ -265,8 +283,8 @@ public class CampaignWorkbenchIDE extends Application {
                     editorTabPanel.getSelectedFileName()
             );
 
-            String resultHtml = renderResult.getRenderedOutput();
-            String resultJs = renderResult.getGeneratedJavaScript();
+            String resultHtml = renderResult.renderedOutput();
+            String resultJs = renderResult.generatedJavaScript();
 
             Platform.runLater(() -> {
                 previewPanel.setContent(resultHtml);

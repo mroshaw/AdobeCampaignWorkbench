@@ -1,19 +1,23 @@
-package com.campaignworkbench.ide.editor;
+package com.campaignworkbench.ide;
 
-import com.campaignworkbench.ide.IDETheme;
-import com.campaignworkbench.ide.ThemeManager;
 import javafx.scene.Cursor;
 import javafx.scene.Node;
 import javafx.scene.control.Label;
 import javafx.scene.layout.VBox;
 import javafx.scene.web.WebView;
 
-public class OutputPreviewPanel implements  IJavaFxNode {
+/**
+ * Implements an HTML preview panel for use in the IDE User Interface
+ */
+public class OutputPreviewPanel implements IJavaFxNode {
 
-    private WebView preview;
-    private VBox topPreviewBox;
+    private final WebView preview;
+    private final VBox topPreviewBox;
     Label outputLabel;
 
+    /**
+     * Constructor
+     */
     public OutputPreviewPanel() {
         preview = new WebView();
         preview.setCursor(Cursor.TEXT);
@@ -22,6 +26,9 @@ public class OutputPreviewPanel implements  IJavaFxNode {
         topPreviewBox = new VBox(5, outputLabel, preview);
     }
 
+    /**
+     * @param content HTML preview content to set in the UI
+     */
     public void setContent(String content) {
         preview.getEngine().loadContent(content);
     }

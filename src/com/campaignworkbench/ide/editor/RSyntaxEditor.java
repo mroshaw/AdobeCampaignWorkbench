@@ -10,16 +10,21 @@ import org.fife.ui.rsyntaxtextarea.*;
 import org.fife.ui.rtextarea.RTextScrollPane;
 
 import javax.swing.*;
-import java.awt.event.HierarchyEvent;
 import java.io.IOException;
 
+/**
+ * Provided an implementation of the ICodeEditor interface using the RSyntaxTextArea control
+ */
 public class RSyntaxEditor implements ICodeEditor {
 
     private final SwingNode swingNode = new SwingNode();
-    private RSyntaxTextArea textArea;
+    private RSyntaxTextArea rSyntaxTextArea;
 
     private IDETheme pendingTheme;
 
+    /**
+     * Constructor
+     */
     public RSyntaxEditor() {
         Platform.runLater(() -> {
             initSwing();
@@ -27,20 +32,23 @@ public class RSyntaxEditor implements ICodeEditor {
         });
     }
 
+    /**
+     * Initialise the swing components
+     */
     private void initSwing() {
-        textArea = new RSyntaxTextArea(25, 80);
-        textArea.setAntiAliasingEnabled(true);
-        textArea.setCodeFoldingEnabled(true);
-        textArea.setBracketMatchingEnabled(true);
-        textArea.setAutoIndentEnabled(true);
-        textArea.setMarkOccurrences(true);
-        textArea.setClearWhitespaceLinesEnabled(false);
-        textArea.setCursor(java.awt.Cursor.getPredefinedCursor(java.awt.Cursor.TEXT_CURSOR));
+        rSyntaxTextArea = new RSyntaxTextArea(25, 80);
+        rSyntaxTextArea.setAntiAliasingEnabled(true);
+        rSyntaxTextArea.setCodeFoldingEnabled(true);
+        rSyntaxTextArea.setBracketMatchingEnabled(true);
+        rSyntaxTextArea.setAutoIndentEnabled(true);
+        rSyntaxTextArea.setMarkOccurrences(true);
+        rSyntaxTextArea.setClearWhitespaceLinesEnabled(false);
+        rSyntaxTextArea.setCursor(java.awt.Cursor.getPredefinedCursor(java.awt.Cursor.TEXT_CURSOR));
         // textArea.setFont(new java.awt.Font("JetBrains Mono", java.awt.Font.PLAIN, 11));
         // textArea.setFont(new java.awt.Font("Fira Code", java.awt.Font.PLAIN, 11));
         // textArea.setFont(new java.awt.Font("Consolas", java.awt.Font.PLAIN, 11));
 
-        RTextScrollPane scrollPane = new RTextScrollPane(textArea);
+        RTextScrollPane scrollPane = new RTextScrollPane(rSyntaxTextArea);
         scrollPane.setFoldIndicatorEnabled(true);
 
         swingNode.setContent(scrollPane);
@@ -54,22 +62,22 @@ public class RSyntaxEditor implements ICodeEditor {
 
     @Override
     public void setText(String text) {
-        Platform.runLater(() -> textArea.setText(text));
+        Platform.runLater(() -> rSyntaxTextArea.setText(text));
     }
 
     @Override
     public String getText() {
-        return textArea.getText();
+        return rSyntaxTextArea.getText();
     }
 
     @Override
     public void setEditable(boolean editable) {
-        Platform.runLater(() -> textArea.setEditable(editable));
+        Platform.runLater(() -> rSyntaxTextArea.setEditable(editable));
     }
 
     @Override
     public void requestFocus() {
-        Platform.runLater(() -> textArea.requestFocusInWindow());
+        Platform.runLater(() -> rSyntaxTextArea.requestFocusInWindow());
     }
 
     @Override
@@ -77,26 +85,26 @@ public class RSyntaxEditor implements ICodeEditor {
         Platform.runLater(() -> {
             switch (syntax) {
                 case TEMPLATE:
-                    textArea.setSyntaxEditingStyle(
+                    rSyntaxTextArea.setSyntaxEditingStyle(
                             SyntaxConstants.SYNTAX_STYLE_JSP
                     );
                     break;
 
                 case BLOCK:
                 case SOURCE_PREVIEW:
-                    textArea.setSyntaxEditingStyle(
+                    rSyntaxTextArea.setSyntaxEditingStyle(
                             SyntaxConstants.SYNTAX_STYLE_JAVASCRIPT
                     );
                     break;
 
                 case XML:
-                    textArea.setSyntaxEditingStyle(
+                    rSyntaxTextArea.setSyntaxEditingStyle(
                             SyntaxConstants.SYNTAX_STYLE_XML
                     );
                     break;
                 case PLAIN:
                 default:
-                    textArea.setSyntaxEditingStyle(
+                    rSyntaxTextArea.setSyntaxEditingStyle(
                             SyntaxConstants.SYNTAX_STYLE_NONE
                     );
                     break;
@@ -104,18 +112,18 @@ public class RSyntaxEditor implements ICodeEditor {
         });
     }
 
-    public void applyThemeAsync(Theme theme) {
+    private void applyThemeAsync(Theme theme) {
         SwingUtilities.invokeLater(new Runnable() {
             @Override
             public void run() {
-                if (textArea.getGraphics() != null) {
+                if (rSyntaxTextArea.getGraphics() != null) {
                     // Safe to apply theme now
-                    theme.apply(textArea);
+                    theme.apply(rSyntaxTextArea);
                 } else {
                     // Not ready yet, try again on the next repaint
                     Timer timer = new Timer(50, e -> {
-                        if (textArea.getGraphics() != null) {
-                            theme.apply(textArea);
+                        if (rSyntaxTextArea.getGraphics() != null) {
+                            theme.apply(rSyntaxTextArea);
                             ((Timer) e.getSource()).stop();
                         }
                     });
@@ -126,6 +134,10 @@ public class RSyntaxEditor implements ICodeEditor {
         });
     }
 
+    /**
+     * Applies a light or dark theme to all controls in the UI
+     * @param ideTheme enum of the LIGHT or DARK theme
+     */
     public void applyTheme(IDETheme ideTheme) {
         try {
             Theme themeToApply;

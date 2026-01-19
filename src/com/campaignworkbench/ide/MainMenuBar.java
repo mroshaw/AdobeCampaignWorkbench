@@ -1,5 +1,4 @@
-package com.campaignworkbench.ide.editor;
-import com.campaignworkbench.ide.ThemeManager;
+package com.campaignworkbench.ide;
 import javafx.application.Platform;
 import javafx.event.ActionEvent;
 import javafx.event.EventHandler;
@@ -12,10 +11,22 @@ import javafx.scene.input.KeyCode;
 import javafx.scene.input.KeyCodeCombination;
 import javafx.scene.input.KeyCombination;
 
-public class MainMenuBar implements IJavaFxNode  {
+/**
+ * Provides a menu bar for use in the IDE User Interface
+ */
+public class MainMenuBar implements IJavaFxNode {
 
     MenuBar menuBar;
 
+    /**
+     * Constructor
+     * @param openTemplateFileHandler action to run when open template menu is selected
+     * @param openBlockFileHandler action to run when open block menu is selected
+     * @param openXMLFileHandler action to run when open XML menu is selected
+     * @param saveCurrentFileHandler action to run when save current file menu is selected
+     * @param applyLightThemeHandler action to run when apply light theme menu is selected
+     * @param applyDarkThemeHandler action to run when apply dark theme menu is selected
+     */
     public MainMenuBar(
             EventHandler<ActionEvent> openTemplateFileHandler,
             EventHandler<ActionEvent> openBlockFileHandler,
@@ -37,7 +48,7 @@ public class MainMenuBar implements IJavaFxNode  {
         MenuItem openBlock = new MenuItem("Block");
         MenuItem openXmlContext = new MenuItem("XML Context");
 
-        openWorkspace.setOnAction(e -> dummyHandler("Open Workspace"));
+        openWorkspace.setOnAction(_ -> dummyHandler());
         openTemplate.setOnAction(openTemplateFileHandler);
         openBlock.setOnAction(openBlockFileHandler);
         openXmlContext.setOnAction(openXMLFileHandler);
@@ -51,10 +62,10 @@ public class MainMenuBar implements IJavaFxNode  {
         MenuItem newBlock = new MenuItem("Block");
         MenuItem newXmlContext = new MenuItem("XML Context");
 
-        newWorkspace.setOnAction(e -> dummyHandler("New Workspace"));
-        newTemplate.setOnAction(e -> dummyHandler("New Template"));
-        newBlock.setOnAction(e -> dummyHandler("New Block"));
-        newXmlContext.setOnAction(e -> dummyHandler("New XML Context"));
+        newWorkspace.setOnAction(_ -> dummyHandler());
+        newTemplate.setOnAction(_ -> dummyHandler());
+        newBlock.setOnAction(_ -> dummyHandler());
+        newXmlContext.setOnAction(_ -> dummyHandler());
 
         newSub.getItems().addAll(newWorkspace, newTemplate, newBlock, newXmlContext);
 
@@ -67,15 +78,15 @@ public class MainMenuBar implements IJavaFxNode  {
         MenuItem exitItem = new MenuItem("Exit");
 
         saveCurrent.setOnAction(saveCurrentFileHandler);
-        saveCurrentAs.setOnAction(e -> dummyHandler("Save Current As"));
-        exitItem.setOnAction(e -> Platform.exit());
+        saveCurrentAs.setOnAction(_ -> dummyHandler());
+        exitItem.setOnAction(_ -> Platform.exit());
 
         fileMenu.getItems().addAll(openSub, newSub, saveCurrent, saveCurrentAs, new SeparatorMenuItem(), exitItem);
 
         // --- Help Menu ---
         Menu helpMenu = new Menu("Help");
         MenuItem aboutItem = new MenuItem("About");
-        aboutItem.setOnAction(e -> dummyHandler("About"));
+        aboutItem.setOnAction(_ -> dummyHandler());
         helpMenu.getItems().add(aboutItem);
 
         Menu viewMenu = new Menu("View");
@@ -92,21 +103,14 @@ public class MainMenuBar implements IJavaFxNode  {
         menuBar.getMenus().addAll(fileMenu, viewMenu, helpMenu);
     }
 
-    private void dummyHandler(String action) {
+    /**
+     * Temp dummy handle for new menu items/testing
+     */
+    private void dummyHandler() {
     }
 
     @Override
     public Node getNode() {
         return menuBar;
-    }
-
-    private void applyDarkToMenu(Menu menu) {
-        menu.setStyle("-fx-text-fill: #dddddd;");
-        menu.getItems().forEach(item -> item.setStyle("-fx-text-fill: #dddddd;"));
-    }
-
-    private void applyLightToMenu(Menu menu) {
-        menu.setStyle("-fx-text-fill: black;");
-        menu.getItems().forEach(item -> item.setStyle("-fx-text-fill: black;"));
     }
 }

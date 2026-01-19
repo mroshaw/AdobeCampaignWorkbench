@@ -6,6 +6,10 @@ import org.mozilla.javascript.Scriptable;
 
 import java.nio.file.Path;
 
+/**
+ * Provided code generation, parsing and execution functionality
+ * that emulates the processes of email rendering in Adobe Campaign Classic
+ */
 public final class TemplateRenderer {
 
     private TemplateRenderer() {}
@@ -91,6 +95,9 @@ public final class TemplateRenderer {
         }
     }
 
+    /**
+     * Overload to enforce only the root generates a StringBuilder
+     */
     private static String transformToJavaScript(String templateSource, Context cx, Scriptable scope) {
         return transformToJavaScript(templateSource, cx, scope, true);
     }

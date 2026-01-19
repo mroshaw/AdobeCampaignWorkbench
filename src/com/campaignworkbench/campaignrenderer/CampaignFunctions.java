@@ -8,15 +8,19 @@ import java.time.format.DateTimeParseException;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
+/**
+ * Provides implementations of bespoke Adobe Campaign functions, that can then be included in template, block, and
+ * module code
+ */
 public class CampaignFunctions {
 
     /**
      * Parses an Adobe Campaign timestamp string into a Calendar.
      * Accepts a simplified ISO 8601 style string with optional time/timezone.
      *
-     * @return Calendar with corresponding instant (UTC based)
+     * @param timestamp as an ISO 8601 string
+     * @return Object with corresponding instant (UTC based)
      */
-
     public static Object parseTimeStamp(String timestamp) {
         try {
             Instant instant = Instant.parse(timestamp); // parse ISO-8601
@@ -40,7 +44,7 @@ public class CampaignFunctions {
         try {
             String dateStr = dateObj.toString().trim();
 
-            // --- Normalize fractional seconds to 3 digits ---
+            // Normalize fractional seconds to 3 digits
             Pattern fracPattern = Pattern.compile("\\.(\\d{1,3})Z$");
             Matcher matcher = fracPattern.matcher(dateStr);
             if (matcher.find()) {
@@ -78,7 +82,8 @@ public class CampaignFunctions {
         if (accFormat == null) return "";
 
         // Replace ACC patterns, longer first
-        String javaPattern = accFormat
+        // 2-digit year
+        return accFormat
                 .replace("%Bl", "MMMM")   // full month name
                 .replace("%B", "MMMM")    // full month name (standard)
                 .replace("%b", "MMM")     // short month name
@@ -87,8 +92,6 @@ public class CampaignFunctions {
                 .replace("%m", "MM")      // month number
                 .replace("%Y", "yyyy")    // 4-digit year
                 .replace("%4Y", "yyyy")   // ACC alias
-                .replace("%y", "yy");     // 2-digit year
-
-        return javaPattern;
+                .replace("%y", "yy");
     }
 }

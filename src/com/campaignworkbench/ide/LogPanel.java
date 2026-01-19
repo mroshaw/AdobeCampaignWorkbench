@@ -1,7 +1,5 @@
-package com.campaignworkbench.ide.editor;
+package com.campaignworkbench.ide;
 
-import com.campaignworkbench.ide.IDETheme;
-import com.campaignworkbench.ide.ThemeManager;
 import javafx.application.Platform;
 import javafx.scene.Cursor;
 import javafx.scene.Node;
@@ -11,15 +9,20 @@ import javafx.scene.layout.Priority;
 import javafx.scene.layout.VBox;
 import javafx.scene.text.Font;
 
-public class LogPanel implements IJavaFxNode  {
+/**
+ * User interface control to provided a logging console
+ */
+public class LogPanel implements IJavaFxNode {
 
-    private TextArea logArea;
-    private Label logLabel;
+    private final TextArea logArea;
     VBox logBox;
 
+    /**
+     * Constructor
+     */
     public LogPanel() {
         // --- Full-width log pane ---
-        logLabel = new Label("Logs");
+        Label logLabel = new Label("Logs");
         logArea = new TextArea();
         logArea.setEditable(false);
         logArea.setWrapText(true);
@@ -34,6 +37,10 @@ public class LogPanel implements IJavaFxNode  {
         return logBox;
     }
 
+    /**
+     * Adds a line of content to the log
+     * @param msg text containing content of the log line to add
+     */
     public void appendLog(String msg) {
         Platform.runLater(() -> logArea.appendText(msg + "\n"));
     }

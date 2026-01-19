@@ -8,11 +8,19 @@ import javafx.scene.layout.BorderPane;
 
 import java.nio.file.Path;
 
+/**
+ * Implements a Tab containing a code editor
+ */
 public final class EditorTab extends Tab {
 
     private final Path file;
     private final ICodeEditor editor;
 
+    /**
+     * Constructor
+     * @param file that the editor is editing
+     * @param initialText any default, initial code to include in the new editor
+     */
     public EditorTab(Path file, String initialText) {
         this.file = file;
         this.editor = new RSyntaxEditor();
@@ -27,16 +35,31 @@ public final class EditorTab extends Tab {
         editor.setSyntax(determineSyntax(file));
     }
 
+    /**
+     * Get the file associated with this editor tab
+     * @return the file associated with this editor tab
+     */
     public Path getFile() {
         return file;
     }
 
+
+    /**
+     * Return the text of this editor tab
+     * @return text of the editor tab
+     */
     public String getEditorText() {
         return editor.getText();
     }
 
+    /**
+     * @return the editor within the editor tab
+     */
     public ICodeEditor getEditor() { return editor ; }
 
+    /**
+     * Derive the underlying SyntaxType for the editor
+     */
     private SyntaxType determineSyntax(Path file) {
         String name = file.getFileName().toString().toLowerCase();
 
@@ -47,6 +70,10 @@ public final class EditorTab extends Tab {
         return SyntaxType.PLAIN;
     }
 
+    /**
+     * Helper for quick check for template type editor
+     * @return boolean true if editor has a template file open
+     */
     public boolean isTemplate() {
         return determineSyntax(file) == SyntaxType.TEMPLATE;
     }

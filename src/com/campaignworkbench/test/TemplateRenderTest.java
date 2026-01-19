@@ -34,7 +34,7 @@ public class TemplateRenderTest {
 
             // Render template
             TemplateRenderResult renderResult = TemplateRenderer.render(template, cx, scope, templatePath.toString());
-            System.out.println(renderResult.getRenderedOutput());
+            System.out.println(renderResult.renderedOutput());
 
         } finally {
             Context.exit();
