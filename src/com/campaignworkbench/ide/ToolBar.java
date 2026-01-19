@@ -21,6 +21,7 @@ public class ToolBar implements IJavaFxNode {
     /**
      * @param openTemplateFileHandler - action to take when open template button is clicked
      * @param setXmlContextHandler - action to take when set XML context button is clicked
+     * @param clearXmlContextHandler - action to take when Clear XML context button is clicked
      * @param runHandler - action to take when run button is clicked
      */
     public ToolBar(

@@ -11,6 +11,8 @@ import org.fife.ui.rtextarea.RTextScrollPane;
 
 import javax.swing.*;
 import java.io.IOException;
+import java.util.ArrayDeque;
+import java.util.Queue;
 
 /**
  * Provided an implementation of the ICodeEditor interface using the RSyntaxTextArea control
@@ -20,7 +22,8 @@ public class RSyntaxEditor implements ICodeEditor {
     private final SwingNode swingNode = new SwingNode();
     private RSyntaxTextArea rSyntaxTextArea;
 
-    private IDETheme pendingTheme;
+    // Queue all actions until RSyntaxTextArea is ready
+    private final Queue<Runnable> pendingActions = new ArrayDeque<>();
 
     /**
      * Constructor
@@ -36,23 +39,27 @@ public class RSyntaxEditor implements ICodeEditor {
      * Initialise the swing components
      */
     private void initSwing() {
-        rSyntaxTextArea = new RSyntaxTextArea(25, 80);
-        rSyntaxTextArea.setAntiAliasingEnabled(true);
-        rSyntaxTextArea.setCodeFoldingEnabled(true);
-        rSyntaxTextArea.setBracketMatchingEnabled(true);
-        rSyntaxTextArea.setAutoIndentEnabled(true);
-        rSyntaxTextArea.setMarkOccurrences(true);
-        rSyntaxTextArea.setClearWhitespaceLinesEnabled(false);
-        rSyntaxTextArea.setCursor(java.awt.Cursor.getPredefinedCursor(java.awt.Cursor.TEXT_CURSOR));
-        // textArea.setFont(new java.awt.Font("JetBrains Mono", java.awt.Font.PLAIN, 11));
-        // textArea.setFont(new java.awt.Font("Fira Code", java.awt.Font.PLAIN, 11));
-        // textArea.setFont(new java.awt.Font("Consolas", java.awt.Font.PLAIN, 11));
+        runOnEDT(() -> {
+            rSyntaxTextArea = new RSyntaxTextArea(25, 80);
+            rSyntaxTextArea.setAntiAliasingEnabled(true);
+            rSyntaxTextArea.setCodeFoldingEnabled(true);
+            rSyntaxTextArea.setBracketMatchingEnabled(true);
+            rSyntaxTextArea.setAutoIndentEnabled(true);
+            rSyntaxTextArea.setMarkOccurrences(true);
+            rSyntaxTextArea.setClearWhitespaceLinesEnabled(false);
+            rSyntaxTextArea.setCursor(java.awt.Cursor.getPredefinedCursor(java.awt.Cursor.TEXT_CURSOR));
 
-        RTextScrollPane scrollPane = new RTextScrollPane(rSyntaxTextArea);
-        scrollPane.setFoldIndicatorEnabled(true);
+            RTextScrollPane scrollPane = new RTextScrollPane(rSyntaxTextArea);
+            scrollPane.setFoldIndicatorEnabled(true);
 
-        swingNode.setContent(scrollPane);
-        swingNode.setCursor(javafx.scene.Cursor.TEXT);
+            swingNode.setContent(scrollPane);
+            swingNode.setCursor(javafx.scene.Cursor.TEXT);
+
+            // Run any queued actions safely now that the component exists
+            while (!pendingActions.isEmpty()) {
+                pendingActions.poll().run();
+            }
+        });
     }
 
     @Override
@@ -62,74 +69,54 @@ public class RSyntaxEditor implements ICodeEditor {
 
     @Override
     public void setText(String text) {
-        Platform.runLater(() -> rSyntaxTextArea.setText(text));
+        runOrQueue(() -> rSyntaxTextArea.setText(text));
     }
 
     @Override
     public String getText() {
-        return rSyntaxTextArea.getText();
+        return rSyntaxTextArea != null ? rSyntaxTextArea.getText() : "";
     }
 
     @Override
     public void setEditable(boolean editable) {
-        Platform.runLater(() -> rSyntaxTextArea.setEditable(editable));
+        runOrQueue(() -> rSyntaxTextArea.setEditable(editable));
     }
 
     @Override
     public void requestFocus() {
-        Platform.runLater(() -> rSyntaxTextArea.requestFocusInWindow());
+        runOrQueue(() -> rSyntaxTextArea.requestFocusInWindow());
     }
 
     @Override
     public void setSyntax(SyntaxType syntax) {
-        Platform.runLater(() -> {
+        runOrQueue(() -> {
             switch (syntax) {
                 case TEMPLATE:
-                    rSyntaxTextArea.setSyntaxEditingStyle(
-                            SyntaxConstants.SYNTAX_STYLE_JSP
-                    );
+                    rSyntaxTextArea.setSyntaxEditingStyle(SyntaxConstants.SYNTAX_STYLE_JSP);
                     break;
-
                 case BLOCK:
                 case SOURCE_PREVIEW:
-                    rSyntaxTextArea.setSyntaxEditingStyle(
-                            SyntaxConstants.SYNTAX_STYLE_JAVASCRIPT
-                    );
+                    rSyntaxTextArea.setSyntaxEditingStyle(SyntaxConstants.SYNTAX_STYLE_JAVASCRIPT);
                     break;
-
                 case XML:
-                    rSyntaxTextArea.setSyntaxEditingStyle(
-                            SyntaxConstants.SYNTAX_STYLE_XML
-                    );
+                    rSyntaxTextArea.setSyntaxEditingStyle(SyntaxConstants.SYNTAX_STYLE_XML);
                     break;
                 case PLAIN:
                 default:
-                    rSyntaxTextArea.setSyntaxEditingStyle(
-                            SyntaxConstants.SYNTAX_STYLE_NONE
-                    );
+                    rSyntaxTextArea.setSyntaxEditingStyle(SyntaxConstants.SYNTAX_STYLE_NONE);
                     break;
             }
         });
     }
 
     private void applyThemeAsync(Theme theme) {
-        SwingUtilities.invokeLater(new Runnable() {
-            @Override
-            public void run() {
-                if (rSyntaxTextArea.getGraphics() != null) {
-                    // Safe to apply theme now
-                    theme.apply(rSyntaxTextArea);
-                } else {
-                    // Not ready yet, try again on the next repaint
-                    Timer timer = new Timer(50, e -> {
-                        if (rSyntaxTextArea.getGraphics() != null) {
-                            theme.apply(rSyntaxTextArea);
-                            ((Timer) e.getSource()).stop();
-                        }
-                    });
-                    timer.setRepeats(true);
-                    timer.start();
-                }
+        runOrQueue(() -> {
+            // Safely defer Theme.apply() until graphics are ready
+            if (rSyntaxTextArea.getGraphics() != null) {
+                theme.apply(rSyntaxTextArea);
+            } else {
+                // Component exists but not painted yet; retry once on next EDT tick
+                SwingUtilities.invokeLater(() -> applyThemeAsync(theme));
             }
         });
     }
@@ -141,7 +128,6 @@ public class RSyntaxEditor implements ICodeEditor {
     public void applyTheme(IDETheme ideTheme) {
         try {
             Theme themeToApply;
-
             switch (ideTheme) {
                 case DARK:
                     themeToApply = Theme.load(getClass().getResourceAsStream(
@@ -153,8 +139,30 @@ public class RSyntaxEditor implements ICodeEditor {
                     break;
             }
             applyThemeAsync(themeToApply);
-        }  catch (IOException ioe) { // Never happens
+        } catch (IOException ioe) { // Never happens
             ioe.printStackTrace();
+        }
+    }
+
+    /**
+     * Helper to safely run code on the Swing EDT, or queue if the component isn't created yet
+     */
+    private void runOrQueue(Runnable action) {
+        if (rSyntaxTextArea == null) {
+            pendingActions.add(() -> runOnEDT(action));
+        } else {
+            runOnEDT(action);
+        }
+    }
+
+    /**
+     * Helper to safely run code on the Swing EDT
+     */
+    private void runOnEDT(Runnable action) {
+        if (SwingUtilities.isEventDispatchThread()) {
+            action.run();
+        } else {
+            SwingUtilities.invokeLater(action);
         }
     }
 }

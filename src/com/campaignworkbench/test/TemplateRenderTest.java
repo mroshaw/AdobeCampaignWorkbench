@@ -8,8 +8,11 @@ import org.mozilla.javascript.Scriptable;
 
 import java.nio.file.Path;
 
+/**
+ * Quick unit test of the Template Renderer
+ */
 public class TemplateRenderTest {
-    public static void main(String[] args) {
+    static void main() {
         Context cx = Context.enter();
         try {
             cx.setOptimizationLevel(-1);

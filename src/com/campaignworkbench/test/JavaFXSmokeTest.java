@@ -5,6 +5,9 @@ import javafx.scene.Scene;
 import javafx.scene.control.Label;
 import javafx.stage.Stage;
 
+/**
+ * Simple test showing a JavaFX window
+ */
 public class JavaFXSmokeTest extends Application {
 
     @Override
@@ -17,7 +20,7 @@ public class JavaFXSmokeTest extends Application {
         stage.show();
     }
 
-    public static void main(String[] args) {
+    static void main(String[] args) {
         launch(args);
     }
 }

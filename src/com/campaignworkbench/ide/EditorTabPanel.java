@@ -78,13 +78,6 @@ public class EditorTabPanel implements IJavaFxNode {
         return getSelected() != null;
     }
 
-    /**
-     * Cleanly closed all tab and associated files
-     */
-    public void closeAll() {
-
-    }
-
     @Override
     public Node getNode() {
         return tabPane;

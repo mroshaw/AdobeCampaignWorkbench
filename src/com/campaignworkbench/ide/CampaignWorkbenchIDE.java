@@ -46,14 +46,6 @@ public class CampaignWorkbenchIDE extends Application {
     public void start(Stage primaryStage) {
         primaryStage.setTitle("Campaign Workbench");
 
-        // Handle close request
-        primaryStage.setOnCloseRequest(event -> {
-            shutDown();
-            Platform.exit();
-            // System.exit(0); // optional, see below
-        });
-
-
         // Menu and toolbar
         MainMenuBar menuBar = new MainMenuBar(_ -> openFile(getWorkspaceTemplatePath()),
                 _ -> openFile(getWorkspaceBlockPath()),
@@ -114,8 +106,10 @@ public class CampaignWorkbenchIDE extends Application {
         appendLog("Welcome to Campaign workbench! Load a template, select an XML context, and hit run!");
     }
 
-    private void shutDown() {
-
+    @Override
+    public void  stop() {
+        Platform.exit();
+        System.exit(0);
     }
 
     private void appendLog(String logMessage) {
@@ -157,8 +151,7 @@ public class CampaignWorkbenchIDE extends Application {
     }
 
     private void updateRunButtonState(Tab tab) {
-        if (tab instanceof EditorTab) {
-            EditorTab editorTab = (EditorTab) tab;
+        if (tab instanceof EditorTab editorTab) {
             String name = editorTab.getFile()
                     .getFileName()
                     .toString()
