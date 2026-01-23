@@ -1,0 +1,83 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project version="4">
+  <component name="ChangeListManager">
+    <list default="true" id="3e80a77b-7743-4c4f-9c47-64b7d36a32ae" name="Changes" comment="">
+      <change afterPath="$PROJECT_DIR$/../Modules/TestModule.module" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/../../../src/com/campaignworkbench/campaignrenderer/ModuleRenderer.java" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/../../../src/com/campaignworkbench/test/ModuleRenderTest.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/../Modules/ETM_M72_MCPaymentScheduleDetails.module" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/../PersoBlocks/ssgDateFormatted.block" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/../PersoBlocks/ssgMessageCenterCommonFunctions.block" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/../PersoBlocks/ssgMessageCenterOrderCommonFunctions.block" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/../PersoBlocks/ssgOrderShipmentFunctions.block" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/../Templates/ETMModuleTestTemplate.template" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/../../../src/com/campaignworkbench/campaignrenderer/TemplateException.java" beforeDir="false" afterPath="$PROJECT_DIR$/../../../src/com/campaignworkbench/campaignrenderer/TemplateException.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/../../../src/com/campaignworkbench/campaignrenderer/TemplateExecutionException.java" beforeDir="false" afterPath="$PROJECT_DIR$/../../../src/com/campaignworkbench/campaignrenderer/TemplateExecutionException.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/../../../src/com/campaignworkbench/campaignrenderer/TemplateGenerationException.java" beforeDir="false" afterPath="$PROJECT_DIR$/../../../src/com/campaignworkbench/campaignrenderer/TemplateGenerationException.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/../../../src/com/campaignworkbench/campaignrenderer/TemplateParseException.java" beforeDir="false" afterPath="$PROJECT_DIR$/../../../src/com/campaignworkbench/campaignrenderer/TemplateParseException.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/../../../src/com/campaignworkbench/campaignrenderer/TemplateRenderer.java" beforeDir="false" afterPath="$PROJECT_DIR$/../../../src/com/campaignworkbench/campaignrenderer/TemplateRenderer.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/../../../src/com/campaignworkbench/ide/CampaignWorkbenchIDE.java" beforeDir="false" afterPath="$PROJECT_DIR$/../../../src/com/campaignworkbench/ide/CampaignWorkbenchIDE.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/../../../src/com/campaignworkbench/ide/EditorTab.java" beforeDir="false" afterPath="$PROJECT_DIR$/../../../src/com/campaignworkbench/ide/EditorTab.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/../../../src/com/campaignworkbench/ide/MainMenuBar.java" beforeDir="false" afterPath="$PROJECT_DIR$/../../../src/com/campaignworkbench/ide/MainMenuBar.java" afterDir="false" />
+    </list>
+    <option name="SHOW_DIALOG" value="false" />
+    <option name="HIGHLIGHT_CONFLICTS" value="true" />
+    <option name="HIGHLIGHT_NON_ACTIVE_CHANGELIST" value="false" />
+    <option name="LAST_RESOLUTION" value="IGNORE" />
+  </component>
+  <component name="Git.Settings">
+    <option name="RECENT_GIT_ROOT_PATH" value="$PROJECT_DIR$/../../.." />
+  </component>
+  <component name="ProjectColorInfo"><![CDATA[{
+  "associatedIndex": 7
+}]]></component>
+  <component name="ProjectId" id="38eacF8mlT8MaEiV7qp8p3pudTZ" />
+  <component name="ProjectViewState">
+    <option name="hideEmptyMiddlePackages" value="true" />
+    <option name="showLibraryContents" value="true" />
+  </component>
+  <component name="PropertiesComponent"><![CDATA[{
+  "keyToString": {
+    "ModuleVcsDetector.initialDetectionPerformed": "true",
+    "RunOnceActivity.ShowReadmeOnStart": "true",
+    "RunOnceActivity.typescript.service.memoryLimit.init": "true",
+    "vue.rearranger.settings.migration": "true"
+  }
+}]]></component>
+  <component name="TaskManager">
+    <task active="true" id="Default" summary="Default task">
+      <changelist id="3e80a77b-7743-4c4f-9c47-64b7d36a32ae" name="Changes" comment="" />
+      <created>1769162568279</created>
+      <option name="number" value="Default" />
+      <option name="presentableId" value="Default" />
+      <updated>1769162568279</updated>
+      <workItem from="1769162572285" duration="4000" />
+    </task>
+    <servers />
+  </component>
+  <component name="TypeScriptGeneratedFilesManager">
+    <option name="version" value="3" />
+  </component>
+  <component name="UnityProjectConfiguration" hasMinimizedUI="false" />
+  <component name="VcsManagerConfiguration">
+    <option name="CLEAR_INITIAL_COMMIT_MESSAGE" value="true" />
+  </component>
+  <component name="XDebuggerManager">
+    <breakpoint-manager>
+      <breakpoints>
+        <breakpoint enabled="true" type="DotNet_Exception_Breakpoints">
+          <properties exception="System.OperationCanceledException" breakIfHandledByOtherCode="false" displayValue="System.OperationCanceledException" />
+          <option name="timeStamp" value="1" />
+        </breakpoint>
+        <breakpoint enabled="true" type="DotNet_Exception_Breakpoints">
+          <properties exception="System.Threading.Tasks.TaskCanceledException" breakIfHandledByOtherCode="false" displayValue="System.Threading.Tasks.TaskCanceledException" />
+          <option name="timeStamp" value="2" />
+        </breakpoint>
+        <breakpoint enabled="true" type="DotNet_Exception_Breakpoints">
+          <properties exception="System.Threading.ThreadAbortException" breakIfHandledByOtherCode="false" displayValue="System.Threading.ThreadAbortException" />
+          <option name="timeStamp" value="3" />
+        </breakpoint>
+      </breakpoints>
+    </breakpoint-manager>
+  </component>
+</project>

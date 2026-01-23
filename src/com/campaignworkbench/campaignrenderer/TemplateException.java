@@ -5,11 +5,13 @@ package com.campaignworkbench.campaignrenderer;
  */
 public abstract class TemplateException extends RuntimeException {
     private final String templateName;
+    private final String sourceCode;
     private final int templateLine;
 
-    protected TemplateException(String message, String templateName, int templateLine, Throwable cause) {
+    protected TemplateException(String message, String templateName, String sourceCode, int templateLine, Throwable cause) {
         super(message, cause);
         this.templateName = templateName;
+        this.sourceCode = sourceCode;
         this.templateLine = templateLine;
     }
 
@@ -24,4 +26,10 @@ public abstract class TemplateException extends RuntimeException {
      * @return templateLine as an integer
      */
     public int getTemplateLine() { return templateLine; }
+
+    /**
+     * Returns the code being processed when the exception occurs
+     * @return source code
+     */
+    public String getSourceCode() { return sourceCode; }
 }

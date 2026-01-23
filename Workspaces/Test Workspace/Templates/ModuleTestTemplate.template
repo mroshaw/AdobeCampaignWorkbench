@@ -1,0 +1,7 @@
+<%@ include view='testFunctions' %>
+<html>
+<body style="background-color:MediumSeaGreen;">
+Hello <%= rtEvent.ctx.customer.name %> <%= test() %> <BR>
+<%@ include module='TestModule' %>
+</body>
+</html>

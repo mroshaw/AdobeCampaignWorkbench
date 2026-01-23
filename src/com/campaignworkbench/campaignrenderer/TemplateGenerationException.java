@@ -8,10 +8,11 @@ public final class TemplateGenerationException extends TemplateException {
      * Template generation exception
      * @param msg describing the exception
      * @param template with the name of the template being executed
+     * @param sourceCode source code being processed when the exception occurred
      * @param line number on which the exception occurred
      * @param cause of the underlying exception
      */
-    public TemplateGenerationException(String msg, String template, int line, Throwable cause) {
-        super(msg, template, line, cause);
+    public TemplateGenerationException(String msg, String template, String sourceCode, int line, Throwable cause) {
+        super(msg, template, sourceCode, line, cause);
     }
 }

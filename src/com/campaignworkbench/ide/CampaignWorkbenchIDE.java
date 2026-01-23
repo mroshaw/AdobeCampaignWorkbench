@@ -2,9 +2,7 @@ package com.campaignworkbench.ide;
 
 import atlantafx.base.theme.CupertinoDark;
 import atlantafx.base.theme.CupertinoLight;
-import com.campaignworkbench.campaignrenderer.TemplateParseException;
-import com.campaignworkbench.campaignrenderer.TemplateRenderResult;
-import com.campaignworkbench.campaignrenderer.TemplateRenderer;
+import com.campaignworkbench.campaignrenderer.*;
 import javafx.application.Application;
 import javafx.application.Platform;
 import javafx.geometry.Orientation;
@@ -48,6 +46,7 @@ public class CampaignWorkbenchIDE extends Application {
 
         // Menu and toolbar
         MainMenuBar menuBar = new MainMenuBar(_ -> openFile(getWorkspaceTemplatePath()),
+                _ -> openFile(getWorkspaceModulePath()),
                 _ -> openFile(getWorkspaceBlockPath()),
                 _ -> openFile(getWorkspaceXmlPath()),
                 _ -> saveCurrent(),
@@ -127,6 +126,8 @@ public class CampaignWorkbenchIDE extends Application {
     private String getWorkspaceXmlPath() {
         return workspacePath + "/XmlContext";
     }
+
+    private String getWorkspaceModulePath() {return workspacePath + "/Modules";}
 
     private void applyTheme(IDETheme theme) {
         ThemeManager.setTheme(theme);
@@ -293,7 +294,20 @@ public class CampaignWorkbenchIDE extends Application {
                 appendLog("Caused by: " + cause.getClass().getSimpleName() + " : " + cause.getMessage());
                 cause = cause.getCause();
             }
-        } catch (Exception ex) {
+            appendLog(parseEx.getSourceCode());
+        } catch (TemplateExecutionException execEx) {
+            appendLog("An error occurred executing the template: " + execEx.getTemplateName() + " at line: " + execEx.getTemplateLine());
+            appendLog(execEx.getMessage());
+            Throwable cause = execEx.getCause();
+            while (cause != null) {
+                appendLog("Caused by: " + cause.getClass().getSimpleName() + " : " + cause.getMessage());
+                cause = cause.getCause();
+            }
+            appendLog(execEx.getSourceCode());
+        } catch (TemplateGenerationException genEx) {
+
+        }
+        catch (Exception ex) {
             ex.printStackTrace();
             showAlert("Error running template: " + ex.getMessage());
             appendLog("Error running template: " + ex.getMessage());

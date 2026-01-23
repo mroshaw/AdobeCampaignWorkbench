@@ -29,6 +29,7 @@ public class MainMenuBar implements IJavaFxNode {
      */
     public MainMenuBar(
             EventHandler<ActionEvent> openTemplateFileHandler,
+            EventHandler<ActionEvent> openModuleFileHandler,
             EventHandler<ActionEvent> openBlockFileHandler,
             EventHandler<ActionEvent> openXMLFileHandler,
             EventHandler<ActionEvent> saveCurrentFileHandler,
@@ -45,29 +46,33 @@ public class MainMenuBar implements IJavaFxNode {
         Menu openSub = new Menu("Open");
         MenuItem openWorkspace = new MenuItem("Workspace");
         MenuItem openTemplate = new MenuItem("Template");
+        MenuItem openModule = new MenuItem("Module");
         MenuItem openBlock = new MenuItem("Block");
         MenuItem openXmlContext = new MenuItem("XML Context");
 
         openWorkspace.setOnAction(_ -> dummyHandler());
         openTemplate.setOnAction(openTemplateFileHandler);
+        openModule.setOnAction(openModuleFileHandler);
         openBlock.setOnAction(openBlockFileHandler);
         openXmlContext.setOnAction(openXMLFileHandler);
 
-        openSub.getItems().addAll(openWorkspace, openTemplate, openBlock, openXmlContext);
+        openSub.getItems().addAll(openWorkspace, openTemplate, openModule, openBlock, openXmlContext);
 
         // New submenu
         Menu newSub = new Menu("New");
         MenuItem newWorkspace = new MenuItem("Workspace");
         MenuItem newTemplate = new MenuItem("Template");
+        MenuItem newModule = new MenuItem("Module");
         MenuItem newBlock = new MenuItem("Block");
         MenuItem newXmlContext = new MenuItem("XML Context");
 
         newWorkspace.setOnAction(_ -> dummyHandler());
         newTemplate.setOnAction(_ -> dummyHandler());
+        newModule.setOnAction(_ -> dummyHandler());
         newBlock.setOnAction(_ -> dummyHandler());
         newXmlContext.setOnAction(_ -> dummyHandler());
 
-        newSub.getItems().addAll(newWorkspace, newTemplate, newBlock, newXmlContext);
+        newSub.getItems().addAll(newWorkspace, newTemplate, newModule, newBlock, newXmlContext);
 
         // Save items
         MenuItem saveCurrent = new MenuItem("Save Current");

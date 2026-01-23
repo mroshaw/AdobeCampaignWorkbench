@@ -7,174 +7,214 @@ import org.mozilla.javascript.Scriptable;
 import java.nio.file.Path;
 
 /**
- * Provided code generation, parsing and execution functionality
- * that emulates the processes of email rendering in Adobe Campaign Classic
+ * Main renderer class, responsible for parsing templates, modules, blocks and XML context
+ * to generate an HTML page
  */
 public final class TemplateRenderer {
 
     private TemplateRenderer() {}
 
     /**
-     * Renders a template or block with Campaign-style syntax.
-     *
-     * @param templateSource Raw template content
-     * @param cx             Rhino context
-     * @param scope          Shared Rhino scope
-     * @param sourceName     File name for error reporting
-     * @return Rendered HTML/Text
+     * @param templateSource source code of the template to render
+     * @param cx Rhino context
+     * @param scope Rhino scope
+     * @param sourceName name of the source being processed
+     * @return HTML source of the renderer page
      */
-    public static TemplateRenderResult render(String templateSource, Context cx, Scriptable scope, String sourceName) {
+    public static TemplateRenderResult render(
+            String templateSource,
+            Context cx,
+            Scriptable scope,
+            String sourceName
+    ) {
 
         try {
-            // Expose CampaignFunctions using Packages
-            cx.evaluateString(scope,
-                    "var formatDate = function(dateObj, formatStr) {" +
-                            "    return com.campaignworkbench.campaignrenderer.CampaignFunctions.formatDate(dateObj, formatStr);" +
-                            "};",
-                    "campaignFunctions.js", 1, null);
+            injectStandardFunctions(cx, scope);
 
-            cx.evaluateString(scope,
-                    "var parseTimeStamp = function(strTime) {" +
-                            "    return com.campaignworkbench.campaignrenderer.CampaignFunctions.parseTimeStamp(strTime);" +
-                            "};",
-                    "campaignFunctions.js", 1, null);
+            // 1️⃣ PREPROCESS (no JavaScript execution)
+            String expanded = preprocess(templateSource, cx, scope);
 
-            cx.evaluateString(scope,
-                    "var System = Packages.java.lang.System;",
-                    "jsImports.js", 1, null
+            // 2️⃣ TRANSFORM TO JS
+            String js = transformToJavaScript(expanded);
+
+            // 3️⃣ EXECUTE
+            Object result = cx.evaluateString(scope, js, sourceName, 1, null);
+            return new TemplateRenderResult(js, Context.toString(result));
+        }
+        catch (org.mozilla.javascript.EvaluatorException e) {
+            throw new TemplateParseException(
+                    "JavaScript syntax error",
+                    sourceName,
+                    templateSource,
+                    e.lineNumber(),
+                    e
             );
-
-            final String transformedJavaScript;
-            try {
-                transformedJavaScript = transformToJavaScript(templateSource, cx, scope);
-            }
-            catch (Exception e) {
-                throw new TemplateGenerationException(
-                        "Failed to generate JavaScript from template",
-                        sourceName,
-                        -1,
-                        e
-                );
-            }
-
-            // System.out.println(transformedJavaScript);
-
-            try {
-                Object result = cx.evaluateString(scope, transformedJavaScript, sourceName, 1, null);
-                TemplateRenderResult renderResult = new TemplateRenderResult(transformedJavaScript, Context.toString(result));
-                return renderResult;
-            }
-            catch (org.mozilla.javascript.EvaluatorException e) {
-                String message =
-                        "JavaScript syntax error" +
-                                (e.lineSource() != null ? ":\n" + e.lineSource() : "");
-
-                throw new TemplateParseException(
-                        message,
-                        sourceName,
-                        e.lineNumber(),
-                        e
-                );
-            }
-            catch (org.mozilla.javascript.JavaScriptException e) {
-                throw new TemplateExecutionException(
-                        "JavaScript execution error: " + e.getMessage(),
-                        sourceName,
-                        e.lineNumber(),
-                        e
-                );
-            }
+        }
+        catch (org.mozilla.javascript.JavaScriptException e) {
+            throw new TemplateExecutionException(
+                    "JavaScript execution error: " + e.getMessage(),
+                    sourceName,
+                    templateSource,
+                    e.lineNumber(),
+                    e
+            );
         }
         catch (org.mozilla.javascript.RhinoException e) {
             throw new TemplateExecutionException(
                     "Rhino error: " + e.getMessage(),
                     sourceName,
+                    templateSource,
                     e.lineNumber(),
                     e
             );
         }
     }
 
-    /**
-     * Overload to enforce only the root generates a StringBuilder
-     */
-    private static String transformToJavaScript(String templateSource, Context cx, Scriptable scope) {
-        return transformToJavaScript(templateSource, cx, scope, true);
-    }
+    // ---------------------------------------------------------------------
 
-    /**
-     * Converts template text into valid JavaScript that appends to a StringBuilder.
-     * Includes are resolved recursively at transformation time.
-     */
-    private static String transformToJavaScript(String templateSource, Context cx, Scriptable scope, boolean isRoot) {
-        StringBuilder js = new StringBuilder();
-        if(isRoot)
-        {
-            js.append("var out = new java.lang.StringBuilder();\n");
-        }
-
+    private static String preprocess(
+            String source,
+            Context cx,
+            Scriptable scope
+    ) {
+        StringBuilder out = new StringBuilder();
         int pos = 0;
-        while (pos < templateSource.length()) {
-            int start = templateSource.indexOf("<%", pos);
+
+        while (pos < source.length()) {
+            int start = source.indexOf("<%@", pos);
             if (start == -1) {
-                appendText(js, templateSource.substring(pos));
+                out.append(source.substring(pos));
                 break;
             }
 
-            // Append static text before tag
-            appendText(js, templateSource.substring(pos, start));
+            out.append(source, pos, start);
 
-            int end = templateSource.indexOf("%>", start);
+            int end = source.indexOf("%>", start);
             if (end == -1) {
-                throw new IllegalArgumentException("Unclosed <% tag in template");
+                throw new IllegalArgumentException("Unclosed <%@ directive");
             }
 
-            String code = templateSource.substring(start + 2, end);
-            String trimmed = code.trim();
+            String directive = source.substring(start + 3, end).trim();
 
-            // Handle include directive: <%@ include view='...' %>
-            if (trimmed.matches("@\\s*include.*")) {
-                String includedFile = extractIncludeFile(trimmed);
-                if (includedFile != null) {
-                    Path path = Path.of("Workspaces/Test Workspace/PersoBlocks", includedFile + ".block");
-                    String blockSource = FileUtil.read(path);
-                    js.append(transformToJavaScript(blockSource, cx, scope, false));
+            if (directive.startsWith("include")) {
+                if (directive.contains("module=")) {
+                    String name = extractQuoted(directive, "module");
+                    Path p = Path.of("Workspaces/Test Workspace/Modules", name + ".module");
+                    String moduleSource = FileUtil.read(p);
+                    String moduleOutput =
+                            ModuleRenderer.renderModule(moduleSource, cx, scope, p.toString());
+                    out.append(preprocess(moduleOutput, cx, scope));
                 }
-            }
-            // Expression block: <%= ... %>
-            else if (trimmed.startsWith("=")) {
-                String expr = trimmed.substring(1).trim();
-                js.append("out.append(").append(expr).append(");\n");
-            }
-            // Statement block: <% ... %>
-            else {
-                js.append(trimmed).append("\n");
+                else if (directive.contains("view=")) {
+                    String name = extractQuoted(directive, "view");
+                    Path p = Path.of("Workspaces/Test Workspace/PersoBlocks", name + ".block");
+                    String blockSource = FileUtil.read(p);
+                    out.append(preprocess(blockSource, cx, scope));
+                }
             }
 
             pos = end + 2;
         }
 
-        js.append("out.toString();\n");
+        return out.toString();
+    }
+
+    // ---------------------------------------------------------------------
+
+    private static String transformToJavaScript(String source) {
+        StringBuilder js = new StringBuilder();
+        js.append("var out = new java.lang.StringBuilder();\n");
+
+        int pos = 0;
+        while (pos < source.length()) {
+            int start = source.indexOf("<%", pos);
+            if (start == -1) {
+                appendText(js, source.substring(pos));
+                break;
+            }
+
+            appendText(js, source.substring(pos, start));
+
+            int end = source.indexOf("%>", start);
+            if (end == -1) {
+                throw new IllegalArgumentException("Unclosed <% tag");
+            }
+
+            String code = source.substring(start + 2, end).trim();
+
+            if (code.startsWith("=")) {
+                js.append("out.append(")
+                        .append(code.substring(1).trim())
+                        .append(");\n");
+            } else {
+                js.append(code).append("\n");
+            }
+
+            pos = end + 2;
+        }
+
+        js.append("out.toString();");
         return js.toString();
     }
 
-    /** Appends static text safely */
     private static void appendText(StringBuilder js, String text) {
         if (text.isEmpty()) return;
-        text = text.replace("\r\n", "\n").replace("\r", "\n");
-        text = text.replace("\\", "\\\\").replace("\"", "\\\"").replace("\n", "\\n");
+        text = text.replace("\\", "\\\\")
+                .replace("\"", "\\\"")
+                .replace("\r\n", "\n")
+                .replace("\r", "\n")
+                .replace("\n", "\\n");
         js.append("out.append(\"").append(text).append("\");\n");
     }
 
-    /** Extracts the file name from <%@ include view='...' %> */
-    private static String extractIncludeFile(String code) {
-        int viewIndex = code.indexOf("view=");
-        if (viewIndex == -1) return null;
+    private static String extractQuoted(String directive, String key) {
+        int keyPos = directive.indexOf(key + "=");
+        if (keyPos == -1) {
+            throw new IllegalArgumentException(
+                    "Missing attribute '" + key + "' in directive: " + directive
+            );
+        }
 
-        int startQuote = code.indexOf("'", viewIndex);
-        int endQuote = code.indexOf("'", startQuote + 1);
-        if (startQuote == -1 || endQuote == -1) return null;
+        int quotePos = keyPos + key.length() + 1;
+        if (quotePos >= directive.length()) {
+            throw new IllegalArgumentException(
+                    "Malformed attribute '" + key + "' in directive: " + directive
+            );
+        }
 
-        return code.substring(startQuote + 1, endQuote).trim();
+        char quote = directive.charAt(quotePos);
+        if (quote != '\'' && quote != '"') {
+            throw new IllegalArgumentException(
+                    "Attribute '" + key + "' must be quoted in directive: " + directive
+            );
+        }
+
+        int end = directive.indexOf(quote, quotePos + 1);
+        if (end == -1) {
+            throw new IllegalArgumentException(
+                    "Unterminated quoted value for '" + key + "' in directive: " + directive
+            );
+        }
+
+        return directive.substring(quotePos + 1, end);
+    }
+
+
+    private static void injectStandardFunctions(Context cx, Scriptable scope) {
+        cx.evaluateString(scope,
+                "var formatDate = function(d,f){" +
+                        " return com.campaignworkbench.campaignrenderer.CampaignFunctions.formatDate(d,f);" +
+                        "};",
+                "campaignFunctions.js", 1, null);
+
+        cx.evaluateString(scope,
+                "var parseTimeStamp = function(s){" +
+                        " return com.campaignworkbench.campaignrenderer.CampaignFunctions.parseTimeStamp(s);" +
+                        "};",
+                "campaignFunctions.js", 1, null);
+
+        cx.evaluateString(scope,
+                "var System = Packages.java.lang.System;",
+                "jsImports.js", 1, null);
     }
 }

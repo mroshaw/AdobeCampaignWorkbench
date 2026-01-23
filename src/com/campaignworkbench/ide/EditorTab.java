@@ -64,6 +64,7 @@ public final class EditorTab extends Tab {
         String name = file.getFileName().toString().toLowerCase();
 
         if (name.endsWith(".template")) return SyntaxType.TEMPLATE;
+        if (name.endsWith(".module")) return SyntaxType.TEMPLATE;
         if (name.endsWith(".block"))    return SyntaxType.BLOCK;
         if (name.endsWith(".xml"))      return SyntaxType.XML;
 
