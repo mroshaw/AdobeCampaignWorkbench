@@ -33,6 +33,7 @@ public final class EditorTab extends Tab {
 
         editor.setText(initialText);
         editor.setSyntax(determineSyntax(file));
+        editor.setCaretAtStart();
     }
 
     /**
@@ -43,6 +44,13 @@ public final class EditorTab extends Tab {
         return file;
     }
 
+
+    /**
+     * Refresh the context of the tab
+     */
+    public void refreshEditor() {
+        editor.refreshContent();
+    }
 
     /**
      * Return the text of this editor tab

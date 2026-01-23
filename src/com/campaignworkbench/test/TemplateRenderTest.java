@@ -2,11 +2,13 @@ package com.campaignworkbench.test;
 
 import com.campaignworkbench.campaignrenderer.TemplateRenderResult;
 import com.campaignworkbench.campaignrenderer.TemplateRenderer;
+import com.campaignworkbench.ide.Workspace;
 import com.campaignworkbench.util.FileUtil;
 import org.mozilla.javascript.Context;
 import org.mozilla.javascript.Scriptable;
 
 import java.nio.file.Path;
+import java.nio.file.Paths;
 
 /**
  * Quick unit test of the Template Renderer
@@ -19,6 +21,7 @@ public class TemplateRenderTest {
             cx.setLanguageVersion(Context.VERSION_1_7);
 
             Scriptable scope = cx.initStandardObjects();
+            Workspace testWorkspace = new Workspace(Paths.get("Workspaces/Test Workspace/Templates"));
 
             // Load template
             Path templatePath = Path.of("Workspaces/Test Workspace/Templates/ETMModuleTestTemplate.template");
@@ -36,7 +39,7 @@ public class TemplateRenderTest {
             );
 
             // Render template
-            TemplateRenderResult renderResult = TemplateRenderer.render(template, cx, scope, templatePath.toString());
+            TemplateRenderResult renderResult = TemplateRenderer.render(testWorkspace, template, cx, scope, templatePath.toString());
             System.out.println(renderResult.renderedOutput());
 
         } finally {

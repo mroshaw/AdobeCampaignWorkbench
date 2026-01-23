@@ -68,6 +68,16 @@ public class RSyntaxEditor implements ICodeEditor {
     }
 
     @Override
+    public void refreshContent() {
+        runOrQueue(this::validateAndRepaint);
+    }
+
+    private void validateAndRepaint() {
+        rSyntaxTextArea.revalidate();
+        rSyntaxTextArea.repaint();
+    }
+
+    @Override
     public void setText(String text) {
         runOrQueue(() -> rSyntaxTextArea.setText(text));
     }
@@ -85,6 +95,13 @@ public class RSyntaxEditor implements ICodeEditor {
     @Override
     public void requestFocus() {
         runOrQueue(() -> rSyntaxTextArea.requestFocusInWindow());
+    }
+
+    @Override
+    public void setCaretAtStart() {
+        runOrQueue(() -> {
+            rSyntaxTextArea.setCaretPosition(0);
+        });
     }
 
     @Override

@@ -28,6 +28,7 @@ public class MainMenuBar implements IJavaFxNode {
      * @param applyDarkThemeHandler action to run when apply dark theme menu is selected
      */
     public MainMenuBar(
+            EventHandler<ActionEvent> openWorkspaceHandler,
             EventHandler<ActionEvent> openTemplateFileHandler,
             EventHandler<ActionEvent> openModuleFileHandler,
             EventHandler<ActionEvent> openBlockFileHandler,
@@ -48,9 +49,9 @@ public class MainMenuBar implements IJavaFxNode {
         MenuItem openTemplate = new MenuItem("Template");
         MenuItem openModule = new MenuItem("Module");
         MenuItem openBlock = new MenuItem("Block");
-        MenuItem openXmlContext = new MenuItem("XML Context");
+        MenuItem openXmlContext = new MenuItem("Context XML");
 
-        openWorkspace.setOnAction(_ -> dummyHandler());
+        openWorkspace.setOnAction(openWorkspaceHandler);
         openTemplate.setOnAction(openTemplateFileHandler);
         openModule.setOnAction(openModuleFileHandler);
         openBlock.setOnAction(openBlockFileHandler);
@@ -64,7 +65,7 @@ public class MainMenuBar implements IJavaFxNode {
         MenuItem newTemplate = new MenuItem("Template");
         MenuItem newModule = new MenuItem("Module");
         MenuItem newBlock = new MenuItem("Block");
-        MenuItem newXmlContext = new MenuItem("XML Context");
+        MenuItem newXmlContext = new MenuItem("Context XML");
 
         newWorkspace.setOnAction(_ -> dummyHandler());
         newTemplate.setOnAction(_ -> dummyHandler());

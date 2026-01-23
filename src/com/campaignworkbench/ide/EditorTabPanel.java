@@ -23,6 +23,15 @@ public class EditorTabPanel implements IJavaFxNode {
         tabPane = new TabPane();
 
         tabPane.getSelectionModel().selectedItemProperty().addListener(tabChangedListener);
+        tabPane.getSelectionModel().selectedItemProperty().addListener((obs, oldTab, newTab) -> {
+            refreshTabEditor(newTab);
+        });
+    }
+
+    private void refreshTabEditor(Tab tab) {
+        if (tab instanceof EditorTab editorTab) {
+            editorTab.refreshEditor();
+        }
     }
 
     /**

@@ -1,5 +1,6 @@
 package com.campaignworkbench.campaignrenderer;
 
+import com.campaignworkbench.ide.Workspace;
 import com.campaignworkbench.util.FileUtil;
 import org.mozilla.javascript.Context;
 import org.mozilla.javascript.Scriptable;
@@ -22,6 +23,7 @@ public final class TemplateRenderer {
      * @return HTML source of the renderer page
      */
     public static TemplateRenderResult render(
+            Workspace workspace,
             String templateSource,
             Context cx,
             Scriptable scope,
@@ -32,7 +34,7 @@ public final class TemplateRenderer {
             injectStandardFunctions(cx, scope);
 
             // 1️⃣ PREPROCESS (no JavaScript execution)
-            String expanded = preprocess(templateSource, cx, scope);
+            String expanded = preprocess(workspace, templateSource, cx, scope);
 
             // 2️⃣ TRANSFORM TO JS
             String js = transformToJavaScript(expanded);
@@ -73,6 +75,7 @@ public final class TemplateRenderer {
     // ---------------------------------------------------------------------
 
     private static String preprocess(
+            Workspace workspace,
             String source,
             Context cx,
             Scriptable scope
@@ -99,17 +102,17 @@ public final class TemplateRenderer {
             if (directive.startsWith("include")) {
                 if (directive.contains("module=")) {
                     String name = extractQuoted(directive, "module");
-                    Path p = Path.of("Workspaces/Test Workspace/Modules", name + ".module");
+                    Path p = workspace.getModulesPath().resolve(name + ".module");
                     String moduleSource = FileUtil.read(p);
                     String moduleOutput =
                             ModuleRenderer.renderModule(moduleSource, cx, scope, p.toString());
-                    out.append(preprocess(moduleOutput, cx, scope));
+                    out.append(preprocess(workspace, moduleOutput, cx, scope));
                 }
                 else if (directive.contains("view=")) {
                     String name = extractQuoted(directive, "view");
-                    Path p = Path.of("Workspaces/Test Workspace/PersoBlocks", name + ".block");
+                    Path p = workspace.getBlocksPath().resolve(name + ".block");
                     String blockSource = FileUtil.read(p);
-                    out.append(preprocess(blockSource, cx, scope));
+                    out.append(preprocess(workspace, blockSource, cx, scope));
                 }
             }
 

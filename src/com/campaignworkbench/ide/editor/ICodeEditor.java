@@ -10,7 +10,12 @@ public interface ICodeEditor {
     /**
      * @return the JavaFX node
      */
-    Node getNode();
+    public Node getNode();
+
+    /**
+     * Refresh the code content of the editor
+     */
+    public void refreshContent();
 
     /**
      * Set the  code content of the editor
@@ -24,23 +29,25 @@ public interface ICodeEditor {
      * Get the code context of the editor
      * @return the text content of the editor
      */
-    String getText();
+    public String getText();
 
     /**
      * Set the syntax highlighting required by the editor
      * @param syntax Language syntax to use for highlighting
      */
-    void setSyntax(SyntaxType syntax);
+    public void setSyntax(SyntaxType syntax);
 
     /**
      * Sets the read only nature of the code editor
      * @param editable whether the code is editable (true) or not (false)
      */
-    void setEditable(boolean editable);
+    public void setEditable(boolean editable);
 
     /**
      * Requests UI focus of the control
      */
-    void requestFocus();
+    public void requestFocus();
+
+    public void setCaretAtStart();
 
 }

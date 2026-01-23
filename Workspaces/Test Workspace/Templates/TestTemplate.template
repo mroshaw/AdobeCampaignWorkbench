@@ -1,15 +1,11 @@
 <%@ include view='testFunctions' %>
-<%@ include view='ssgDateFormatted' %>
-<%@ include view='ssgOrderShipmentFunctions' %>
+
 <html>
 <body style="background-color:MediumSeaGreen;">
 Hello <%= rtEvent.ctx.customer.name %> <%= test() %> <BR>
 <%
-    var orderDate = formatDateMC(rtEvent.ctx.order.createdAt, "com.specsavers.delivery.added-gb");
-    var latestDelivery = getLatestDelivery();
+	var test = test();
 %>
-Order Created: <%= orderDate %><br>
-Latest Delivery Date: <%= latestDelivery.createdAt %>
-
+Test Result: <%= test %><br>
 </body>
 </html>

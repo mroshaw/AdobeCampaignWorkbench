@@ -10,6 +10,7 @@ import javafx.scene.Scene;
 import javafx.scene.control.*;
 import javafx.scene.layout.BorderPane;
 import javafx.scene.layout.VBox;
+import javafx.stage.DirectoryChooser;
 import javafx.stage.FileChooser;
 import javafx.stage.Stage;
 import org.mozilla.javascript.Context;
@@ -25,8 +26,9 @@ import java.nio.file.Path;
  */
 public class CampaignWorkbenchIDE extends Application {
 
-    private final String workspacePath = "Workspaces/Test Workspace";
-
+    private final String defaultWorkspacePath = "Workspaces/Test Workspace";
+    private Workspace currentWorkspace;
+    private WorkspaceExplorer workspaceExplorer;
     private ToolBar toolBar;
     private EditorTabPanel editorTabPanel;
     private LogPanel logPanel;
@@ -45,7 +47,8 @@ public class CampaignWorkbenchIDE extends Application {
         primaryStage.setTitle("Campaign Workbench");
 
         // Menu and toolbar
-        MainMenuBar menuBar = new MainMenuBar(_ -> openFile(getWorkspaceTemplatePath()),
+        MainMenuBar menuBar = new MainMenuBar( _ -> openWorkspace(),
+                _ -> openFile(getWorkspaceTemplatePath()),
                 _ -> openFile(getWorkspaceModulePath()),
                 _ -> openFile(getWorkspaceBlockPath()),
                 _ -> openFile(getWorkspaceXmlPath()),
@@ -54,10 +57,13 @@ public class CampaignWorkbenchIDE extends Application {
                 _ -> applyTheme(IDETheme.DARK)
         );
 
-        toolBar = new ToolBar(_ -> openFile(getWorkspaceTemplatePath()),
-                _ -> setXmlContext(),
+        toolBar = new ToolBar(_ -> openWorkspace(),
+                _ -> setContextXml(),
                 _ -> clearXmlContext(),
                 _ -> runTemplate());
+
+        // Workspace Explorer
+        workspaceExplorer = new WorkspaceExplorer(this::openFileFromWorkspace);
 
         // Editor tabs
         editorTabPanel = new EditorTabPanel((_, _, newTab) -> updateRunButtonState(newTab));
@@ -74,16 +80,29 @@ public class CampaignWorkbenchIDE extends Application {
         previewSplitPane.setOrientation(Orientation.VERTICAL);
         previewSplitPane.getItems().addAll(previewPanel.getNode(), sourcePanel.getNode());
         previewSplitPane.setDividerPositions(0.7);
+        // Workspace explorer (left-most pane)
+        // --- Split: Workspace Explorer | Editor Tabs ---
+        SplitPane workspaceEditorSplit = new SplitPane();
+        workspaceEditorSplit.setOrientation(Orientation.HORIZONTAL);
+        workspaceEditorSplit.getItems().addAll(
+                workspaceExplorer.getNode(),
+                editorTabPanel.getNode()
+        );
+        workspaceEditorSplit.setDividerPositions(0.3);
 
         // --- Right pane (holds preview split) ---
         BorderPane rightPane = new BorderPane();
         rightPane.setCenter(previewSplitPane);
 
-        // Main horizontal split (editor tabs | preview)
+        // --- Split: (Workspace+Editor) | Preview ---
         SplitPane mainSplitPane = new SplitPane();
         mainSplitPane.setOrientation(Orientation.HORIZONTAL);
-        mainSplitPane.getItems().addAll(editorTabPanel.getNode(), rightPane);
-        mainSplitPane.setDividerPositions(0.5);
+        mainSplitPane.getItems().addAll(
+                workspaceEditorSplit,
+                rightPane
+        );
+        mainSplitPane.setDividerPositions(0.6);
+
 
         VBox topBar = new VBox(menuBar.getNode(), toolBar.getNode());
 
@@ -100,9 +119,11 @@ public class CampaignWorkbenchIDE extends Application {
         primaryStage.setScene(scene);
         primaryStage.show();
 
+        toolBar.setContextXmlState(false);
+
         ThemeManager.applyCurrentTheme();
 
-        appendLog("Welcome to Campaign workbench! Load a template, select an XML context, and hit run!");
+        appendLog("Welcome to Campaign workbench! Open a workspace, load a template, select an XML context, and hit run!");
     }
 
     @Override
@@ -116,18 +137,20 @@ public class CampaignWorkbenchIDE extends Application {
     }
 
     private String getWorkspaceTemplatePath() {
-        return workspacePath + "/Templates";
+        return currentWorkspace.getTemplatesPath().toString();
     }
 
     private String getWorkspaceBlockPath() {
-        return workspacePath + "/PersoBlocks";
+        return currentWorkspace.getBlocksPath().toString();
     }
 
     private String getWorkspaceXmlPath() {
-        return workspacePath + "/XmlContext";
+        return currentWorkspace.getContextXmlPath().toString();
     }
 
-    private String getWorkspaceModulePath() {return workspacePath + "/Modules";}
+    private String getWorkspaceModulePath() {
+        return currentWorkspace.getModulesPath().toString();
+    }
 
     private void applyTheme(IDETheme theme) {
         ThemeManager.setTheme(theme);
@@ -157,17 +180,50 @@ public class CampaignWorkbenchIDE extends Application {
                     .getFileName()
                     .toString()
                     .toLowerCase();
-            toolBar.setRunButtonState(!name.endsWith(".template"));
+            toolBar.setRunButtonState(name.endsWith(".template"));
         } else {
             toolBar.setRunButtonState(true);
         }
     }
 
-    private void setXmlContext() {
+    private void openWorkspace() {
+
+        DirectoryChooser chooser = new DirectoryChooser();
+        File initialDir = new File(System.getProperty("user.dir"), "Workspaces");
+        if (!initialDir.exists()) {
+            initialDir.mkdirs(); // optional: create it if it doesn't exist
+        }
+        chooser.setInitialDirectory(initialDir);
+
+        chooser.setTitle("Open Workspace");
+
+        File selected = chooser.showDialog(editorTabPanel.getWindow());
+        if (selected == null) return;
+
+        Workspace ws = new Workspace(selected.toPath());
+        if (!ws.isValid()) {
+            showAlert("Selected folder is not a valid workspace.");
+            return;
+        }
+
+        this.currentWorkspace = ws;
+        workspaceExplorer.displayWorkspace(ws);
+
+        toolBar.setContextXmlState(true);
+
+        appendLog("Workspace opened: " + selected.getAbsolutePath());
+    }
+
+
+    private void openFileFromWorkspace(File file) {
+            openFileInNewTab(file);
+    }
+
+    private void setContextXml() {
         FileChooser fileChooser = new FileChooser();
         fileChooser.setTitle("Open File");
         fileChooser.setInitialDirectory(
-                new File(System.getProperty("user.dir"), workspacePath + "/XmlContext")
+                new File(currentWorkspace.getContextXmlPath().toString())
         );
         fileChooser.getExtensionFilters().addAll(
                 new FileChooser.ExtensionFilter("All Files", "*.*"),
@@ -178,7 +234,7 @@ public class CampaignWorkbenchIDE extends Application {
 
         if (selectedFile != null && selectedFile.getName().endsWith(".xml")) {
             xmlContextFile = selectedFile;
-            toolBar.setXmlContextLabel(selectedFile.getName());
+            toolBar.setContextXmlLabel(selectedFile.getName());
             try {
                 xmlContextContent = Files.readString(xmlContextFile.toPath());
             } catch (IOException ex) {
@@ -203,14 +259,18 @@ public class CampaignWorkbenchIDE extends Application {
         File selectedFile = fileChooser.showOpenDialog(editorTabPanel.getWindow());
         if (selectedFile == null) return;
 
+        openFileInNewTab(selectedFile);
+    }
+
+    private void openFileInNewTab(File selectedFile) {
         try {
             Path path = selectedFile.toPath();
             String content = Files.readString(path);
 
             editorTabPanel.addEditorTab(path, content);
 
-            EditorTab tab = new EditorTab(path, content);
-            tab.setClosable(true);
+            // EditorTab tab = new EditorTab(path, content);
+            // tab.setClosable(true);
 
         } catch (IOException ex) {
             ex.printStackTrace();
@@ -271,6 +331,7 @@ public class CampaignWorkbenchIDE extends Application {
             scope.put("xmlContext", scope, xmlContextContent);
 
             TemplateRenderResult renderResult = TemplateRenderer.render(
+                    currentWorkspace,
                     templateSource,
                     cx,
                     scope,
