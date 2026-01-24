@@ -37,6 +37,7 @@ public class LogPanel implements IJavaFxNode {
 
         logPanel = new VBox(5, logLabel, logArea);
         logPanel.setPadding(new Insets(0,0, 0,5));
+        logPanel.setMinHeight(0);
         VBox.setVgrow(logArea, Priority.ALWAYS);
     }
 

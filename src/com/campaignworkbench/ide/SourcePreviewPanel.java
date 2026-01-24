@@ -38,6 +38,7 @@ public class SourcePreviewPanel implements IJavaFxNode {
         sourcePreviewLabel.setStyle("-fx-font-weight: bold;");
         sourcePreviewPanel = new VBox(5, sourcePreviewLabel, editor.getNode());
         sourcePreviewPanel.setPadding(new Insets(0,0, 0,5));
+        sourcePreviewPanel.setMinHeight(0);
         
         VBox.setVgrow(editor.getNode(), Priority.ALWAYS);
 

@@ -21,6 +21,7 @@ public class EditorTabPanel implements IJavaFxNode {
      */
     public EditorTabPanel(ChangeListener<Tab> tabChangedListener) {
         tabPane = new TabPane();
+        tabPane.setMinHeight(0);
 
         tabPane.getSelectionModel().selectedItemProperty().addListener(tabChangedListener);
         tabPane.getSelectionModel().selectedItemProperty().addListener((obs, oldTab, newTab) -> {

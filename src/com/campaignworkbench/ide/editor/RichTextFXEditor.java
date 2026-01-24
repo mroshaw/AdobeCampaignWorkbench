@@ -11,6 +11,8 @@ import org.fxmisc.richtext.model.StyleSpansBuilder;
 import org.fxmisc.flowless.VirtualizedScrollPane;
 import javafx.scene.shape.Polygon;
 import javafx.scene.layout.HBox;
+import javafx.scene.layout.VBox;
+import javafx.scene.layout.Priority;
 import javafx.scene.Cursor;
 import javafx.geometry.Pos;
 import java.util.function.IntFunction;
@@ -87,18 +89,29 @@ public class RichTextFXEditor implements ICodeEditor {
      */
     public RichTextFXEditor() {
         this.codeArea = new CodeArea();
+        this.codeArea.setCursor(Cursor.TEXT);
         
-        IntFunction<Node> numberFactory = LineNumberFactory.get(codeArea, digits -> "%" + digits + "d ");
+        this.scrollPane = new VirtualizedScrollPane<>(codeArea);
+        VBox.setVgrow(codeArea, Priority.ALWAYS);
+
+        IntFunction<Node> baseNumberFactory = LineNumberFactory.get(codeArea, digits -> "%" + Math.max(3, digits) + "d ");
+        IntFunction<Node> numberFactory = line -> {
+            if (codeArea.getText().trim().isEmpty()) {
+                return new javafx.scene.layout.Region();
+            }
+            Node node = baseNumberFactory.apply(line);
+            node.getStyleClass().add("lineno");
+            return node;
+        };
         IntFunction<Node> foldingFactory = new FoldingFactory();
         IntFunction<Node> graphicFactory = line -> {
             HBox hbox = new HBox(numberFactory.apply(line), foldingFactory.apply(line));
-            hbox.setAlignment(Pos.CENTER_LEFT);
+            hbox.getStyleClass().add("gutter");
+            hbox.setAlignment(Pos.CENTER_RIGHT);
             return hbox;
         };
         this.codeArea.setParagraphGraphicFactory(graphicFactory);
         
-        this.scrollPane = new VirtualizedScrollPane<>(codeArea);
-
         // Re-highlight on text change
         codeArea.textProperty().addListener((obs, oldText, newText) -> {
             codeArea.setStyleSpans(0, computeHighlighting(newText));
@@ -110,8 +123,9 @@ public class RichTextFXEditor implements ICodeEditor {
     private class FoldingFactory implements IntFunction<Node> {
         @Override
         public Node apply(int lineNumber) {
-            Polygon triangle = new Polygon(0.0, 0.0, 10.0, 5.0, 0.0, 10.0);
+            Polygon triangle = new Polygon(0.0, 0.0, 8.0, 4.0, 0.0, 8.0);
             triangle.getStyleClass().add("folding-triangle");
+            HBox.setMargin(triangle, new javafx.geometry.Insets(0, 0, 0, 5));
             
             // Logic to check if this line is foldable
             if (isFoldable(lineNumber)) {
@@ -393,7 +407,7 @@ public class RichTextFXEditor implements ICodeEditor {
     public void applyTheme(IDETheme theme) {
         // Use AtlantaFX CSS variables for theme integration
         // -fx-text-fill doesn't work for CodeArea text, we need to style the .text class
-        codeArea.setStyle("-fx-background-color: -color-bg-default; -fx-font-family: 'Consolas'; -fx-font-size: 11pt;");
+        codeArea.setStyle("-fx-font-family: 'Consolas'; -fx-font-size: 11pt;");
 
         if (theme == IDETheme.DARK) {
             // Define colors for dark theme - these can also use AtlantaFX variables if suitable ones exist
@@ -423,7 +437,14 @@ public class RichTextFXEditor implements ICodeEditor {
     }
 
     private void applyHighlightingStyles(String keyword, String string, String comment, String tag, String attribute, String scriptlet, String symbol) {
-        String css = ".code-area .text { -fx-fill: -color-fg-default; }\n" +
+        String css = ".code-area { " +
+                     "  -fx-background-color: linear-gradient(to right, -color-bg-subtle 0%, -color-bg-subtle 60px, -color-bg-default 60px, -color-bg-default 100%); " +
+                     "}\n" +
+                     ".virtualized-scroll-pane { -fx-background-color: -color-bg-default; }\n" +
+                     ".code-area .text { -fx-fill: -color-fg-default; }\n" +
+                     ".paragraph-box { -fx-background-color: transparent; }\n" +
+                     ".gutter { -fx-background-color: transparent; }\n" +
+                //".gutter { -fx-background-color: transparent; -fx-padding: 0 5 0 0; -fx-min-width: 60px; -fx-max-width: 60px; }\n" +
                      ".keyword { -fx-fill: " + keyword + " !important; -fx-font-weight: bold; }\n" +
                      ".string { -fx-fill: " + string + " !important; }\n" +
                      ".comment { -fx-fill: " + comment + " !important; }\n" +
@@ -437,10 +458,17 @@ public class RichTextFXEditor implements ICodeEditor {
                      ".caret { -fx-stroke: -color-fg-default !important; }\n" +
                      ".folding-triangle { -fx-fill: -color-fg-muted !important; }\n" +
                      ".folding-triangle:hover { -fx-fill: -color-accent-fg !important; }\n" +
-                     ".lineno { -fx-text-fill: -color-fg-muted !important; -fx-background-color: -color-bg-subtle !important; -fx-padding: 0 5 0 5; -fx-font-family: 'Consolas'; -fx-font-size: 14pt; }";
+                     ".lineno { -fx-text-fill: -color-fg-muted !important; -fx-background-color: transparent !important; -fx-font-family: 'Consolas'; -fx-font-size: 11pt; }";
         
         codeArea.getStylesheets().clear();
-        String dataUri = "data:text/css," + css.replace(" ", "%20").replace("\n", "%0A").replace("#", "%23");
-        codeArea.getStylesheets().add(dataUri);
+        scrollPane.getStylesheets().clear();
+        try {
+            String encodedCss = java.net.URLEncoder.encode(css, java.nio.charset.StandardCharsets.UTF_8).replace("+", "%20");
+            String dataUri = "data:text/css," + encodedCss;
+            codeArea.getStylesheets().add(dataUri);
+            scrollPane.getStylesheets().add(dataUri);
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
     }
 }

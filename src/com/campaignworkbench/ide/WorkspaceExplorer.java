@@ -51,6 +51,7 @@ public class WorkspaceExplorer implements IJavaFxNode {
         explorerLabel.setStyle("-fx-font-weight: bold;");
 
         workspaceExplorerPanel = new VBox(5, explorerLabel, treeView);
+        workspaceExplorerPanel.setMinHeight(0);
         VBox.setVgrow(treeView, Priority.ALWAYS);
         workspaceExplorerPanel.setPadding(new Insets(0,0, 0,5));
     }

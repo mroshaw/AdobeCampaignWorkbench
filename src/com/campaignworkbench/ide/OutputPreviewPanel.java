@@ -34,6 +34,7 @@ public class OutputPreviewPanel implements IJavaFxNode {
 
         topPreviewBox = new VBox(5, outputLabel, preview);
         topPreviewBox.setPadding(new Insets(0,0, 0,5));
+        topPreviewBox.setMinHeight(0);
         
         VBox.setVgrow(preview, Priority.ALWAYS);
     }

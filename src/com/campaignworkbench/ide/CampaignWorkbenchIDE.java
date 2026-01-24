@@ -118,7 +118,7 @@ public class CampaignWorkbenchIDE extends Application {
         SplitPane previewSplitPane = new SplitPane();
         previewSplitPane.setOrientation(Orientation.VERTICAL);
         previewSplitPane.getItems().addAll(previewPanel.getNode(), postSourcePanel.getNode(), preSourcePanel.getNode());
-        previewSplitPane.setDividerPositions(0.5, 0.75);
+        previewSplitPane.setDividerPositions(0.33, 0.66);
         // Workspace explorer (left-most pane)
         // --- Split: Workspace Explorer | Editor Tabs ---
         SplitPane workspaceEditorSplit = new SplitPane();
@@ -227,6 +227,7 @@ public class CampaignWorkbenchIDE extends Application {
             case DARK -> new CupertinoDark().getUserAgentStylesheet();
             case LIGHT -> new CupertinoLight().getUserAgentStylesheet();
         };
+        Application.setUserAgentStylesheet(null);
         Application.setUserAgentStylesheet(stylesheet);
     }
 

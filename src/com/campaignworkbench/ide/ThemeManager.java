@@ -39,9 +39,9 @@ public final class ThemeManager {
     public static void setTheme(IDETheme theme) {
         currentTheme = theme;
 
+        CampaignWorkbenchIDE.setTheme(theme);
         for (ICodeEditor editor : editors) {
             editor.applyTheme(theme);
         }
-        CampaignWorkbenchIDE.setTheme(theme);
     }
 }
