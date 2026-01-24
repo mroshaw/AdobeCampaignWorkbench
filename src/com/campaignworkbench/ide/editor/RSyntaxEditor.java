@@ -121,25 +121,14 @@ public class RSyntaxEditor implements ICodeEditor {
     @Override
     public void setSyntax(SyntaxType syntax) {
         runOrQueue(() -> {
-            switch (syntax) {
-                case TEMPLATE:
-                    rSyntaxTextArea.setSyntaxEditingStyle(SyntaxConstants.SYNTAX_STYLE_JSP);
-                    break;
-                case BLOCK:
-                case SOURCE_PREVIEW:
-                    rSyntaxTextArea.setSyntaxEditingStyle(SyntaxConstants.SYNTAX_STYLE_JAVASCRIPT);
-                    break;
-                case XML:
-                    rSyntaxTextArea.setSyntaxEditingStyle(SyntaxConstants.SYNTAX_STYLE_XML);
-                    break;
-                case HTML_PREVIEW:
-                    rSyntaxTextArea.setSyntaxEditingStyle(SyntaxConstants.SYNTAX_STYLE_HTML);
-                    break;
-                case PLAIN:
-                default:
-                    rSyntaxTextArea.setSyntaxEditingStyle(SyntaxConstants.SYNTAX_STYLE_NONE);
-                    break;
-            }
+            String style = switch (syntax) {
+                case TEMPLATE -> SyntaxConstants.SYNTAX_STYLE_JSP;
+                case BLOCK, SOURCE_PREVIEW -> SyntaxConstants.SYNTAX_STYLE_JAVASCRIPT;
+                case XML -> SyntaxConstants.SYNTAX_STYLE_XML;
+                case HTML_PREVIEW -> SyntaxConstants.SYNTAX_STYLE_HTML;
+                default -> SyntaxConstants.SYNTAX_STYLE_NONE;
+            };
+            rSyntaxTextArea.setSyntaxEditingStyle(style);
         });
     }
 
@@ -161,17 +150,11 @@ public class RSyntaxEditor implements ICodeEditor {
      */
     public void applyTheme(IDETheme ideTheme) {
         try {
-            Theme themeToApply;
-            switch (ideTheme) {
-                case DARK:
-                    themeToApply = Theme.load(getClass().getResourceAsStream(
-                            "/rsyntaxtextarea/themes/dark.xml"));
-                    break;
-                default:
-                    themeToApply = Theme.load(getClass().getResourceAsStream(
-                            "/rsyntaxtextarea/themes/default.xml"));
-                    break;
-            }
+            String themePath = switch (ideTheme) {
+                case DARK -> "/rsyntaxtextarea/themes/dark.xml";
+                default -> "/rsyntaxtextarea/themes/default.xml";
+            };
+            Theme themeToApply = Theme.load(getClass().getResourceAsStream(themePath));
             applyThemeAsync(themeToApply);
         } catch (IOException ioe) { // Never happens
             ioe.printStackTrace();

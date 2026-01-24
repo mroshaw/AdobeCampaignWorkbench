@@ -29,8 +29,7 @@ public class EditorTabPanel implements IJavaFxNode {
     }
 
     private void refreshTabEditor(Tab tab) {
-        if (tab instanceof EditorTab) {
-            EditorTab editorTab = (EditorTab) tab;
+        if (tab instanceof EditorTab editorTab) {
             editorTab.refreshEditor();
         }
     }
@@ -44,8 +43,7 @@ public class EditorTabPanel implements IJavaFxNode {
     public void openFileAndGoToLine(Path path, int line) {
         EditorTab targetTab = null;
         for (Tab tab : tabPane.getTabs()) {
-            if (tab instanceof EditorTab) {
-                EditorTab editorTab = (EditorTab) tab;
+            if (tab instanceof EditorTab editorTab) {
                 if (editorTab.getFile().equals(path)) {
                     targetTab = editorTab;
                     break;

@@ -183,22 +183,15 @@ public class CampaignWorkbenchIDE extends Application {
      * @param ideTheme theme, LIGHT or DARK, to apply to the IDE
      */
     public static void setTheme(IDETheme ideTheme) {
-        switch(ideTheme)
-        {
-            case DARK:
-                Application.setUserAgentStylesheet(new CupertinoDark().getUserAgentStylesheet());
-                break;
-
-            case LIGHT:
-            default:
-                Application.setUserAgentStylesheet(new CupertinoLight().getUserAgentStylesheet());
-                break;
-        }
+        String stylesheet = switch (ideTheme) {
+            case DARK -> new CupertinoDark().getUserAgentStylesheet();
+            case LIGHT -> new CupertinoLight().getUserAgentStylesheet();
+        };
+        Application.setUserAgentStylesheet(stylesheet);
     }
 
     private void updateRunButtonState(Tab tab) {
-        if (tab instanceof EditorTab) {
-            EditorTab editorTab = (EditorTab) tab;
+        if (tab instanceof EditorTab editorTab) {
             String name = editorTab.getFile()
                     .getFileName()
                     .toString()

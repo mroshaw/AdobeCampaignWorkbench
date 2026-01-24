@@ -26,10 +26,10 @@ public final class ModuleRenderer {
             String sourceName
     ) {
         try {
-            String js =
-                    "var out = new java.lang.StringBuilder();\n" +
-                            transformModuleToJavaScript(moduleSource) +
-                            "out.toString();";
+            String js = """
+                    var out = new java.lang.StringBuilder();
+                    %s
+                    out.toString();""".formatted(transformModuleToJavaScript(moduleSource));
 
             Object result = cx.evaluateString(scope, js, sourceName, 1, null);
             return Context.toString(result);

@@ -15,18 +15,7 @@ import java.util.List;
  */
 public final class TemplateRenderer {
 
-    private static class SourceMapping {
-        final String sourceName;
-        final int startLineInExpanded;
-        final int endLineInExpanded;
-        final int lineOffsetInOriginal; // To handle sub-segments if needed, but usually 0 for full files
-
-        SourceMapping(String sourceName, int startLineInExpanded, int endLineInExpanded, int lineOffsetInOriginal) {
-            this.sourceName = sourceName;
-            this.startLineInExpanded = startLineInExpanded;
-            this.endLineInExpanded = endLineInExpanded;
-            this.lineOffsetInOriginal = lineOffsetInOriginal;
-        }
+    private record SourceMapping(String sourceName, int startLineInExpanded, int endLineInExpanded, int lineOffsetInOriginal) {
     }
 
     private static final ThreadLocal<List<SourceMapping>> sourceMappings = ThreadLocal.withInitial(ArrayList::new);
@@ -69,41 +58,40 @@ public final class TemplateRenderer {
 
             return new TemplateRenderResult(js.trim(), output);
         }
-        catch (org.mozilla.javascript.EvaluatorException e) {
-            SourceMapping mapping = findSourceMapping(e.lineNumber());
-            throw new TemplateParseException(
-                    "JavaScript syntax error",
-                    mapping != null ? mapping.sourceName : sourceName,
-                    expanded.isEmpty() ? templateSource : expanded,
-                    mapping != null ? (e.lineNumber() - mapping.startLineInExpanded + 1 + mapping.lineOffsetInOriginal) : e.lineNumber(),
-                    e.details(),
-                    "Check the template or included files for syntax errors in JavaScript blocks.",
-                    e
-            );
-        }
-        catch (org.mozilla.javascript.JavaScriptException e) {
-            SourceMapping mapping = findSourceMapping(e.lineNumber());
-            throw new TemplateExecutionException(
-                    "JavaScript execution error: " + e.getMessage(),
-                    mapping != null ? mapping.sourceName : sourceName,
-                    expanded,
-                    mapping != null ? (e.lineNumber() - mapping.startLineInExpanded + 1 + mapping.lineOffsetInOriginal) : e.lineNumber(),
-                    e.details(),
-                    "Ensure all variables are defined and function calls are valid.",
-                    e
-            );
-        }
         catch (org.mozilla.javascript.RhinoException e) {
             SourceMapping mapping = findSourceMapping(e.lineNumber());
-            throw new TemplateExecutionException(
-                    "Rhino error: " + e.getMessage(),
-                    mapping != null ? mapping.sourceName : sourceName,
-                    expanded,
-                    mapping != null ? (e.lineNumber() - mapping.startLineInExpanded + 1 + mapping.lineOffsetInOriginal) : e.lineNumber(),
-                    e.details(),
-                    "Check for script errors or invalid Rhino context operations.",
-                    e
-            );
+            String message = switch (e) {
+                case org.mozilla.javascript.EvaluatorException _ -> "JavaScript syntax error";
+                case org.mozilla.javascript.JavaScriptException _ -> "JavaScript execution error: " + e.getMessage();
+                default -> "Rhino error: " + e.getMessage();
+            };
+            
+            int mappedLine = mapping != null ? (e.lineNumber() - mapping.startLineInExpanded() + 1 + mapping.lineOffsetInOriginal()) : e.lineNumber();
+            String mappedSourceName = mapping != null ? mapping.sourceName() : sourceName;
+
+            if (e instanceof org.mozilla.javascript.EvaluatorException evaluatorException) {
+                throw new TemplateParseException(
+                        message,
+                        mappedSourceName,
+                        expanded.isEmpty() ? templateSource : expanded,
+                        mappedLine,
+                        evaluatorException.details(),
+                        "Check the template or included files for syntax errors in JavaScript blocks.",
+                        evaluatorException
+                );
+            } else {
+                throw new TemplateExecutionException(
+                        message,
+                        mappedSourceName,
+                        expanded,
+                        mappedLine,
+                        e.details(),
+                        e instanceof org.mozilla.javascript.JavaScriptException ? 
+                            "Ensure all variables are defined and function calls are valid." :
+                            "Check for script errors or invalid Rhino context operations.",
+                        e
+                );
+            }
         }
         catch(TemplateException e) {
             throw e;
@@ -174,25 +162,25 @@ public final class TemplateRenderer {
                 if (directive.contains("module=")) {
                     String name = extractQuoted(directive, "module");
                     Path p = workspace.getModulesPath().resolve(name + ".module");
-                    try {
-                        String moduleSource = FileUtil.read(p);
-                        String moduleOutput =
-                                ModuleRenderer.renderModule(moduleSource, cx, scope, p.toString());
-                        out.append("/* SOURCE:").append(p.getFileName()).append(" */\n");
-                        out.append(preprocess(workspace, moduleOutput, cx, scope, p.toString()));
-                        out.append("\n/* END SOURCE:").append(p.getFileName()).append(" */");
-                    } catch (Exception e) {
-                        if (e instanceof TemplateException) throw (TemplateException)e;
-                        throw new TemplateParseException(
-                                "Failed to include/render module: " + name,
-                                sourceName,
-                                source,
-                                lineNumberAt(source, start),
-                                e.getMessage(),
-                                "Check if the module file exists and is valid: " + p,
-                                e
-                        );
-                    }
+                try {
+                    String moduleSource = FileUtil.read(p);
+                    String moduleOutput =
+                            ModuleRenderer.renderModule(moduleSource, cx, scope, p.toString());
+                    out.append("/* SOURCE:").append(p.getFileName()).append(" */\n");
+                    out.append(preprocess(workspace, moduleOutput, cx, scope, p.toString()));
+                    out.append("\n/* END SOURCE:").append(p.getFileName()).append(" */");
+                } catch (Exception e) {
+                    if (e instanceof TemplateException te) throw te;
+                    throw new TemplateParseException(
+                            "Failed to include/render module: " + name,
+                            sourceName,
+                            source,
+                            lineNumberAt(source, start),
+                            e.getMessage(),
+                            "Check if the module file exists and is valid: " + p,
+                            e
+                    );
+                }
                 }
                 else if (directive.contains("view=")) {
                     String name = extractQuoted(directive, "view");
@@ -203,7 +191,7 @@ public final class TemplateRenderer {
                         out.append(preprocess(workspace, blockSource, cx, scope, p.toString()));
                         out.append("\n/* END SOURCE:").append(p.getFileName()).append(" */");
                     } catch (Exception e) {
-                        if (e instanceof TemplateException) throw (TemplateException)e;
+                        if (e instanceof TemplateException te) throw te;
                         throw new TemplateParseException(
                                 "Failed to include block: " + name,
                                 sourceName,
@@ -326,7 +314,7 @@ public final class TemplateRenderer {
         List<SourceMapping> mappings = sourceMappings.get();
         if (!mappings.isEmpty()) {
             SourceMapping last = mappings.get(mappings.size() - 1);
-            mappings.set(mappings.size() - 1, new SourceMapping(last.sourceName, last.startLineInExpanded, endLine, last.lineOffsetInOriginal));
+            mappings.set(mappings.size() - 1, new SourceMapping(last.sourceName(), last.startLineInExpanded(), endLine, last.lineOffsetInOriginal()));
         }
     }
 
@@ -383,18 +371,18 @@ public final class TemplateRenderer {
 
     private static SourceMapping findSourceMapping(int expandedLine) {
         List<SourceMapping> map = sourceMappings.get();
-        SourceMapping best = null;
-        for (SourceMapping entry : map) {
-            if (entry.startLineInExpanded <= expandedLine) {
-                if (best == null || entry.startLineInExpanded > best.startLineInExpanded) {
-                    best = entry;
+            SourceMapping best = null;
+            for (SourceMapping entry : map) {
+                if (entry.startLineInExpanded() <= expandedLine) {
+                    if (best == null || entry.startLineInExpanded() > best.startLineInExpanded()) {
+                        best = entry;
+                    }
                 }
             }
-        }
-        if (best != null && expandedLine > best.endLineInExpanded) {
-            // It's after the end of this mapping, might be the next one or in "no man's land"
-        }
-        return best;
+            if (best != null && expandedLine > best.endLineInExpanded()) {
+                // It's after the end of this mapping, might be the next one or in "no man's land"
+            }
+            return best;
     }
 
     private static void appendText(StringBuilder js, String text) {
@@ -449,15 +437,19 @@ public final class TemplateRenderer {
 
     private static void injectStandardFunctions(Context cx, Scriptable scope) {
         cx.evaluateString(scope,
-                "var formatDate = function(d,f){" +
-                        " return com.campaignworkbench.campaignrenderer.CampaignFunctions.formatDate(d,f);" +
-                        "};",
+                """
+                var formatDate = function(d,f){
+                 return com.campaignworkbench.campaignrenderer.CampaignFunctions.formatDate(d,f);
+                };
+                """,
                 "campaignFunctions.js", 1, null);
 
         cx.evaluateString(scope,
-                "var parseTimeStamp = function(s){" +
-                        " return com.campaignworkbench.campaignrenderer.CampaignFunctions.parseTimeStamp(s);" +
-                        "};",
+                """
+                var parseTimeStamp = function(s){
+                 return com.campaignworkbench.campaignrenderer.CampaignFunctions.parseTimeStamp(s);
+                };
+                """,
                 "campaignFunctions.js", 1, null);
 
         cx.evaluateString(scope,

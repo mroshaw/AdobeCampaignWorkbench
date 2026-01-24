@@ -71,12 +71,12 @@ public final class EditorTab extends Tab {
     private SyntaxType determineSyntax(Path file) {
         String name = file.getFileName().toString().toLowerCase();
 
-        if (name.endsWith(".template")) return SyntaxType.TEMPLATE;
-        if (name.endsWith(".module")) return SyntaxType.TEMPLATE;
-        if (name.endsWith(".block"))    return SyntaxType.BLOCK;
-        if (name.endsWith(".xml"))      return SyntaxType.XML;
-
-        return SyntaxType.PLAIN;
+        return switch (name) {
+            case String s when s.endsWith(".template") || s.endsWith(".module") -> SyntaxType.TEMPLATE;
+            case String s when s.endsWith(".block") -> SyntaxType.BLOCK;
+            case String s when s.endsWith(".xml") -> SyntaxType.XML;
+            default -> SyntaxType.PLAIN;
+        };
     }
 
     /**

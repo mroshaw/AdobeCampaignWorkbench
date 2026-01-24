@@ -42,8 +42,8 @@ public class SyntaxErrorLineMappingTest {
                 System.out.println("File: " + ex.getTemplateName());
                 System.out.println("Line: " + ex.getTemplateLine());
                 System.out.println("Root Cause: " + ex.getRootCause());
-                if (ex.getCause() instanceof org.mozilla.javascript.RhinoException) {
-                    System.out.println("Rhino Line: " + ((org.mozilla.javascript.RhinoException)ex.getCause()).lineNumber());
+                if (ex.getCause() instanceof org.mozilla.javascript.RhinoException re) {
+                    System.out.println("Rhino Line: " + re.lineNumber());
                 }
                 
                 // Based on the template above:

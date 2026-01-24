@@ -3,7 +3,7 @@ package com.campaignworkbench.campaignrenderer;
 /**
  * Top level exception with detailed information about the process that caused the exception
  */
-public abstract class TemplateException extends RuntimeException {
+public abstract sealed class TemplateException extends RuntimeException permits TemplateExecutionException, TemplateGenerationException, TemplateParseException {
     private final String templateName;
     private final String sourceCode;
     private final int templateLine;

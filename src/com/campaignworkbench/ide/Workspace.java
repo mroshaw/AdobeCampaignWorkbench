@@ -4,7 +4,6 @@ import java.io.File;
 import java.nio.file.Path;
 import java.util.Arrays;
 import java.util.List;
-import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 /**
@@ -14,7 +13,7 @@ public class Workspace {
 
     private final Path root;
     public static final List<String> REQUIRED =
-            Arrays.asList("Templates", "Modules", "Blocks", "ContextXml");
+            List.of("Templates", "Modules", "Blocks", "ContextXml");
 
     /**
      * @param root folder for the workspace
@@ -74,7 +73,7 @@ public class Workspace {
     public List<File> getFolderFiles(String subfolder) {
         File dir = root.resolve(subfolder).toFile();
         return dir.isDirectory()
-                ? Arrays.stream(dir.listFiles()).collect(Collectors.toList())
+                ? Arrays.stream(dir.listFiles()).toList()
                 : List.of();
     }
 
@@ -89,6 +88,6 @@ public class Workspace {
                             ? Arrays.stream(d.listFiles())
                             : Stream.empty();
                 })
-                .collect(Collectors.toList());
+                .toList();
     }
 }
