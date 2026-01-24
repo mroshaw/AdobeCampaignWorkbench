@@ -1,6 +1,7 @@
 package com.campaignworkbench.ide;
 
 import javafx.application.Platform;
+import javafx.geometry.Insets;
 import javafx.scene.Cursor;
 import javafx.scene.Node;
 import javafx.scene.control.Label;
@@ -15,26 +16,28 @@ import javafx.scene.text.Font;
 public class LogPanel implements IJavaFxNode {
 
     private final TextArea logArea;
-    VBox logBox;
+    VBox logPanel;
 
     /**
      * Constructor
      */
-    public LogPanel() {
-        // --- Full-width log pane ---
-        Label logLabel = new Label("Logs");
+    public LogPanel(String label) {
+        Label logLabel = new Label(label);
+        logLabel.setPadding(new Insets(0,0, 0,5));
+        logLabel.setStyle("-fx-font-weight: bold;");
         logArea = new TextArea();
         logArea.setEditable(false);
         logArea.setWrapText(true);
         logArea.setCursor(Cursor.TEXT); // full-width log pane
         logArea.setFont(Font.font("Source Code Pro", 14));
 
-        logBox = new VBox(5, logLabel, logArea);
+        logPanel = new VBox(5, logLabel, logArea);
+        logPanel.setPadding(new Insets(0,0, 0,5));
         VBox.setVgrow(logArea, Priority.ALWAYS);
     }
 
     public Node getNode() {
-        return logBox;
+        return logPanel;
     }
 
     /**

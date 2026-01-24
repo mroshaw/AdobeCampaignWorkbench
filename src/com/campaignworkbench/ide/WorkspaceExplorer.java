@@ -1,23 +1,28 @@
 package com.campaignworkbench.ide;
 
 import javafx.scene.Node;
+import javafx.scene.control.Label;
 import javafx.scene.control.TreeCell;
 import javafx.scene.control.TreeItem;
 import javafx.scene.control.TreeView;
 import javafx.scene.input.MouseButton;
-
+import javafx.scene.layout.Priority;
+import javafx.scene.layout.VBox;
 import java.io.File;
 import java.util.function.Consumer;
+import javafx.geometry.Insets;
 
 public class WorkspaceExplorer implements IJavaFxNode {
 
     private TreeView<File> treeView;
     private Consumer<File> fileOpenHandler;
+    private VBox workspaceExplorerPanel;
 
     /**
+     * @param label Label to use for the control in the UI
      * @param fileOpenHandler that handles double clicks of files in the Explorer
      */
-    public WorkspaceExplorer(Consumer<File> fileOpenHandler) {
+    public WorkspaceExplorer(String label, Consumer<File> fileOpenHandler) {
         treeView = new TreeView<>();
         setupDoubleClick();
 
@@ -34,6 +39,14 @@ public class WorkspaceExplorer implements IJavaFxNode {
             }
         });
         this.fileOpenHandler = fileOpenHandler;
+
+        Label explorerLabel = new Label(label);
+        explorerLabel.setPadding(new Insets(0,0, 0,5));
+        explorerLabel.setStyle("-fx-font-weight: bold;");
+
+        workspaceExplorerPanel = new VBox(5, explorerLabel, treeView);
+        VBox.setVgrow(treeView, Priority.ALWAYS);
+        workspaceExplorerPanel.setPadding(new Insets(0,0, 0,5));
     }
 
     /**
@@ -70,6 +83,6 @@ public class WorkspaceExplorer implements IJavaFxNode {
 
     @Override
     public Node getNode() {
-        return treeView;
+        return workspaceExplorerPanel;
     }
 }

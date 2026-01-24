@@ -11,5 +11,8 @@
     <orderEntry type="library" name="cat.inspiracio.rhino.js.engine" level="project" />
     <orderEntry type="library" name="fifesoft.rsyntaxtextarea" level="project" />
     <orderEntry type="library" name="atlantafx-base-2.1.0" level="project" />
+    <orderEntry type="library" name="fifesoft.rstaui" level="project" />
+    <orderEntry type="library" name="fifesoft.languagesupport" level="project" />
+    <orderEntry type="library" name="fxmisc.richtext.richtextfx" level="project" />
   </component>
 </module>

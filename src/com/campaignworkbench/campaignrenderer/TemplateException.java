@@ -7,12 +7,16 @@ public abstract class TemplateException extends RuntimeException {
     private final String templateName;
     private final String sourceCode;
     private final int templateLine;
+    private final String rootCause;
+    private final String solution;
 
-    protected TemplateException(String message, String templateName, String sourceCode, int templateLine, Throwable cause) {
+    protected TemplateException(String message, String templateName, String sourceCode, int templateLine, String rootCause, String solution, Throwable cause) {
         super(message, cause);
         this.templateName = templateName;
         this.sourceCode = sourceCode;
         this.templateLine = templateLine;
+        this.rootCause = rootCause;
+        this.solution = solution;
     }
 
     /**
@@ -32,4 +36,16 @@ public abstract class TemplateException extends RuntimeException {
      * @return source code
      */
     public String getSourceCode() { return sourceCode; }
+
+    /**
+     * Returns the root cause of the error
+     * @return root cause
+     */
+    public String getRootCause() { return rootCause; }
+
+    /**
+     * Returns a recommended solution
+     * @return solution
+     */
+    public String getSolution() { return solution; }
 }

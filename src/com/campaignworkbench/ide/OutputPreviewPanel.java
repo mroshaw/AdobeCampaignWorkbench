@@ -1,5 +1,6 @@
 package com.campaignworkbench.ide;
 
+import javafx.geometry.Insets;
 import javafx.scene.Cursor;
 import javafx.scene.Node;
 import javafx.scene.control.Label;
@@ -18,12 +19,16 @@ public class OutputPreviewPanel implements IJavaFxNode {
     /**
      * Constructor
      */
-    public OutputPreviewPanel() {
+    public OutputPreviewPanel(String label) {
         preview = new WebView();
         preview.setCursor(Cursor.TEXT);
 
-        outputLabel = new Label("Output");
+        outputLabel = new Label(label);
+        outputLabel.setPadding(new Insets(0,0, 0,5));
+        outputLabel.setStyle("-fx-font-weight: bold;");
+
         topPreviewBox = new VBox(5, outputLabel, preview);
+        topPreviewBox.setPadding(new Insets(0,0, 0,5));
     }
 
     /**

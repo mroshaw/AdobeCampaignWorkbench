@@ -3,6 +3,7 @@ package com.campaignworkbench.ide;
 import atlantafx.base.theme.CupertinoDark;
 import atlantafx.base.theme.CupertinoLight;
 import com.campaignworkbench.campaignrenderer.*;
+import com.campaignworkbench.ide.editor.SyntaxType;
 import javafx.application.Application;
 import javafx.application.Platform;
 import javafx.geometry.Orientation;
@@ -32,8 +33,10 @@ public class CampaignWorkbenchIDE extends Application {
     private ToolBar toolBar;
     private EditorTabPanel editorTabPanel;
     private LogPanel logPanel;
+    private ErrorLogPanel errorLogPanel;
     private OutputPreviewPanel previewPanel;
-    private SourcePreviewPanel sourcePanel;
+    private SourcePreviewPanel postSourcePanel;
+    private SourcePreviewPanel preSourcePanel;
 
     private File xmlContextFile;
     private String xmlContextContent;
@@ -63,23 +66,29 @@ public class CampaignWorkbenchIDE extends Application {
                 _ -> runTemplate());
 
         // Workspace Explorer
-        workspaceExplorer = new WorkspaceExplorer(this::openFileFromWorkspace);
+        workspaceExplorer = new WorkspaceExplorer("Workspace Explorer", this::openFileFromWorkspace);
 
         // Editor tabs
         editorTabPanel = new EditorTabPanel((_, _, newTab) -> updateRunButtonState(newTab));
 
         // Output panes
-        previewPanel = new OutputPreviewPanel();
-        sourcePanel = new SourcePreviewPanel();
+        previewPanel = new OutputPreviewPanel("Preview WebView");
+        preSourcePanel = new SourcePreviewPanel("Pre Process JavaScript", SyntaxType.SOURCE_PREVIEW);
+        postSourcePanel = new SourcePreviewPanel("Post Process HTML", SyntaxType.HTML_PREVIEW);
 
         // Log pane
-        logPanel = new LogPanel();
+        logPanel = new LogPanel("Logs");
+        errorLogPanel = new ErrorLogPanel("Errors");
+        SplitPane logSplitPane = new SplitPane();
+        logSplitPane.setOrientation(Orientation.HORIZONTAL);
+        logSplitPane.getItems().addAll(logPanel.getNode(), errorLogPanel.getNode());
+        logSplitPane.setDividerPositions(0.5);
 
         // Create the right hand side preview split panes
         SplitPane previewSplitPane = new SplitPane();
         previewSplitPane.setOrientation(Orientation.VERTICAL);
-        previewSplitPane.getItems().addAll(previewPanel.getNode(), sourcePanel.getNode());
-        previewSplitPane.setDividerPositions(0.7);
+        previewSplitPane.getItems().addAll(previewPanel.getNode(), postSourcePanel.getNode(), preSourcePanel.getNode());
+        previewSplitPane.setDividerPositions(0.5, 0.75);
         // Workspace explorer (left-most pane)
         // --- Split: Workspace Explorer | Editor Tabs ---
         SplitPane workspaceEditorSplit = new SplitPane();
@@ -108,7 +117,7 @@ public class CampaignWorkbenchIDE extends Application {
 
         SplitPane rootSplitPane = new SplitPane();
         rootSplitPane.setOrientation(Orientation.VERTICAL);
-        rootSplitPane.getItems().addAll(mainSplitPane, logPanel.getNode()); // logBox = VBox with logLabel + logArea
+        rootSplitPane.getItems().addAll(mainSplitPane, logSplitPane); // logBox = VBox with logLabel + logArea
         rootSplitPane.setDividerPositions(0.8); // 80% main area, 20% log initially
 
         // --- Root BorderPane ---
@@ -312,6 +321,8 @@ public class CampaignWorkbenchIDE extends Application {
             return;
         }
 
+        errorLogPanel.clearErrors();
+
         try {
             String templateSource = editorTabPanel.getSelectedText();
 
@@ -343,30 +354,14 @@ public class CampaignWorkbenchIDE extends Application {
 
             Platform.runLater(() -> {
                 previewPanel.setContent(resultHtml);
-                sourcePanel.setText(resultJs);
-
+                postSourcePanel.setText(resultHtml);
+                preSourcePanel.setText(resultJs);
                 appendLog("Template ran successfully: " + editorTabPanel.getSelectedFileName());
             });
-        } catch (TemplateParseException parseEx) {
-            appendLog("An error occurred parsing the template: " + parseEx.getTemplateName() + " at line: " + parseEx.getTemplateLine());
-            appendLog(parseEx.getMessage());
-            Throwable cause = parseEx.getCause();
-            while (cause != null) {
-                appendLog("Caused by: " + cause.getClass().getSimpleName() + " : " + cause.getMessage());
-                cause = cause.getCause();
-            }
-            appendLog(parseEx.getSourceCode());
-        } catch (TemplateExecutionException execEx) {
-            appendLog("An error occurred executing the template: " + execEx.getTemplateName() + " at line: " + execEx.getTemplateLine());
-            appendLog(execEx.getMessage());
-            Throwable cause = execEx.getCause();
-            while (cause != null) {
-                appendLog("Caused by: " + cause.getClass().getSimpleName() + " : " + cause.getMessage());
-                cause = cause.getCause();
-            }
-            appendLog(execEx.getSourceCode());
-        } catch (TemplateGenerationException genEx) {
-
+        } catch (TemplateException ex) {
+            appendLog("An error occurred: " + ex.getMessage());
+            errorLogPanel.addError(ex);
+            preSourcePanel.setText(ex.getSourceCode());
         }
         catch (Exception ex) {
             ex.printStackTrace();

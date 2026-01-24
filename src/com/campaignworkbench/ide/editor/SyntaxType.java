@@ -25,6 +25,10 @@ public enum SyntaxType {
      */
     SOURCE_PREVIEW,
     /**
+     * HTML highlighting
+     */
+    HTML_PREVIEW,
+    /**
      * Plain text, no highlighting
      */
     PLAIN

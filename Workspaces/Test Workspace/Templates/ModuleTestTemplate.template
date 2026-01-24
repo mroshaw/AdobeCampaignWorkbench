@@ -1,7 +1,10 @@
-<%@ include view='testFunctions' %>
+<%@ include view='MoreTestFunctions' %>
+
 <html>
 <body style="background-color:MediumSeaGreen;">
-Hello <%= rtEvent.ctx.customer.name %> <%= test() %> <BR>
+Hello <%= rtEvent.ctx.customer.name %><BR>
 <%@ include module='TestModule' %>
+<% var today = getCurrentDate(); %>
+Today is: <%= today %>
 </body>
 </html>

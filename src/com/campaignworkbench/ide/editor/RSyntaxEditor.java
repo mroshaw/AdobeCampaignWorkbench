@@ -118,6 +118,9 @@ public class RSyntaxEditor implements ICodeEditor {
                 case XML:
                     rSyntaxTextArea.setSyntaxEditingStyle(SyntaxConstants.SYNTAX_STYLE_XML);
                     break;
+                case HTML_PREVIEW:
+                    rSyntaxTextArea.setSyntaxEditingStyle(SyntaxConstants.SYNTAX_STYLE_HTML);
+                    break;
                 case PLAIN:
                 default:
                     rSyntaxTextArea.setSyntaxEditingStyle(SyntaxConstants.SYNTAX_STYLE_NONE);

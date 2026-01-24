@@ -1,0 +1,16 @@
+<component name="libraryTable">
+  <library name="fifesoft.rstaui" type="repository">
+    <properties maven-id="com.fifesoft:rstaui:3.3.1" />
+    <CLASSES>
+      <root url="jar://$MAVEN_REPOSITORY$/com/fifesoft/rstaui/3.3.1/rstaui-3.3.1.jar!/" />
+      <root url="jar://$MAVEN_REPOSITORY$/com/fifesoft/rsyntaxtextarea/3.3.2/rsyntaxtextarea-3.3.2.jar!/" />
+      <root url="jar://$MAVEN_REPOSITORY$/com/fifesoft/autocomplete/3.3.1/autocomplete-3.3.1.jar!/" />
+    </CLASSES>
+    <JAVADOC>
+      <root url="jar://$MAVEN_REPOSITORY$/com/fifesoft/rstaui/3.3.1/rstaui-3.3.1-javadoc.jar!/" />
+      <root url="jar://$MAVEN_REPOSITORY$/com/fifesoft/rsyntaxtextarea/3.3.2/rsyntaxtextarea-3.3.2-javadoc.jar!/" />
+      <root url="jar://$MAVEN_REPOSITORY$/com/fifesoft/autocomplete/3.3.1/autocomplete-3.3.1-javadoc.jar!/" />
+    </JAVADOC>
+    <SOURCES />
+  </library>
+</component>

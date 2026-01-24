@@ -40,6 +40,8 @@ public final class ModuleRenderer {
                     sourceName,
                     moduleSource,
                     e.lineNumber(),
+                    e.details(),
+                    "Check the module source for JavaScript errors.",
                     e
             );
         }

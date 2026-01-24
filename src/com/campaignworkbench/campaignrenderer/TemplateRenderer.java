@@ -33,15 +33,15 @@ public final class TemplateRenderer {
         try {
             injectStandardFunctions(cx, scope);
 
-            // 1️⃣ PREPROCESS (no JavaScript execution)
-            String expanded = preprocess(workspace, templateSource, cx, scope);
+            // 1. PREPROCESS (no JavaScript execution)
+            String expanded = preprocess(workspace, templateSource, cx, scope, sourceName);
 
-            // 2️⃣ TRANSFORM TO JS
-            String js = transformToJavaScript(expanded);
+            // 2. TRANSFORM TO JS
+            String js = transformToJavaScript(expanded, sourceName);
 
-            // 3️⃣ EXECUTE
+            // 3. EXECUTE
             Object result = cx.evaluateString(scope, js, sourceName, 1, null);
-            return new TemplateRenderResult(js, Context.toString(result));
+            return new TemplateRenderResult(js.trim(), Context.toString(result).trim());
         }
         catch (org.mozilla.javascript.EvaluatorException e) {
             throw new TemplateParseException(
@@ -49,6 +49,8 @@ public final class TemplateRenderer {
                     sourceName,
                     templateSource,
                     e.lineNumber(),
+                    e.details(),
+                    "Check the template or included files for syntax errors in JavaScript blocks.",
                     e
             );
         }
@@ -58,6 +60,8 @@ public final class TemplateRenderer {
                     sourceName,
                     templateSource,
                     e.lineNumber(),
+                    e.details(),
+                    "Ensure all variables are defined and function calls are valid.",
                     e
             );
         }
@@ -67,9 +71,37 @@ public final class TemplateRenderer {
                     sourceName,
                     templateSource,
                     e.lineNumber(),
+                    e.details(),
+                    "Check for script errors or invalid Rhino context operations.",
                     e
             );
         }
+        catch(TemplateException e) {
+            throw e;
+        }
+        catch(java.lang.IllegalArgumentException e) {
+            throw new TemplateParseException(
+                    "Validation Error: " + e.getMessage(),
+                    sourceName,
+                    templateSource,
+                    -1,
+                    e.getMessage(),
+                    "Check directive syntax and ensure required attributes are present.",
+                    e
+            );
+        }
+        catch(Exception e) {
+            throw new TemplateExecutionException(
+                    "Unexpected error: " + e.getMessage(),
+                    sourceName,
+                    templateSource,
+                    -1,
+                    e.getClass().getSimpleName(),
+                    "Check the logs for more details.",
+                    e
+            );
+        }
+
     }
 
     // ---------------------------------------------------------------------
@@ -78,7 +110,8 @@ public final class TemplateRenderer {
             Workspace workspace,
             String source,
             Context cx,
-            Scriptable scope
+            Scriptable scope,
+            String sourceName
     ) {
         StringBuilder out = new StringBuilder();
         int pos = 0;
@@ -94,7 +127,16 @@ public final class TemplateRenderer {
 
             int end = source.indexOf("%>", start);
             if (end == -1) {
-                throw new IllegalArgumentException("Unclosed <%@ directive");
+                int line = lineNumberAt(source, start);
+                throw new TemplateParseException(
+                        "Unclosed <%@ directive",
+                        sourceName,
+                        source,
+                        line,
+                        "Unclosed <%@ directive",
+                        "Ensure all directives are closed with '%>'.",
+                        null
+                );
             }
 
             String directive = source.substring(start + 3, end).trim();
@@ -103,28 +145,54 @@ public final class TemplateRenderer {
                 if (directive.contains("module=")) {
                     String name = extractQuoted(directive, "module");
                     Path p = workspace.getModulesPath().resolve(name + ".module");
-                    String moduleSource = FileUtil.read(p);
-                    String moduleOutput =
-                            ModuleRenderer.renderModule(moduleSource, cx, scope, p.toString());
-                    out.append(preprocess(workspace, moduleOutput, cx, scope));
+                    try {
+                        String moduleSource = FileUtil.read(p);
+                        String moduleOutput =
+                                ModuleRenderer.renderModule(moduleSource, cx, scope, p.toString());
+                        out.append(preprocess(workspace, moduleOutput, cx, scope, p.toString()));
+                    } catch (Exception e) {
+                        if (e instanceof TemplateException) throw (TemplateException)e;
+                        throw new TemplateParseException(
+                                "Failed to include/render module: " + name,
+                                sourceName,
+                                source,
+                                lineNumberAt(source, start),
+                                e.getMessage(),
+                                "Check if the module file exists and is valid: " + p,
+                                e
+                        );
+                    }
                 }
                 else if (directive.contains("view=")) {
                     String name = extractQuoted(directive, "view");
                     Path p = workspace.getBlocksPath().resolve(name + ".block");
-                    String blockSource = FileUtil.read(p);
-                    out.append(preprocess(workspace, blockSource, cx, scope));
+                    try {
+                        String blockSource = FileUtil.read(p);
+                        out.append(preprocess(workspace, blockSource, cx, scope, p.toString()));
+                    } catch (Exception e) {
+                        if (e instanceof TemplateException) throw (TemplateException)e;
+                        throw new TemplateParseException(
+                                "Failed to include block: " + name,
+                                sourceName,
+                                source,
+                                lineNumberAt(source, start),
+                                e.getMessage(),
+                                "Check if the block file exists: " + p,
+                                e
+                        );
+                    }
                 }
             }
 
             pos = end + 2;
         }
 
-        return out.toString();
+        return out.toString().trim();
     }
 
     // ---------------------------------------------------------------------
 
-    private static String transformToJavaScript(String source) {
+    private static String transformToJavaScript(String source, String sourceName) {
         StringBuilder js = new StringBuilder();
         js.append("var out = new java.lang.StringBuilder();\n");
 
@@ -140,7 +208,16 @@ public final class TemplateRenderer {
 
             int end = source.indexOf("%>", start);
             if (end == -1) {
-                throw new IllegalArgumentException("Unclosed <% tag");
+                int line = lineNumberAt(source, start);
+                throw new TemplateParseException(
+                        "Unclosed <% directive",
+                        sourceName,
+                        source,
+                        line,
+                        "Unclosed <% directive",
+                        "Ensure all scriptlet blocks are closed with '%>'.",
+                        null
+                );
             }
 
             String code = source.substring(start + 2, end).trim();
@@ -157,7 +234,17 @@ public final class TemplateRenderer {
         }
 
         js.append("out.toString();");
-        return js.toString();
+        return js.toString().trim();
+    }
+
+    private static int lineNumberAt(String source, int charIndex) {
+        int line = 1;
+        for (int i = 0; i < charIndex && i < source.length(); i++) {
+            if (source.charAt(i) == '\n') {
+                line++;
+            }
+        }
+        return line;
     }
 
     private static void appendText(StringBuilder js, String text) {
