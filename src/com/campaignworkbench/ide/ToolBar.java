@@ -17,9 +17,13 @@ public class ToolBar implements IJavaFxNode {
     private final HBox toolBar;
     private final Button runButton;
     private final Button setXmlButton;
+    /**
+     * Label displaying the current context XML file
+     */
     private final Label contextXmlLabel;
 
     /**
+     * Constructor
      * @param openWorkspaceHandler - action to take when open workspace button is clicked
      * @param setContextXmlHandler - action to take when set XML context button is clicked
      * @param clearContextXmlHandler - action to take when Clear XML context button is clicked

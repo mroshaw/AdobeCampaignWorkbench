@@ -11,17 +11,17 @@ public enum SyntaxType {
     /**
      * JavaScript like
      */
-    BLOCK,      // JavaScript
+    BLOCK,
     /**
      * Plain XML
      */
     XML,
     /**
-     * JSP like
+     * JSP like for modules
      */
     MODULE,
     /**
-     * JSP like
+     * JSP like for source preview
      */
     SOURCE_PREVIEW,
     /**

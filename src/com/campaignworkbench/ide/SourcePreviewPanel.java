@@ -12,11 +12,19 @@ import javafx.scene.layout.VBox;
  */
 public class SourcePreviewPanel extends RSyntaxEditor implements IJavaFxNode {
 
+    /**
+     * The panel containing the source preview
+     */
     VBox sourcePreviewPanel;
+    /**
+     * The label for the source preview panel
+     */
     Label sourcePreviewLabel;
 
     /**
      * Constructor
+     * @param label The label for the source preview panel
+     * @param syntaxType The syntax highlighting type to use
      */
     public SourcePreviewPanel(String label, SyntaxType syntaxType) {
         super();

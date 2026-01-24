@@ -12,6 +12,9 @@ import java.util.stream.Stream;
 public class Workspace {
 
     private final Path root;
+    /**
+     * List of required subfolders in a valid workspace
+     */
     public static final List<String> REQUIRED =
             List.of("Templates", "Modules", "Blocks", "ContextXml");
 

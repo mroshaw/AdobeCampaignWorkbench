@@ -14,6 +14,8 @@ import java.util.regex.Pattern;
  */
 public class CampaignFunctions {
 
+    private CampaignFunctions() {}
+
     /**
      * Parses an Adobe Campaign timestamp string into a Calendar.
      * Accepts a simplified ISO 8601 style string with optional time/timezone.

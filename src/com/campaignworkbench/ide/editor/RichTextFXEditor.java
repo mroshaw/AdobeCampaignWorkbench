@@ -2,6 +2,9 @@ package com.campaignworkbench.ide.editor;
 
 import javafx.scene.Node;
 
+/**
+ * Placeholder implementation of ICodeEditor using RichTextFX (currently not implemented)
+ */
 public class RichTextFXEditor implements ICodeEditor {
 
     @Override

@@ -14,10 +14,14 @@ public class OutputPreviewPanel implements IJavaFxNode {
 
     private final WebView preview;
     private final VBox topPreviewBox;
+    /**
+     * The label for the preview panel
+     */
     Label outputLabel;
 
     /**
      * Constructor
+     * @param label The label for the preview panel
      */
     public OutputPreviewPanel(String label) {
         preview = new WebView();

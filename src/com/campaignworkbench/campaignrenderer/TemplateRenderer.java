@@ -18,16 +18,21 @@ public final class TemplateRenderer {
     private record SourceMapping(String sourceName, int startLineInExpanded, int endLineInExpanded, int lineOffsetInOriginal) {
     }
 
+    /**
+     * Thread local storage for source mappings to ensure thread safety during rendering
+     */
     private static final ThreadLocal<List<SourceMapping>> sourceMappings = ThreadLocal.withInitial(ArrayList::new);
 
     private TemplateRenderer() {}
 
     /**
+     * Renders a template into HTML
+     * @param workspace the current workspace
      * @param templateSource source code of the template to render
      * @param cx Rhino context
      * @param scope Rhino scope
      * @param sourceName name of the source being processed
-     * @return HTML source of the renderer page
+     * @return HTML source of the rendered page
      */
     public static TemplateRenderResult render(
             Workspace workspace,
@@ -123,6 +128,15 @@ public final class TemplateRenderer {
 
     // ---------------------------------------------------------------------
 
+    /**
+     * Preprocesses the template source to handle includes and directives
+     * @param workspace the current workspace
+     * @param source the template source code
+     * @param cx Rhino context
+     * @param scope Rhino scope
+     * @param sourceName name of the source being processed
+     * @return preprocessed template source
+     */
     private static String preprocess(
             Workspace workspace,
             String source,
@@ -222,6 +236,11 @@ public final class TemplateRenderer {
         return out.toString();
     }
 
+    /**
+     * Counts the number of newlines in a string
+     * @param s the string to check
+     * @return the number of newlines found
+     */
     private static int countLines(String s) {
         int lines = 0;
         for (int i = 0; i < s.length(); i++) {
@@ -232,6 +251,12 @@ public final class TemplateRenderer {
 
     // ---------------------------------------------------------------------
 
+    /**
+     * Transforms the preprocessed source into executable JavaScript
+     * @param source preprocessed template source
+     * @param sourceName name of the source being processed
+     * @return executable JavaScript code
+     */
     private static String transformToJavaScript(String source, String sourceName) {
         StringBuilder js = new StringBuilder();
         js.append("var out = new java.lang.StringBuilder();\n");
@@ -310,6 +335,10 @@ public final class TemplateRenderer {
         return js.toString().trim();
     }
 
+    /**
+     * Updates the end line of the last source mapping
+     * @param endLine the new end line number
+     */
     private static void updateLastMappingEnd(int endLine) {
         List<SourceMapping> mappings = sourceMappings.get();
         if (!mappings.isEmpty()) {
@@ -318,6 +347,12 @@ public final class TemplateRenderer {
         }
     }
 
+    /**
+     * Determines the line number in the source string at a specific character index
+     * @param source the source string
+     * @param charIndex the character index
+     * @return the line number (1-indexed)
+     */
     private static int lineNumberAt(String source, int charIndex) {
         int line = 1;
         for (int i = 0; i < charIndex && i < source.length(); i++) {
@@ -328,10 +363,23 @@ public final class TemplateRenderer {
         return line;
     }
 
+    /**
+     * Calculates the total line shift caused by source markers up to a specific character index
+     * @param expandedSource the expanded template source
+     * @param charIndex the character index
+     * @return the total line shift
+     */
     private static int calculateMarkerLineShift(String expandedSource, int charIndex) {
         return calculateMarkerLineShiftInRange(expandedSource, 0, charIndex);
     }
 
+    /**
+     * Calculates the line shift caused by source markers within a specific range
+     * @param expandedSource the expanded template source
+     * @param start start character index
+     * @param end end character index
+     * @return the line shift in the specified range
+     */
     private static int calculateMarkerLineShiftInRange(String expandedSource, int start, int end) {
         int shift = 0;
         int pos = start;
@@ -369,6 +417,11 @@ public final class TemplateRenderer {
         return shift;
     }
 
+    /**
+     * Finds the source mapping for a given line number in the expanded JavaScript
+     * @param expandedLine the line number in the expanded JavaScript
+     * @return the corresponding SourceMapping, or null if not found
+     */
     private static SourceMapping findSourceMapping(int expandedLine) {
         List<SourceMapping> map = sourceMappings.get();
             SourceMapping best = null;
@@ -402,6 +455,12 @@ public final class TemplateRenderer {
         }
     }
 
+    /**
+     * Extracts a quoted attribute value from a directive
+     * @param directive the full directive string
+     * @param key the attribute key to look for
+     * @return the quoted value (excluding quotes)
+     */
     private static String extractQuoted(String directive, String key) {
         int keyPos = directive.indexOf(key + "=");
         if (keyPos == -1) {

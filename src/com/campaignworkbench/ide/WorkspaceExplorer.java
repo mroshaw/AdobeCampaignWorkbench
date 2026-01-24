@@ -12,10 +12,16 @@ import java.io.File;
 import java.util.function.Consumer;
 import javafx.geometry.Insets;
 
+/**
+ * User interface control to explore and navigate the files in a workspace
+ */
 public class WorkspaceExplorer implements IJavaFxNode {
 
     private TreeView<File> treeView;
     private Consumer<File> fileOpenHandler;
+    /**
+     * The panel containing the workspace explorer
+     */
     private VBox workspaceExplorerPanel;
 
     /**

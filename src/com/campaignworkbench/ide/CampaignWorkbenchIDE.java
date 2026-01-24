@@ -28,6 +28,9 @@ import java.nio.file.Path;
 public class CampaignWorkbenchIDE extends Application {
 
     private final String defaultWorkspacePath = "Workspaces/Test Workspace";
+    /**
+     * The current active workspace
+     */
     private Workspace currentWorkspace;
     private WorkspaceExplorer workspaceExplorer;
     private ToolBar toolBar;
@@ -38,9 +41,19 @@ public class CampaignWorkbenchIDE extends Application {
     private SourcePreviewPanel postSourcePanel;
     private SourcePreviewPanel preSourcePanel;
 
+    /**
+     * File representing the current XML context for rendering
+     */
     private File xmlContextFile;
+    /**
+     * Content of the current XML context file
+     */
     private String xmlContextContent;
 
+    /**
+     * Main entry point for the application
+     * @param args command line arguments
+     */
     static void main(String[] args) {
         launch(args);
     }
@@ -148,32 +161,55 @@ public class CampaignWorkbenchIDE extends Application {
         appendLog("Welcome to Campaign workbench! Open a workspace, load a template, select an XML context, and hit run!");
     }
 
+    /**
+     * Stop the application
+     */
     @Override
     public void  stop() {
         Platform.exit();
         System.exit(0);
     }
 
+    /**
+     * Appends a message to the log panel
+     * @param logMessage the message to append
+     */
     private void appendLog(String logMessage) {
         logPanel.appendLog(logMessage);
     }
 
+    /**
+     * @return the path to the templates folder in the current workspace
+     */
     private String getWorkspaceTemplatePath() {
         return currentWorkspace.getTemplatesPath().toString();
     }
 
+    /**
+     * @return the path to the blocks folder in the current workspace
+     */
     private String getWorkspaceBlockPath() {
         return currentWorkspace.getBlocksPath().toString();
     }
 
+    /**
+     * @return the path to the context XML folder in the current workspace
+     */
     private String getWorkspaceXmlPath() {
         return currentWorkspace.getContextXmlPath().toString();
     }
 
+    /**
+     * @return the path to the modules folder in the current workspace
+     */
     private String getWorkspaceModulePath() {
         return currentWorkspace.getModulesPath().toString();
     }
 
+    /**
+     * Applies a theme to the IDE
+     * @param theme the theme to apply
+     */
     private void applyTheme(IDETheme theme) {
         ThemeManager.setTheme(theme);
     }
@@ -190,6 +226,10 @@ public class CampaignWorkbenchIDE extends Application {
         Application.setUserAgentStylesheet(stylesheet);
     }
 
+    /**
+     * Updates the run button state based on the current tab
+     * @param tab the currently selected tab
+     */
     private void updateRunButtonState(Tab tab) {
         if (tab instanceof EditorTab editorTab) {
             String name = editorTab.getFile()
@@ -202,8 +242,10 @@ public class CampaignWorkbenchIDE extends Application {
         }
     }
 
+    /**
+     * Opens a workspace directory
+     */
     private void openWorkspace() {
-
         DirectoryChooser chooser = new DirectoryChooser();
         File initialDir = new File(System.getProperty("user.dir"), "Workspaces");
         if (!initialDir.exists()) {
@@ -230,11 +272,17 @@ public class CampaignWorkbenchIDE extends Application {
         appendLog("Workspace opened: " + selected.getAbsolutePath());
     }
 
-
+    /**
+     * Opens a file from the workspace explorer
+     * @param file the file to open
+     */
     private void openFileFromWorkspace(File file) {
             openFileInNewTab(file);
     }
 
+    /**
+     * Sets the XML context for rendering
+     */
     private void setContextXml() {
         FileChooser fileChooser = new FileChooser();
         fileChooser.setTitle("Open File");
@@ -259,12 +307,19 @@ public class CampaignWorkbenchIDE extends Application {
         }
     }
 
+    /**
+     * Clears the current XML context
+     */
     private void clearXmlContext() {
         xmlContextFile = null;
         xmlContextContent = "";
         toolBar.clearXmlContextLabel();
     }
 
+    /**
+     * Opens a file from the file system
+     * @param defaultSubfolder the default folder to start the file chooser in
+     */
     private void openFile(String defaultSubfolder) {
         FileChooser fileChooser = new FileChooser();
         fileChooser.setTitle("Open File");
@@ -278,22 +333,25 @@ public class CampaignWorkbenchIDE extends Application {
         openFileInNewTab(selectedFile);
     }
 
+    /**
+     * Opens a file in a new editor tab
+     * @param selectedFile the file to open
+     */
     private void openFileInNewTab(File selectedFile) {
         try {
             Path path = selectedFile.toPath();
             String content = Files.readString(path);
 
             editorTabPanel.addEditorTab(path, content);
-
-            // EditorTab tab = new EditorTab(path, content);
-            // tab.setClosable(true);
-
         } catch (IOException ex) {
             ex.printStackTrace();
             showAlert("Failed to open file: " + ex.getMessage());
         }
     }
 
+    /**
+     * Saves the content of the currently selected editor tab
+     */
     private void saveCurrent() {
 
         if (!editorTabPanel.isSelected()) {
@@ -315,6 +373,9 @@ public class CampaignWorkbenchIDE extends Application {
         }
     }
 
+    /**
+     * Runs the template in the currently selected editor tab
+     */
     private void runTemplate() {
         if (xmlContextFile == null) {
             showAlert("No XML context file set!");
@@ -379,6 +440,10 @@ public class CampaignWorkbenchIDE extends Application {
         }
     }
 
+    /**
+     * Shows an alert dialog with the specified message
+     * @param msg the message to show
+     */
     private void showAlert(String msg) {
         Platform.runLater(() -> {
             Alert alert = new Alert(
@@ -390,6 +455,11 @@ public class CampaignWorkbenchIDE extends Application {
         });
     }
 
+    /**
+     * Finds a file in the workspace based on its name
+     * @param fileName the name of the file to find
+     * @return the path to the file, or null if not found
+     */
     private Path findFileInWorkspace(String fileName) {
         if (currentWorkspace == null) return null;
         for (File file : currentWorkspace.getAllFiles()) {

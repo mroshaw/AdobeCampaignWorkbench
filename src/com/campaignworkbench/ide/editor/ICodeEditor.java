@@ -48,7 +48,15 @@ public interface ICodeEditor {
      */
     public void requestFocus();
 
+    /**
+     * Sets the caret position at the start of the document
+     */
     public void setCaretAtStart();
+
+    /**
+     * Moves the caret to the specified line number
+     * @param line the line number to move the caret to
+     */
     public void gotoLine(int line);
 
 }

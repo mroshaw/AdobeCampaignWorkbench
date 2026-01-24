@@ -16,10 +16,14 @@ import javafx.scene.text.Font;
 public class LogPanel implements IJavaFxNode {
 
     private final TextArea logArea;
+    /**
+     * The panel containing the log
+     */
     VBox logPanel;
 
     /**
      * Constructor
+     * @param label The label for the log panel
      */
     public LogPanel(String label) {
         Label logLabel = new Label(label);

@@ -67,6 +67,8 @@ public final class EditorTab extends Tab {
 
     /**
      * Derive the underlying SyntaxType for the editor
+     * @param file the path to the file to determine syntax for
+     * @return the determined syntax type
      */
     private SyntaxType determineSyntax(Path file) {
         String name = file.getFileName().toString().toLowerCase();

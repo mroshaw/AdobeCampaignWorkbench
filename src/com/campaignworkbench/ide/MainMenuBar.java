@@ -16,11 +16,16 @@ import javafx.scene.input.KeyCombination;
  */
 public class MainMenuBar implements IJavaFxNode {
 
+    /**
+     * The menu bar component
+     */
     MenuBar menuBar;
 
     /**
      * Constructor
+     * @param openWorkspaceHandler action to run when open workspace menu is selected
      * @param openTemplateFileHandler action to run when open template menu is selected
+     * @param openModuleFileHandler action to run when open module menu is selected
      * @param openBlockFileHandler action to run when open block menu is selected
      * @param openXMLFileHandler action to run when open XML menu is selected
      * @param saveCurrentFileHandler action to run when save current file menu is selected

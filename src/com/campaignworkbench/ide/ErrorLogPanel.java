@@ -18,10 +18,17 @@ import java.util.function.BiConsumer;
 public class ErrorLogPanel implements IJavaFxNode {
 
     private TreeView<String> errorTreeView;
+    /**
+     * The panel containing the error log
+     */
     VBox logPanel;
     private Map<TreeItem<String>, TemplateException> errorData = new HashMap<>();
     private BiConsumer<String, Integer> onErrorDoubleClicked;
 
+    /**
+     * Constructor
+     * @param label The label for the error log panel
+     */
     public ErrorLogPanel(String label) {
         Label logLabel = new Label(label);
         logLabel.setPadding(new Insets(0,0, 0,5));
@@ -55,15 +62,26 @@ public class ErrorLogPanel implements IJavaFxNode {
         VBox.setVgrow(errorTreeView, Priority.ALWAYS);
     }
 
+    /**
+     * Sets the callback for when an error is double-clicked
+     * @param callback the callback function accepting template name and line number
+     */
     public void setOnErrorDoubleClicked(BiConsumer<String, Integer> callback) {
         this.onErrorDoubleClicked = callback;
     }
 
+    /**
+     * Clears all errors from the tree view
+     */
     public void clearErrors() {
         errorTreeView.setRoot(new TreeItem<>("Root"));
         errorData.clear();
     }
 
+    /**
+     * Adds an error to the tree view based on the provided exception
+     * @param ex the template exception to add
+     */
     public void addError(TemplateException ex) {
         if (errorTreeView.getRoot() == null) {
             clearErrors();

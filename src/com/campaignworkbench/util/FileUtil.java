@@ -13,6 +13,7 @@ public final class FileUtil {
     private FileUtil() {}
 
     /**
+     * Reads the entire content of a file as a string (UTF-8)
      * @param path full path to the file to read
      * @return string of file content
      */

@@ -20,6 +20,9 @@ import java.util.Queue;
 public class RSyntaxEditor implements ICodeEditor {
 
     private final SwingNode swingNode = new SwingNode();
+    /**
+     * The underlying RSyntaxTextArea component
+     */
     private RSyntaxTextArea rSyntaxTextArea;
 
     // Queue all actions until RSyntaxTextArea is ready
@@ -104,6 +107,10 @@ public class RSyntaxEditor implements ICodeEditor {
         });
     }
 
+    /**
+     * Moves the caret to the specified line
+     * @param line The line number to go to (1-indexed)
+     */
     @Override
     public void gotoLine(int line) {
         if (line <= 0) return;
