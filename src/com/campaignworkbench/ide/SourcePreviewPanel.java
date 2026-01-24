@@ -7,6 +7,7 @@ import com.campaignworkbench.ide.editor.SyntaxType;
 import javafx.geometry.Insets;
 import javafx.scene.Node;
 import javafx.scene.control.Label;
+import javafx.scene.layout.Priority;
 import javafx.scene.layout.VBox;
 
 /**
@@ -30,15 +31,17 @@ public class SourcePreviewPanel implements IJavaFxNode {
      * @param syntaxType The syntax highlighting type to use
      */
     public SourcePreviewPanel(String label, SyntaxType syntaxType) {
-        // this.editor = new RichTextFXEditor();
-        this.editor = new RSyntaxEditor();
+        this.editor = new RichTextFXEditor();
+        // this.editor = new RSyntaxEditor();
         sourcePreviewLabel = new Label(label);
         sourcePreviewLabel.setPadding(new Insets(0,0, 0,5));
         sourcePreviewLabel.setStyle("-fx-font-weight: bold;");
         sourcePreviewPanel = new VBox(5, sourcePreviewLabel, editor.getNode());
         sourcePreviewPanel.setPadding(new Insets(0,0, 0,5));
+        
+        VBox.setVgrow(editor.getNode(), Priority.ALWAYS);
 
-        editor.setEditable(true);
+        editor.setEditable(false);
         editor.setSyntax(syntaxType);
     }
 

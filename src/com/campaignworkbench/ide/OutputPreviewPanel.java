@@ -4,6 +4,7 @@ import javafx.geometry.Insets;
 import javafx.scene.Cursor;
 import javafx.scene.Node;
 import javafx.scene.control.Label;
+import javafx.scene.layout.Priority;
 import javafx.scene.layout.VBox;
 import javafx.scene.web.WebView;
 
@@ -33,6 +34,8 @@ public class OutputPreviewPanel implements IJavaFxNode {
 
         topPreviewBox = new VBox(5, outputLabel, preview);
         topPreviewBox.setPadding(new Insets(0,0, 0,5));
+        
+        VBox.setVgrow(preview, Priority.ALWAYS);
     }
 
     /**

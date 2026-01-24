@@ -24,8 +24,8 @@ public final class EditorTab extends Tab {
      */
     public EditorTab(Path file, String initialText) {
         this.file = file;
-        // this.editor = new RichTextFXEditor();
-        this.editor = new RSyntaxEditor();
+        this.editor = new RichTextFXEditor();
+        // this.editor = new RSyntaxEditor();
         setText(file.getFileName().toString());
 
         BorderPane root = new BorderPane();

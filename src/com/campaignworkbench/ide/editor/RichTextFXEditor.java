@@ -9,6 +9,11 @@ import org.fxmisc.richtext.LineNumberFactory;
 import org.fxmisc.richtext.model.StyleSpans;
 import org.fxmisc.richtext.model.StyleSpansBuilder;
 import org.fxmisc.flowless.VirtualizedScrollPane;
+import javafx.scene.shape.Polygon;
+import javafx.scene.layout.HBox;
+import javafx.scene.Cursor;
+import javafx.geometry.Pos;
+import java.util.function.IntFunction;
 
 import java.util.Collection;
 import java.util.Collections;
@@ -24,35 +29,57 @@ public class RichTextFXEditor implements ICodeEditor {
     private final VirtualizedScrollPane<CodeArea> scrollPane;
     private SyntaxType currentSyntax = SyntaxType.PLAIN;
 
-    private static final String[] KEYWORDS = new String[] {
-            "abstract", "assert", "boolean", "break", "byte",
-            "case", "catch", "char", "class", "const",
-            "continue", "default", "do", "double", "else",
-            "enum", "extends", "final", "finally", "float",
-            "for", "goto", "if", "implements", "import",
-            "instanceof", "int", "interface", "long", "native",
-            "new", "package", "private", "protected", "public",
-            "return", "short", "static", "strictfp", "super",
-            "switch", "synchronized", "this", "throw", "throws",
-            "transient", "try", "void", "volatile", "while", "var"
+    // Folding support
+    private final java.util.Set<Integer> foldedParagraphs = new java.util.HashSet<>();
+    private final java.util.Map<Integer, String> foldedContents = new java.util.HashMap<>();
+
+    private static final String[] JS_KEYWORDS = new String[] {
+            "break", "case", "catch", "class", "const", "continue", "debugger", "default", "delete", "do",
+            "else", "export", "extends", "finally", "for", "function", "if", "import", "in", "instanceof",
+            "new", "return", "super", "switch", "this", "throw", "try", "typeof", "var", "void", "while", "with",
+            "yield", "let", "static", "enum", "await", "async"
     };
 
-    private static final String KEYWORD_PATTERN = "\\b(" + String.join("|", KEYWORDS) + ")\\b";
-    private static final String PAREN_PATTERN = "\\(|\\)";
-    private static final String BRACE_PATTERN = "\\{|\\}";
-    private static final String BRACKET_PATTERN = "\\[|\\]";
-    private static final String SEMICOLON_PATTERN = "\\;";
-    private static final String STRING_PATTERN = "\"([^\"\\\\]|\\\\.)*\"";
-    private static final String COMMENT_PATTERN = "//[^\n]*" + "|" + "/\\*(.|\\R)*?\\*/";
+    private static final String JS_KEYWORD_PATTERN = "\\b(" + String.join("|", JS_KEYWORDS) + ")\\b";
+    private static final String JS_PAREN_PATTERN = "\\(|\\)";
+    private static final String JS_BRACE_PATTERN = "\\{|\\}";
+    private static final String JS_BRACKET_PATTERN = "\\[|\\]";
+    private static final String JS_SEMICOLON_PATTERN = "\\;";
+    private static final String JS_STRING_PATTERN = "\"([^\"\\\\]|\\\\.)*\"|'([^'\\\\]|\\\\.)*'";
+    private static final String JS_COMMENT_PATTERN = "//[^\n]*" + "|" + "/\\*(.|\\R)*?\\*/";
 
-    private static final Pattern PATTERN = Pattern.compile(
-            "(?<KEYWORD>" + KEYWORD_PATTERN + ")"
-                    + "|(?<PAREN>" + PAREN_PATTERN + ")"
-                    + "|(?<BRACE>" + BRACE_PATTERN + ")"
-                    + "|(?<BRACKET>" + BRACKET_PATTERN + ")"
-                    + "|(?<SEMICOLON>" + SEMICOLON_PATTERN + ")"
-                    + "|(?<STRING>" + STRING_PATTERN + ")"
-                    + "|(?<COMMENT>" + COMMENT_PATTERN + ")"
+    private static final Pattern JS_PATTERN = Pattern.compile(
+            "(?<KEYWORD>" + JS_KEYWORD_PATTERN + ")"
+                    + "|(?<PAREN>" + JS_PAREN_PATTERN + ")"
+                    + "|(?<BRACE>" + JS_BRACE_PATTERN + ")"
+                    + "|(?<BRACKET>" + JS_BRACKET_PATTERN + ")"
+                    + "|(?<SEMICOLON>" + JS_SEMICOLON_PATTERN + ")"
+                    + "|(?<STRING>" + JS_STRING_PATTERN + ")"
+                    + "|(?<COMMENT>" + JS_COMMENT_PATTERN + ")"
+    );
+
+    // XML highlighting
+    private static final String XML_TAG_PATTERN = "(<(?<TAGNAME>/?[-_a-zA-Z0-9]+))|((?<TAGEND>/?|/)>)";
+    private static final String XML_ATTRIBUTE_PATTERN = "\\b(?<ATTRIBUTENAME>[-_a-zA-Z0-9]+)(?=\\s*=)";
+    private static final String XML_STRING_PATTERN = "\"([^\"\\\\]|\\\\.)*\"|'([^'\\\\]|\\\\.)*'";
+    private static final String XML_COMMENT_PATTERN = "<!--(.|\\R)*?-->";
+
+    private static final Pattern XML_PATTERN = Pattern.compile(
+            "(?<TAG>" + XML_TAG_PATTERN + ")"
+                    + "|(?<ATTRIBUTE>" + XML_ATTRIBUTE_PATTERN + ")"
+                    + "|(?<STRING>" + XML_STRING_PATTERN + ")"
+                    + "|(?<COMMENT>" + XML_COMMENT_PATTERN + ")"
+    );
+
+    // JSP / Template highlighting (Integrated JS and XML)
+    private static final String JSP_SCRIPTLET_PATTERN = "<%([\\s\\S]*?)%>";
+
+    private static final Pattern JSP_PATTERN = Pattern.compile(
+            "(?<SCRIPTLET>" + JSP_SCRIPTLET_PATTERN + ")"
+                    + "|(?<TAG>" + XML_TAG_PATTERN + ")"
+                    + "|(?<ATTRIBUTE>" + XML_ATTRIBUTE_PATTERN + ")"
+                    + "|(?<STRING>" + XML_STRING_PATTERN + ")"
+                    + "|(?<COMMENT>" + XML_COMMENT_PATTERN + ")"
     );
 
     /**
@@ -60,7 +87,16 @@ public class RichTextFXEditor implements ICodeEditor {
      */
     public RichTextFXEditor() {
         this.codeArea = new CodeArea();
-        this.codeArea.setParagraphGraphicFactory(LineNumberFactory.get(codeArea));
+        
+        IntFunction<Node> numberFactory = LineNumberFactory.get(codeArea, digits -> "%" + digits + "d ");
+        IntFunction<Node> foldingFactory = new FoldingFactory();
+        IntFunction<Node> graphicFactory = line -> {
+            HBox hbox = new HBox(numberFactory.apply(line), foldingFactory.apply(line));
+            hbox.setAlignment(Pos.CENTER_LEFT);
+            return hbox;
+        };
+        this.codeArea.setParagraphGraphicFactory(graphicFactory);
+        
         this.scrollPane = new VirtualizedScrollPane<>(codeArea);
 
         // Re-highlight on text change
@@ -71,26 +107,234 @@ public class RichTextFXEditor implements ICodeEditor {
         Platform.runLater(() -> ThemeManager.register(this));
     }
 
-    private static StyleSpans<Collection<String>> computeHighlighting(String text) {
-        Matcher matcher = PATTERN.matcher(text);
+    private class FoldingFactory implements IntFunction<Node> {
+        @Override
+        public Node apply(int lineNumber) {
+            Polygon triangle = new Polygon(0.0, 0.0, 10.0, 5.0, 0.0, 10.0);
+            triangle.getStyleClass().add("folding-triangle");
+            
+            // Logic to check if this line is foldable
+            if (isFoldable(lineNumber)) {
+                triangle.setVisible(true);
+                triangle.setRotate(foldedParagraphs.contains(lineNumber) ? 0 : 90);
+                triangle.setCursor(Cursor.HAND);
+                triangle.setOnMouseClicked(e -> toggleFold(lineNumber));
+            } else {
+                triangle.setVisible(false);
+            }
+            
+            return triangle;
+        }
+    }
+
+    private boolean isFoldable(int lineNumber) {
+        String text = codeArea.getParagraph(lineNumber).getText();
+        if (currentSyntax == SyntaxType.BLOCK || currentSyntax == SyntaxType.SOURCE_PREVIEW || currentSyntax == SyntaxType.TEMPLATE) {
+            return text.contains("{");
+        } else if (currentSyntax == SyntaxType.XML || currentSyntax == SyntaxType.HTML_PREVIEW) {
+            return text.contains("<") && !text.contains("</") && !text.contains("/>");
+        }
+        return false;
+    }
+
+    private void toggleFold(int lineNumber) {
+        if (foldedParagraphs.contains(lineNumber)) {
+            unfold(lineNumber);
+        } else {
+            fold(lineNumber);
+        }
+    }
+
+    private void fold(int lineNumber) {
+        // Find matching closing brace/tag
+        int endLine = findClosingElement(lineNumber);
+        if (endLine > lineNumber) {
+            // Simple folding: hide text between lineNumber and endLine
+            // RichTextFX doesn't easily support hiding paragraphs in CodeArea without specialized models.
+            // As a workaround, we'll replace the text with a placeholder.
+            // Note: This is a simplified approach.
+            
+            int startOffset = codeArea.getAbsolutePosition(lineNumber, codeArea.getParagraph(lineNumber).length());
+            int endOffset = codeArea.getAbsolutePosition(endLine, codeArea.getParagraph(endLine).length());
+            
+            String originalText = codeArea.getText(startOffset, endOffset);
+            foldedContents.put(lineNumber, originalText);
+            foldedParagraphs.add(lineNumber);
+            
+            String placeholder = (currentSyntax == SyntaxType.XML || currentSyntax == SyntaxType.HTML_PREVIEW) ? " ... " : " { ... }";
+            codeArea.replaceText(startOffset, endOffset, placeholder);
+        }
+    }
+
+    private void unfold(int lineNumber) {
+        String originalText = foldedContents.remove(lineNumber);
+        if (originalText != null) {
+            String placeholder = (currentSyntax == SyntaxType.XML || currentSyntax == SyntaxType.HTML_PREVIEW) ? " ... " : " { ... }";
+            int startOffset = codeArea.getAbsolutePosition(lineNumber, codeArea.getParagraph(lineNumber).getText().indexOf(placeholder));
+            int endOffset = startOffset + placeholder.length();
+            
+            codeArea.replaceText(startOffset, endOffset, originalText);
+            foldedParagraphs.remove(lineNumber);
+        }
+    }
+
+    private int findClosingElement(int startLine) {
+        String startText = codeArea.getParagraph(startLine).getText();
+        if (startText.contains("{")) {
+            int openBraces = 0;
+            for (int i = startLine; i < codeArea.getParagraphs().size(); i++) {
+                String lineText = codeArea.getParagraph(i).getText();
+                for (char c : lineText.toCharArray()) {
+                    if (c == '{') openBraces++;
+                    else if (c == '}') {
+                        openBraces--;
+                        if (openBraces == 0) return i;
+                    }
+                }
+            }
+        } else if (currentSyntax == SyntaxType.XML || currentSyntax == SyntaxType.HTML_PREVIEW) {
+            // Find the tag name at the start line
+            Pattern tagPattern = Pattern.compile("<(?<TAGNAME>[-_a-zA-Z0-9]+)");
+            Matcher matcher = tagPattern.matcher(startText);
+            if (matcher.find()) {
+                String tagName = matcher.group("TAGNAME");
+                String openingTag = "<" + tagName;
+                String closingTag = "</" + tagName + ">";
+                
+                int openTags = 0;
+                for (int i = startLine; i < codeArea.getParagraphs().size(); i++) {
+                    String lineText = codeArea.getParagraph(i).getText();
+                    
+                    // Simple count of opening and closing tags for this specific tag name
+                    // This is still a bit simplified as it doesn't handle tags spanning multiple lines perfectly,
+                    // but it's better than nothing and should work for most well-formatted XML.
+                    
+                    int index = 0;
+                    while ((index = lineText.indexOf(openingTag, index)) != -1) {
+                        // Check if it's not a closing tag and not self-closing
+                        if (index == 0 || lineText.charAt(index - 1) != '/') {
+                            // verify it's a full tag name match
+                            int endOfName = index + openingTag.length();
+                            if (endOfName >= lineText.length() || !Character.isLetterOrDigit(lineText.charAt(endOfName))) {
+                                // Check if it's NOT self-closing on the same line
+                                int tagEnd = lineText.indexOf(">", index);
+                                if (tagEnd != -1 && lineText.charAt(tagEnd - 1) != '/') {
+                                    openTags++;
+                                }
+                            }
+                        }
+                        index += openingTag.length();
+                    }
+                    
+                    index = 0;
+                    while ((index = lineText.indexOf(closingTag, index)) != -1) {
+                        openTags--;
+                        if (openTags == 0) return i;
+                        index += closingTag.length();
+                    }
+                }
+            }
+        }
+        return -1;
+    }
+
+    private StyleSpans<Collection<String>> computeHighlighting(String text) {
+        Pattern pattern = switch (currentSyntax) {
+            case TEMPLATE -> JSP_PATTERN;
+            case BLOCK, SOURCE_PREVIEW -> JS_PATTERN;
+            case XML -> XML_PATTERN;
+            case HTML_PREVIEW -> XML_PATTERN; // Use XML pattern for HTML for now
+            default -> null;
+        };
+
+        if (pattern == null) {
+            return new StyleSpansBuilder<Collection<String>>().add(Collections.emptyList(), text.length()).create();
+        }
+
+        Matcher matcher = pattern.matcher(text);
         int lastKwEnd = 0;
         StyleSpansBuilder<Collection<String>> spansBuilder = new StyleSpansBuilder<>();
         while(matcher.find()) {
-            String styleClass =
-                    matcher.group("KEYWORD") != null ? "keyword" :
-                    matcher.group("PAREN") != null ? "paren" :
-                    matcher.group("BRACE") != null ? "brace" :
-                    matcher.group("BRACKET") != null ? "bracket" :
-                    matcher.group("SEMICOLON") != null ? "semicolon" :
-                    matcher.group("STRING") != null ? "string" :
-                    matcher.group("COMMENT") != null ? "comment" :
-                    null; /* never happens */ assert styleClass != null;
+            String styleClass = getStyleClass(matcher);
+
             spansBuilder.add(Collections.emptyList(), matcher.start() - lastKwEnd);
-            spansBuilder.add(Collections.singleton(styleClass), matcher.end() - matcher.start());
+
+            if (currentSyntax == SyntaxType.TEMPLATE && "scriptlet".equals(styleClass)) {
+                // Nested highlighting for scriptlets
+                String scriptletText = matcher.group("SCRIPTLET");
+                int innerStart = matcher.start();
+                
+                // Add scriptlet background but also process inner JS
+                // Since RichTextFX only supports one set of style classes per range easily with this builder,
+                // we'll combine "scriptlet" with other classes.
+                
+                processScriptlet(spansBuilder, scriptletText, innerStart);
+            } else {
+                spansBuilder.add(Collections.singleton(styleClass), matcher.end() - matcher.start());
+            }
             lastKwEnd = matcher.end();
         }
         spansBuilder.add(Collections.emptyList(), text.length() - lastKwEnd);
         return spansBuilder.create();
+    }
+
+    private void processScriptlet(StyleSpansBuilder<Collection<String>> spansBuilder, String scriptletText, int offset) {
+        // Strip <% and %>
+        String content = scriptletText.substring(2, scriptletText.length() - 2);
+        
+        // Add style for <%
+        spansBuilder.add(java.util.List.of("scriptlet", "tag"), 2);
+        
+        Matcher jsMatcher = JS_PATTERN.matcher(content);
+        int lastInnerEnd = 0;
+        while (jsMatcher.find()) {
+            // Text between matches
+            if (jsMatcher.start() > lastInnerEnd) {
+                spansBuilder.add(Collections.singleton("scriptlet"), jsMatcher.start() - lastInnerEnd);
+            }
+            
+            // The match itself
+            String jsStyleClass = getJSStyleClass(jsMatcher);
+            spansBuilder.add(java.util.List.of("scriptlet", jsStyleClass), jsMatcher.end() - jsMatcher.start());
+            lastInnerEnd = jsMatcher.end();
+        }
+        
+        if (lastInnerEnd < content.length()) {
+            spansBuilder.add(Collections.singleton("scriptlet"), content.length() - lastInnerEnd);
+        }
+        
+        // Add style for %>
+        spansBuilder.add(java.util.List.of("scriptlet", "tag"), 2);
+    }
+
+    private String getJSStyleClass(Matcher matcher) {
+        if (matcher.group("KEYWORD") != null) return "keyword";
+        if (matcher.group("PAREN") != null) return "paren";
+        if (matcher.group("BRACE") != null) return "brace";
+        if (matcher.group("BRACKET") != null) return "bracket";
+        if (matcher.group("SEMICOLON") != null) return "semicolon";
+        if (matcher.group("STRING") != null) return "string";
+        if (matcher.group("COMMENT") != null) return "comment";
+        return "plain";
+    }
+
+    private String getStyleClass(Matcher matcher) {
+        if (currentSyntax == SyntaxType.BLOCK || currentSyntax == SyntaxType.SOURCE_PREVIEW) {
+            if (matcher.group("KEYWORD") != null) return "keyword";
+            if (matcher.group("PAREN") != null) return "paren";
+            if (matcher.group("BRACE") != null) return "brace";
+            if (matcher.group("BRACKET") != null) return "bracket";
+            if (matcher.group("SEMICOLON") != null) return "semicolon";
+            if (matcher.group("STRING") != null) return "string";
+            if (matcher.group("COMMENT") != null) return "comment";
+        } else if (currentSyntax == SyntaxType.XML || currentSyntax == SyntaxType.HTML_PREVIEW || currentSyntax == SyntaxType.TEMPLATE) {
+            if (matcher.group("TAG") != null) return "tag";
+            if (matcher.group("ATTRIBUTE") != null) return "attribute";
+            if (matcher.group("STRING") != null) return "string";
+            if (matcher.group("COMMENT") != null) return "comment";
+            if (currentSyntax == SyntaxType.TEMPLATE && matcher.group("SCRIPTLET") != null) return "scriptlet";
+        }
+        return "plain";
     }
 
     @Override
@@ -146,14 +390,56 @@ public class RichTextFXEditor implements ICodeEditor {
 
     @Override
     public void applyTheme(IDETheme theme) {
-        // In a real app, we would load a specific CSS file for the code area here.
-        // For now, we rely on the global CSS from atlantafx and maybe add some basic styles.
+        // Use AtlantaFX CSS variables for theme integration
+        // -fx-text-fill doesn't work for CodeArea text, we need to style the .text class
+        codeArea.setStyle("-fx-background-color: -color-bg-default; -fx-font-family: 'Consolas'; -fx-font-size: 11pt;");
+
         if (theme == IDETheme.DARK) {
-            codeArea.setStyle("-fx-background-color: #2b2b2b; -fx-text-fill: #a9b7c6; -fx-font-family: 'Consolas'; -fx-font-size: 14pt;");
-            codeArea.lookupAll(".line-number").forEach(node -> node.setStyle("-fx-text-fill: #606366;"));
+            // Define colors for dark theme - these can also use AtlantaFX variables if suitable ones exist
+            // but for syntax highlighting we usually want specific colors.
+            // Using AtlantaFX accent colors where possible.
+            String keywordColor = "-color-accent-fg";
+            String stringColor = "-color-success-fg";
+            String commentColor = "-color-fg-subtle";
+            String tagColor = "-color-accent-fg";
+            String attributeColor = "-color-warning-fg";
+            String scriptletColor = "-color-fg-default";
+            String symbolColor = "-color-fg-muted";
+
+            applyHighlightingStyles(keywordColor, stringColor, commentColor, tagColor, attributeColor, scriptletColor, symbolColor);
         } else {
-            codeArea.setStyle("-fx-background-color: #ffffff; -fx-text-fill: #000000; -fx-font-family: 'Consolas'; -fx-font-size: 14pt;");
-            codeArea.lookupAll(".line-number").forEach(node -> node.setStyle("-fx-text-fill: #999999;"));
+            // Define colors for light theme
+            String keywordColor = "-color-accent-emphasis";
+            String stringColor = "-color-success-emphasis";
+            String commentColor = "-color-fg-subtle";
+            String tagColor = "-color-accent-emphasis";
+            String attributeColor = "-color-warning-emphasis";
+            String scriptletColor = "-color-fg-default";
+            String symbolColor = "-color-fg-muted";
+
+            applyHighlightingStyles(keywordColor, stringColor, commentColor, tagColor, attributeColor, scriptletColor, symbolColor);
         }
+    }
+
+    private void applyHighlightingStyles(String keyword, String string, String comment, String tag, String attribute, String scriptlet, String symbol) {
+        String css = ".code-area .text { -fx-fill: -color-fg-default; }\n" +
+                     ".keyword { -fx-fill: " + keyword + " !important; -fx-font-weight: bold; }\n" +
+                     ".string { -fx-fill: " + string + " !important; }\n" +
+                     ".comment { -fx-fill: " + comment + " !important; }\n" +
+                     ".tag { -fx-fill: " + tag + " !important; -fx-font-weight: bold; }\n" +
+                     ".attribute { -fx-fill: " + attribute + " !important; }\n" +
+                     ".scriptlet { -fx-background-color: -color-accent-subtle !important; }\n" +
+                     ".paren { -fx-fill: " + symbol + " !important; }\n" +
+                     ".brace { -fx-fill: " + symbol + " !important; }\n" +
+                     ".bracket { -fx-fill: " + symbol + " !important; }\n" +
+                     ".semicolon { -fx-fill: " + symbol + " !important; }\n" +
+                     ".caret { -fx-stroke: -color-fg-default !important; }\n" +
+                     ".folding-triangle { -fx-fill: -color-fg-muted !important; }\n" +
+                     ".folding-triangle:hover { -fx-fill: -color-accent-fg !important; }\n" +
+                     ".lineno { -fx-text-fill: -color-fg-muted !important; -fx-background-color: -color-bg-subtle !important; -fx-padding: 0 5 0 5; -fx-font-family: 'Consolas'; -fx-font-size: 14pt; }";
+        
+        codeArea.getStylesheets().clear();
+        String dataUri = "data:text/css," + css.replace(" ", "%20").replace("\n", "%0A").replace("#", "%23");
+        codeArea.getStylesheets().add(dataUri);
     }
 }
