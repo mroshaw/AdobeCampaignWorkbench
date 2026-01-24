@@ -105,6 +105,20 @@ public class RSyntaxEditor implements ICodeEditor {
     }
 
     @Override
+    public void gotoLine(int line) {
+        if (line <= 0) return;
+        runOrQueue(() -> {
+            try {
+                int lineStartOffset = rSyntaxTextArea.getLineStartOffset(line - 1);
+                rSyntaxTextArea.setCaretPosition(lineStartOffset);
+                rSyntaxTextArea.requestFocusInWindow();
+            } catch (Exception e) {
+                // Ignore invalid line numbers
+            }
+        });
+    }
+
+    @Override
     public void setSyntax(SyntaxType syntax) {
         runOrQueue(() -> {
             switch (syntax) {

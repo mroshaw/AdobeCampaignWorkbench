@@ -61,7 +61,13 @@ public final class TemplateRenderer {
             // 3. EXECUTE
             // We use line 2 because transformToJavaScript adds "var out..." at line 1.
             Object result = cx.evaluateString(scope, js, "RenderedTemplate", 1, null);
-            return new TemplateRenderResult(js.trim(), Context.toString(result).trim());
+            String output = Context.toString(result).trim();
+
+            // Strip source markers from final output
+            output = output.replaceAll("/\\* SOURCE:.*? \\*/[\r\n]*", "");
+            output = output.replaceAll("/\\* END SOURCE:.*? \\*/[\r\n]*", "");
+
+            return new TemplateRenderResult(js.trim(), output);
         }
         catch (org.mozilla.javascript.EvaluatorException e) {
             SourceMapping mapping = findSourceMapping(e.lineNumber());
@@ -174,7 +180,7 @@ public final class TemplateRenderer {
                                 ModuleRenderer.renderModule(moduleSource, cx, scope, p.toString());
                         out.append("/* SOURCE:").append(p.getFileName()).append(" */\n");
                         out.append(preprocess(workspace, moduleOutput, cx, scope, p.toString()));
-                        out.append("\n/* END SOURCE:").append(p.getFileName()).append(" */\n");
+                        out.append("\n/* END SOURCE:").append(p.getFileName()).append(" */");
                     } catch (Exception e) {
                         if (e instanceof TemplateException) throw (TemplateException)e;
                         throw new TemplateParseException(
@@ -195,7 +201,7 @@ public final class TemplateRenderer {
                         String blockSource = FileUtil.read(p);
                         out.append("/* SOURCE:").append(p.getFileName()).append(" */\n");
                         out.append(preprocess(workspace, blockSource, cx, scope, p.toString()));
-                        out.append("\n/* END SOURCE:").append(p.getFileName()).append(" */\n");
+                        out.append("\n/* END SOURCE:").append(p.getFileName()).append(" */");
                     } catch (Exception e) {
                         if (e instanceof TemplateException) throw (TemplateException)e;
                         throw new TemplateParseException(
@@ -209,12 +215,23 @@ public final class TemplateRenderer {
                         );
                     }
                 }
+            } else {
+                // Replace other directives with exactly the same number of newlines they occupied
+                int directiveLines = countLines(source.substring(start, end + 2));
+                for(int i=0; i<directiveLines; i++) out.append("\n");
             }
+            
+            // If the directive was on a line by itself (with a newline following it),
+            // we've already accounted for the directive's line with the above appends/newlines.
+            // But if we want to BE SURE that the NEXT line of content starts at the NEXT line number,
+            // we should replace the directive block exactly.
+            // The directive starts at 'start' and ends at 'end+2'.
+            // If we replace it with exactly ONE newline, it works if it was on its own line.
 
             pos = end + 2;
         }
 
-        return out.toString().trim();
+        return out.toString();
     }
 
     private static int countLines(String s) {
@@ -264,34 +281,38 @@ public final class TemplateRenderer {
             int codeLinesInExpanded = 0;
 
             if (code.startsWith("=")) {
-                js.append("out.append(")
-                        .append(code.substring(1).trim())
-                        .append(");\n");
+                js.append("out.append(").append(code.substring(1).trim()).append(");\n");
                 codeLinesInExpanded = 1;
             } else {
                 js.append(code).append("\n");
                 codeLinesInExpanded = 1 + countLines(code);
             }
 
-            // Find the last SOURCE marker before 'start'
+            // --- SOURCE MAPPING LOGIC ---
             String fileName = sourceName;
-            int offset = 0;
+            int sourceLineInPreprocessed = lineNumberAt(source, start);
+            
+            // Check if we are inside an included file by looking for SOURCE markers
             int lastSourceMarker = source.lastIndexOf("/* SOURCE:", start);
-            if (lastSourceMarker != -1) {
-                int endMarker = source.indexOf(" */", lastSourceMarker);
-                if (endMarker != -1 && endMarker < start) {
-                    // Check if there's an END SOURCE between them
-                    int lastEndMarker = source.lastIndexOf("/* END SOURCE:", start);
-                    if (lastEndMarker == -1 || lastEndMarker < lastSourceMarker) {
-                        fileName = source.substring(lastSourceMarker + 10, endMarker);
-                        // Calculate offset from the start of the file
-                        offset = lineNumberAt(source, endMarker + 3) - 1; 
-                    }
+            int lastEndMarker = source.lastIndexOf("/* END SOURCE:", start);
+            
+            if (lastSourceMarker != -1 && (lastEndMarker == -1 || lastEndMarker < lastSourceMarker)) {
+                // We ARE inside an include
+                int markerEnd = source.indexOf(" */", lastSourceMarker);
+                if (markerEnd != -1 && markerEnd < start) {
+                    fileName = source.substring(lastSourceMarker + 10, markerEnd);
+                    // The line number in the original file is the line number in the preprocessed source
+                    // minus the line number where the SOURCE marker was found.
+                    int markerLine = lineNumberAt(source, lastSourceMarker);
+                    sourceLineInPreprocessed = sourceLineInPreprocessed - markerLine;
                 }
+            } else {
+                // If not in an include, account for markers that came before us in the main file
+                int shift = calculateMarkerLineShift(source, start);
+                sourceLineInPreprocessed -= shift;
             }
             
-            int sourceLine = lineNumberAt(source, start) - offset;
-            sourceMappings.get().add(new SourceMapping(fileName, currentExpandedLine, currentExpandedLine + codeLinesInExpanded - 1, sourceLine - 1));
+            sourceMappings.get().add(new SourceMapping(fileName, currentExpandedLine, currentExpandedLine + codeLinesInExpanded - 1, sourceLineInPreprocessed - 1));
             currentExpandedLine += codeLinesInExpanded;
 
             pos = end + 2;
@@ -317,6 +338,47 @@ public final class TemplateRenderer {
             }
         }
         return line;
+    }
+
+    private static int calculateMarkerLineShift(String expandedSource, int charIndex) {
+        return calculateMarkerLineShiftInRange(expandedSource, 0, charIndex);
+    }
+
+    private static int calculateMarkerLineShiftInRange(String expandedSource, int start, int end) {
+        int shift = 0;
+        int pos = start;
+        while (pos < end) {
+            int startMarker = expandedSource.indexOf("/* SOURCE:", pos);
+            if (startMarker == -1 || startMarker >= end) break;
+
+            int endOfStartMarker = expandedSource.indexOf(" */", startMarker);
+            if (endOfStartMarker == -1) break;
+            
+            int endMarker = expandedSource.indexOf("/* END SOURCE:", endOfStartMarker);
+            if (endMarker == -1) break;
+            
+            int endOfEndMarker = expandedSource.indexOf(" */", endMarker);
+            if (endOfEndMarker == -1) break;
+            
+            // Count lines from the start of the line containing startMarker
+            // up to and including the newline following endOfEndMarker.
+            int blockStartLine = lineNumberAt(expandedSource, startMarker);
+            
+            int nextNewline = expandedSource.indexOf('\n', endOfEndMarker);
+            int blockEndLine;
+            if (nextNewline == -1) {
+                blockEndLine = countLines(expandedSource) + 1;
+                pos = expandedSource.length();
+            } else {
+                blockEndLine = lineNumberAt(expandedSource, nextNewline);
+                pos = nextNewline + 1;
+            }
+            
+            int blockLines = blockEndLine - blockStartLine + 1;
+            // Subtract blockLines - 1 (because the directive occupied 1 line)
+            shift += (blockLines - 1);
+        }
+        return shift;
     }
 
     private static SourceMapping findSourceMapping(int expandedLine) {

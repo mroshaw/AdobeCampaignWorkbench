@@ -50,26 +50,26 @@ public class CampaignWorkbenchIDE extends Application {
         primaryStage.setTitle("Campaign Workbench");
 
         // Menu and toolbar
-        MainMenuBar menuBar = new MainMenuBar( _ -> openWorkspace(),
-                _ -> openFile(getWorkspaceTemplatePath()),
-                _ -> openFile(getWorkspaceModulePath()),
-                _ -> openFile(getWorkspaceBlockPath()),
-                _ -> openFile(getWorkspaceXmlPath()),
-                _ -> saveCurrent(),
-                _ -> applyTheme(IDETheme.LIGHT),
-                _ -> applyTheme(IDETheme.DARK)
+        MainMenuBar menuBar = new MainMenuBar( event -> openWorkspace(),
+                event -> openFile(getWorkspaceTemplatePath()),
+                event -> openFile(getWorkspaceModulePath()),
+                event -> openFile(getWorkspaceBlockPath()),
+                event -> openFile(getWorkspaceXmlPath()),
+                event -> saveCurrent(),
+                event -> applyTheme(IDETheme.LIGHT),
+                event -> applyTheme(IDETheme.DARK)
         );
 
-        toolBar = new ToolBar(_ -> openWorkspace(),
-                _ -> setContextXml(),
-                _ -> clearXmlContext(),
-                _ -> runTemplate());
+        toolBar = new ToolBar(event -> openWorkspace(),
+                event -> setContextXml(),
+                event -> clearXmlContext(),
+                event -> runTemplate());
 
         // Workspace Explorer
         workspaceExplorer = new WorkspaceExplorer("Workspace Explorer", this::openFileFromWorkspace);
 
         // Editor tabs
-        editorTabPanel = new EditorTabPanel((_, _, newTab) -> updateRunButtonState(newTab));
+        editorTabPanel = new EditorTabPanel((obs, oldTab, newTab) -> updateRunButtonState(newTab));
 
         // Output panes
         previewPanel = new OutputPreviewPanel("Preview WebView");
@@ -79,6 +79,19 @@ public class CampaignWorkbenchIDE extends Application {
         // Log pane
         logPanel = new LogPanel("Logs");
         errorLogPanel = new ErrorLogPanel("Errors");
+        errorLogPanel.setOnErrorDoubleClicked((fileName, line) -> {
+            // Find the file in the workspace
+            Path filePath = findFileInWorkspace(fileName);
+            if (filePath != null) {
+                if (editorTabPanel.isOpened(filePath)) {
+                    editorTabPanel.openFileAndGoToLine(filePath, line);
+                } else {
+                    openFileInNewTab(filePath.toFile());
+                    // Wait a bit for the tab to be created and editor to be ready
+                    Platform.runLater(() -> editorTabPanel.openFileAndGoToLine(filePath, line));
+                }
+            }
+        });
         SplitPane logSplitPane = new SplitPane();
         logSplitPane.setOrientation(Orientation.HORIZONTAL);
         logSplitPane.getItems().addAll(logPanel.getNode(), errorLogPanel.getNode());
@@ -184,7 +197,8 @@ public class CampaignWorkbenchIDE extends Application {
     }
 
     private void updateRunButtonState(Tab tab) {
-        if (tab instanceof EditorTab editorTab) {
+        if (tab instanceof EditorTab) {
+            EditorTab editorTab = (EditorTab) tab;
             String name = editorTab.getFile()
                     .getFileName()
                     .toString()
@@ -381,6 +395,16 @@ public class CampaignWorkbenchIDE extends Application {
             );
             alert.showAndWait();
         });
+    }
+
+    private Path findFileInWorkspace(String fileName) {
+        if (currentWorkspace == null) return null;
+        for (File file : currentWorkspace.getAllFiles()) {
+            if (file.getName().equals(fileName)) {
+                return file.toPath();
+            }
+        }
+        return null;
     }
 
 

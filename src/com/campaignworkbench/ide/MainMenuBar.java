@@ -67,11 +67,11 @@ public class MainMenuBar implements IJavaFxNode {
         MenuItem newBlock = new MenuItem("Block");
         MenuItem newXmlContext = new MenuItem("Context XML");
 
-        newWorkspace.setOnAction(_ -> dummyHandler());
-        newTemplate.setOnAction(_ -> dummyHandler());
-        newModule.setOnAction(_ -> dummyHandler());
-        newBlock.setOnAction(_ -> dummyHandler());
-        newXmlContext.setOnAction(_ -> dummyHandler());
+        newWorkspace.setOnAction(event -> dummyHandler());
+        newTemplate.setOnAction(event -> dummyHandler());
+        newModule.setOnAction(event -> dummyHandler());
+        newBlock.setOnAction(event -> dummyHandler());
+        newXmlContext.setOnAction(event -> dummyHandler());
 
         newSub.getItems().addAll(newWorkspace, newTemplate, newModule, newBlock, newXmlContext);
 
@@ -84,15 +84,15 @@ public class MainMenuBar implements IJavaFxNode {
         MenuItem exitItem = new MenuItem("Exit");
 
         saveCurrent.setOnAction(saveCurrentFileHandler);
-        saveCurrentAs.setOnAction(_ -> dummyHandler());
-        exitItem.setOnAction(_ -> Platform.exit());
+        saveCurrentAs.setOnAction(event -> dummyHandler());
+        exitItem.setOnAction(event -> Platform.exit());
 
         fileMenu.getItems().addAll(openSub, newSub, saveCurrent, saveCurrentAs, new SeparatorMenuItem(), exitItem);
 
         // --- Help Menu ---
         Menu helpMenu = new Menu("Help");
         MenuItem aboutItem = new MenuItem("About");
-        aboutItem.setOnAction(_ -> dummyHandler());
+        aboutItem.setOnAction(event -> dummyHandler());
         helpMenu.getItems().add(aboutItem);
 
         Menu viewMenu = new Menu("View");

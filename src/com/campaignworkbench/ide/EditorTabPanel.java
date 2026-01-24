@@ -29,9 +29,52 @@ public class EditorTabPanel implements IJavaFxNode {
     }
 
     private void refreshTabEditor(Tab tab) {
-        if (tab instanceof EditorTab editorTab) {
+        if (tab instanceof EditorTab) {
+            EditorTab editorTab = (EditorTab) tab;
             editorTab.refreshEditor();
         }
+    }
+
+    /**
+     * Finds and selects a tab by its file path, or opens it if not found.
+     * Then jumps to the specified line.
+     * @param path The path to the file
+     * @param line The line number to jump to (1-indexed)
+     */
+    public void openFileAndGoToLine(Path path, int line) {
+        EditorTab targetTab = null;
+        for (Tab tab : tabPane.getTabs()) {
+            if (tab instanceof EditorTab) {
+                EditorTab editorTab = (EditorTab) tab;
+                if (editorTab.getFile().equals(path)) {
+                    targetTab = editorTab;
+                    break;
+                }
+            }
+        }
+
+        if (targetTab == null) {
+            return;
+        }
+
+        tabPane.getSelectionModel().select(targetTab);
+        targetTab.getEditor().gotoLine(line);
+    }
+
+    /**
+     * @param path The path to the file
+     * @return true if the file is already open in a tab
+     */
+    public boolean isOpened(Path path) {
+        for (Tab tab : tabPane.getTabs()) {
+            if (tab instanceof EditorTab) {
+                EditorTab editorTab = (EditorTab) tab;
+                if (editorTab.getFile().equals(path)) {
+                    return true;
+                }
+            }
+        }
+        return false;
     }
 
     /**

@@ -49,5 +49,6 @@ public interface ICodeEditor {
     public void requestFocus();
 
     public void setCaretAtStart();
+    public void gotoLine(int line);
 
 }

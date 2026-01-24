@@ -1,0 +1,369 @@
+E:\Dev\AdobeCampaignWorkbench\src\com\campaignworkbench\ide\CampaignWorkbenchIDE.java:3: error: cannot access CupertinoDark
+import atlantafx.base.theme.CupertinoDark;
+                           ^
+  bad class file: lib\atlantafx-base-2.1.0.jar(/atlantafx/base/theme/CupertinoDark.class)
+    class file has wrong version 65.0, should be 55.0
+    Please remove or make sure it appears in the correct subdirectory of the classpath.
+E:\Dev\AdobeCampaignWorkbench\src\com\campaignworkbench\ide\CampaignWorkbenchIDE.java:4: error: cannot access CupertinoLight
+import atlantafx.base.theme.CupertinoLight;
+                           ^
+  bad class file: lib\atlantafx-base-2.1.0.jar(/atlantafx/base/theme/CupertinoLight.class)
+    class file has wrong version 65.0, should be 55.0
+    Please remove or make sure it appears in the correct subdirectory of the classpath.
+E:\Dev\AdobeCampaignWorkbench\src\com\campaignworkbench\ide\CampaignWorkbenchIDE.java:7: error: package javafx.application does not exist
+import javafx.application.Application;
+                         ^
+E:\Dev\AdobeCampaignWorkbench\src\com\campaignworkbench\ide\CampaignWorkbenchIDE.java:8: error: package javafx.application does not exist
+import javafx.application.Platform;
+                         ^
+E:\Dev\AdobeCampaignWorkbench\src\com\campaignworkbench\ide\CampaignWorkbenchIDE.java:9: error: package javafx.geometry does not exist
+import javafx.geometry.Orientation;
+                      ^
+E:\Dev\AdobeCampaignWorkbench\src\com\campaignworkbench\ide\CampaignWorkbenchIDE.java:10: error: package javafx.scene does not exist
+import javafx.scene.Scene;
+                   ^
+E:\Dev\AdobeCampaignWorkbench\src\com\campaignworkbench\ide\CampaignWorkbenchIDE.java:12: error: package javafx.scene.layout does not exist
+import javafx.scene.layout.BorderPane;
+                          ^
+E:\Dev\AdobeCampaignWorkbench\src\com\campaignworkbench\ide\CampaignWorkbenchIDE.java:13: error: package javafx.scene.layout does not exist
+import javafx.scene.layout.VBox;
+                          ^
+E:\Dev\AdobeCampaignWorkbench\src\com\campaignworkbench\ide\CampaignWorkbenchIDE.java:14: error: package javafx.stage does not exist
+import javafx.stage.DirectoryChooser;
+                   ^
+E:\Dev\AdobeCampaignWorkbench\src\com\campaignworkbench\ide\CampaignWorkbenchIDE.java:15: error: package javafx.stage does not exist
+import javafx.stage.FileChooser;
+                   ^
+E:\Dev\AdobeCampaignWorkbench\src\com\campaignworkbench\ide\CampaignWorkbenchIDE.java:16: error: package javafx.stage does not exist
+import javafx.stage.Stage;
+                   ^
+E:\Dev\AdobeCampaignWorkbench\src\com\campaignworkbench\ide\CampaignWorkbenchIDE.java:28: error: cannot find symbol
+public class CampaignWorkbenchIDE extends Application {
+                                          ^
+  symbol: class Application
+E:\Dev\AdobeCampaignWorkbench\src\com\campaignworkbench\ide\WorkspaceExplorer.java:3: error: package javafx.scene does not exist
+import javafx.scene.Node;
+                   ^
+E:\Dev\AdobeCampaignWorkbench\src\com\campaignworkbench\ide\WorkspaceExplorer.java:4: error: package javafx.scene.control does not exist
+import javafx.scene.control.Label;
+                           ^
+E:\Dev\AdobeCampaignWorkbench\src\com\campaignworkbench\ide\WorkspaceExplorer.java:5: error: package javafx.scene.control does not exist
+import javafx.scene.control.TreeCell;
+                           ^
+E:\Dev\AdobeCampaignWorkbench\src\com\campaignworkbench\ide\WorkspaceExplorer.java:6: error: package javafx.scene.control does not exist
+import javafx.scene.control.TreeItem;
+                           ^
+E:\Dev\AdobeCampaignWorkbench\src\com\campaignworkbench\ide\WorkspaceExplorer.java:7: error: package javafx.scene.control does not exist
+import javafx.scene.control.TreeView;
+                           ^
+E:\Dev\AdobeCampaignWorkbench\src\com\campaignworkbench\ide\WorkspaceExplorer.java:8: error: package javafx.scene.input does not exist
+import javafx.scene.input.MouseButton;
+                         ^
+E:\Dev\AdobeCampaignWorkbench\src\com\campaignworkbench\ide\WorkspaceExplorer.java:9: error: package javafx.scene.layout does not exist
+import javafx.scene.layout.Priority;
+                          ^
+E:\Dev\AdobeCampaignWorkbench\src\com\campaignworkbench\ide\WorkspaceExplorer.java:10: error: package javafx.scene.layout does not exist
+import javafx.scene.layout.VBox;
+                          ^
+E:\Dev\AdobeCampaignWorkbench\src\com\campaignworkbench\ide\WorkspaceExplorer.java:13: error: package javafx.geometry does not exist
+import javafx.geometry.Insets;
+                      ^
+E:\Dev\AdobeCampaignWorkbench\src\com\campaignworkbench\ide\IJavaFxNode.java:3: error: package javafx.scene does not exist
+import javafx.scene.Node;
+                   ^
+E:\Dev\AdobeCampaignWorkbench\src\com\campaignworkbench\ide\ToolBar.java:3: error: package javafx.event does not exist
+import javafx.event.ActionEvent;
+                   ^
+E:\Dev\AdobeCampaignWorkbench\src\com\campaignworkbench\ide\ToolBar.java:4: error: package javafx.event does not exist
+import javafx.event.EventHandler;
+                   ^
+E:\Dev\AdobeCampaignWorkbench\src\com\campaignworkbench\ide\ToolBar.java:5: error: package javafx.geometry does not exist
+import javafx.geometry.Pos;
+                      ^
+E:\Dev\AdobeCampaignWorkbench\src\com\campaignworkbench\ide\ToolBar.java:6: error: package javafx.scene does not exist
+import javafx.scene.Node;
+                   ^
+E:\Dev\AdobeCampaignWorkbench\src\com\campaignworkbench\ide\ToolBar.java:7: error: package javafx.scene.control does not exist
+import javafx.scene.control.Button;
+                           ^
+E:\Dev\AdobeCampaignWorkbench\src\com\campaignworkbench\ide\ToolBar.java:8: error: package javafx.scene.control does not exist
+import javafx.scene.control.Label;
+                           ^
+E:\Dev\AdobeCampaignWorkbench\src\com\campaignworkbench\ide\ToolBar.java:9: error: package javafx.scene.control does not exist
+import javafx.scene.control.Tooltip;
+                           ^
+E:\Dev\AdobeCampaignWorkbench\src\com\campaignworkbench\ide\ToolBar.java:10: error: package javafx.scene.layout does not exist
+import javafx.scene.layout.HBox;
+                          ^
+E:\Dev\AdobeCampaignWorkbench\src\com\campaignworkbench\ide\EditorTabPanel.java:3: error: package javafx.beans.value does not exist
+import javafx.beans.value.ChangeListener;
+                         ^
+E:\Dev\AdobeCampaignWorkbench\src\com\campaignworkbench\ide\EditorTabPanel.java:4: error: package javafx.scene does not exist
+import javafx.scene.Node;
+                   ^
+E:\Dev\AdobeCampaignWorkbench\src\com\campaignworkbench\ide\EditorTabPanel.java:5: error: package javafx.scene.control does not exist
+import javafx.scene.control.Tab;
+                           ^
+E:\Dev\AdobeCampaignWorkbench\src\com\campaignworkbench\ide\EditorTabPanel.java:6: error: package javafx.scene.control does not exist
+import javafx.scene.control.TabPane;
+                           ^
+E:\Dev\AdobeCampaignWorkbench\src\com\campaignworkbench\ide\EditorTabPanel.java:7: error: package javafx.stage does not exist
+import javafx.stage.Window;
+                   ^
+E:\Dev\AdobeCampaignWorkbench\src\com\campaignworkbench\ide\LogPanel.java:3: error: package javafx.application does not exist
+import javafx.application.Platform;
+                         ^
+E:\Dev\AdobeCampaignWorkbench\src\com\campaignworkbench\ide\LogPanel.java:4: error: package javafx.geometry does not exist
+import javafx.geometry.Insets;
+                      ^
+E:\Dev\AdobeCampaignWorkbench\src\com\campaignworkbench\ide\LogPanel.java:5: error: package javafx.scene does not exist
+import javafx.scene.Cursor;
+                   ^
+E:\Dev\AdobeCampaignWorkbench\src\com\campaignworkbench\ide\LogPanel.java:6: error: package javafx.scene does not exist
+import javafx.scene.Node;
+                   ^
+E:\Dev\AdobeCampaignWorkbench\src\com\campaignworkbench\ide\LogPanel.java:7: error: package javafx.scene.control does not exist
+import javafx.scene.control.Label;
+                           ^
+E:\Dev\AdobeCampaignWorkbench\src\com\campaignworkbench\ide\LogPanel.java:8: error: package javafx.scene.control does not exist
+import javafx.scene.control.TextArea;
+                           ^
+E:\Dev\AdobeCampaignWorkbench\src\com\campaignworkbench\ide\LogPanel.java:9: error: package javafx.scene.layout does not exist
+import javafx.scene.layout.Priority;
+                          ^
+E:\Dev\AdobeCampaignWorkbench\src\com\campaignworkbench\ide\LogPanel.java:10: error: package javafx.scene.layout does not exist
+import javafx.scene.layout.VBox;
+                          ^
+E:\Dev\AdobeCampaignWorkbench\src\com\campaignworkbench\ide\LogPanel.java:11: error: package javafx.scene.text does not exist
+import javafx.scene.text.Font;
+                        ^
+E:\Dev\AdobeCampaignWorkbench\src\com\campaignworkbench\ide\ErrorLogPanel.java:4: error: package javafx.geometry does not exist
+import javafx.geometry.Insets;
+                      ^
+E:\Dev\AdobeCampaignWorkbench\src\com\campaignworkbench\ide\ErrorLogPanel.java:5: error: package javafx.scene does not exist
+import javafx.scene.Node;
+                   ^
+E:\Dev\AdobeCampaignWorkbench\src\com\campaignworkbench\ide\ErrorLogPanel.java:6: error: package javafx.scene.control does not exist
+import javafx.scene.control.Label;
+                           ^
+E:\Dev\AdobeCampaignWorkbench\src\com\campaignworkbench\ide\ErrorLogPanel.java:7: error: package javafx.scene.control does not exist
+import javafx.scene.control.TreeCell;
+                           ^
+E:\Dev\AdobeCampaignWorkbench\src\com\campaignworkbench\ide\ErrorLogPanel.java:8: error: package javafx.scene.control does not exist
+import javafx.scene.control.TreeItem;
+                           ^
+E:\Dev\AdobeCampaignWorkbench\src\com\campaignworkbench\ide\ErrorLogPanel.java:9: error: package javafx.scene.control does not exist
+import javafx.scene.control.TreeView;
+                           ^
+E:\Dev\AdobeCampaignWorkbench\src\com\campaignworkbench\ide\ErrorLogPanel.java:10: error: package javafx.scene.input does not exist
+import javafx.scene.input.MouseButton;
+                         ^
+E:\Dev\AdobeCampaignWorkbench\src\com\campaignworkbench\ide\ErrorLogPanel.java:11: error: package javafx.scene.layout does not exist
+import javafx.scene.layout.Priority;
+                          ^
+E:\Dev\AdobeCampaignWorkbench\src\com\campaignworkbench\ide\ErrorLogPanel.java:12: error: package javafx.scene.layout does not exist
+import javafx.scene.layout.VBox;
+                          ^
+E:\Dev\AdobeCampaignWorkbench\src\com\campaignworkbench\ide\OutputPreviewPanel.java:3: error: package javafx.geometry does not exist
+import javafx.geometry.Insets;
+                      ^
+E:\Dev\AdobeCampaignWorkbench\src\com\campaignworkbench\ide\OutputPreviewPanel.java:4: error: package javafx.scene does not exist
+import javafx.scene.Cursor;
+                   ^
+E:\Dev\AdobeCampaignWorkbench\src\com\campaignworkbench\ide\OutputPreviewPanel.java:5: error: package javafx.scene does not exist
+import javafx.scene.Node;
+                   ^
+E:\Dev\AdobeCampaignWorkbench\src\com\campaignworkbench\ide\OutputPreviewPanel.java:6: error: package javafx.scene.control does not exist
+import javafx.scene.control.Label;
+                           ^
+E:\Dev\AdobeCampaignWorkbench\src\com\campaignworkbench\ide\OutputPreviewPanel.java:7: error: package javafx.scene.layout does not exist
+import javafx.scene.layout.VBox;
+                          ^
+E:\Dev\AdobeCampaignWorkbench\src\com\campaignworkbench\ide\OutputPreviewPanel.java:8: error: package javafx.scene.web does not exist
+import javafx.scene.web.WebView;
+                       ^
+E:\Dev\AdobeCampaignWorkbench\src\com\campaignworkbench\ide\SourcePreviewPanel.java:5: error: package javafx.geometry does not exist
+import javafx.geometry.Insets;
+                      ^
+E:\Dev\AdobeCampaignWorkbench\src\com\campaignworkbench\ide\SourcePreviewPanel.java:6: error: package javafx.scene does not exist
+import javafx.scene.Node;
+                   ^
+E:\Dev\AdobeCampaignWorkbench\src\com\campaignworkbench\ide\SourcePreviewPanel.java:7: error: package javafx.scene.control does not exist
+import javafx.scene.control.Label;
+                           ^
+E:\Dev\AdobeCampaignWorkbench\src\com\campaignworkbench\ide\SourcePreviewPanel.java:8: error: package javafx.scene.layout does not exist
+import javafx.scene.layout.VBox;
+                          ^
+E:\Dev\AdobeCampaignWorkbench\src\com\campaignworkbench\ide\editor\RSyntaxEditor.java:5: error: package javafx.application does not exist
+import javafx.application.Platform;
+                         ^
+E:\Dev\AdobeCampaignWorkbench\src\com\campaignworkbench\ide\editor\RSyntaxEditor.java:6: error: package javafx.embed.swing does not exist
+import javafx.embed.swing.SwingNode;
+                         ^
+E:\Dev\AdobeCampaignWorkbench\src\com\campaignworkbench\ide\editor\RSyntaxEditor.java:7: error: package javafx.scene does not exist
+import javafx.scene.Node;
+                   ^
+E:\Dev\AdobeCampaignWorkbench\src\com\campaignworkbench\ide\editor\ICodeEditor.java:3: error: package javafx.scene does not exist
+import javafx.scene.Node;
+                   ^
+E:\Dev\AdobeCampaignWorkbench\src\com\campaignworkbench\ide\CampaignWorkbenchIDE.java:49: error: cannot find symbol
+    public void start(Stage primaryStage) {
+                      ^
+  symbol:   class Stage
+  location: class CampaignWorkbenchIDE
+E:\Dev\AdobeCampaignWorkbench\src\com\campaignworkbench\ide\CampaignWorkbenchIDE.java:199: error: cannot find symbol
+    private void updateRunButtonState(Tab tab) {
+                                      ^
+  symbol:   class Tab
+  location: class CampaignWorkbenchIDE
+E:\Dev\AdobeCampaignWorkbench\src\com\campaignworkbench\ide\SourcePreviewPanel.java:15: error: cannot find symbol
+    VBox sourcePreviewPanel;
+    ^
+  symbol:   class VBox
+  location: class SourcePreviewPanel
+E:\Dev\AdobeCampaignWorkbench\src\com\campaignworkbench\ide\SourcePreviewPanel.java:16: error: cannot find symbol
+    Label sourcePreviewLabel;
+    ^
+  symbol:   class Label
+  location: class SourcePreviewPanel
+E:\Dev\AdobeCampaignWorkbench\src\com\campaignworkbench\ide\SourcePreviewPanel.java:33: error: cannot find symbol
+    public Node getNode() {
+           ^
+  symbol:   class Node
+  location: class SourcePreviewPanel
+E:\Dev\AdobeCampaignWorkbench\src\com\campaignworkbench\ide\editor\RSyntaxEditor.java:22: error: cannot find symbol
+    private final SwingNode swingNode = new SwingNode();
+                  ^
+  symbol:   class SwingNode
+  location: class RSyntaxEditor
+E:\Dev\AdobeCampaignWorkbench\src\com\campaignworkbench\ide\editor\RSyntaxEditor.java:66: error: cannot find symbol
+    public Node getNode() {
+           ^
+  symbol:   class Node
+  location: class RSyntaxEditor
+E:\Dev\AdobeCampaignWorkbench\src\com\campaignworkbench\ide\editor\ICodeEditor.java:13: error: cannot find symbol
+    public Node getNode();
+           ^
+  symbol:   class Node
+  location: interface ICodeEditor
+E:\Dev\AdobeCampaignWorkbench\src\com\campaignworkbench\ide\OutputPreviewPanel.java:15: error: cannot find symbol
+    private final WebView preview;
+                  ^
+  symbol:   class WebView
+  location: class OutputPreviewPanel
+E:\Dev\AdobeCampaignWorkbench\src\com\campaignworkbench\ide\OutputPreviewPanel.java:16: error: cannot find symbol
+    private final VBox topPreviewBox;
+                  ^
+  symbol:   class VBox
+  location: class OutputPreviewPanel
+E:\Dev\AdobeCampaignWorkbench\src\com\campaignworkbench\ide\OutputPreviewPanel.java:17: error: cannot find symbol
+    Label outputLabel;
+    ^
+  symbol:   class Label
+  location: class OutputPreviewPanel
+E:\Dev\AdobeCampaignWorkbench\src\com\campaignworkbench\ide\OutputPreviewPanel.java:42: error: cannot find symbol
+    public Node getNode() {
+           ^
+  symbol:   class Node
+  location: class OutputPreviewPanel
+E:\Dev\AdobeCampaignWorkbench\src\com\campaignworkbench\ide\ErrorLogPanel.java:20: error: cannot find symbol
+    private TreeView<String> errorTreeView;
+            ^
+  symbol:   class TreeView
+  location: class ErrorLogPanel
+E:\Dev\AdobeCampaignWorkbench\src\com\campaignworkbench\ide\ErrorLogPanel.java:21: error: cannot find symbol
+    VBox logPanel;
+    ^
+  symbol:   class VBox
+  location: class ErrorLogPanel
+E:\Dev\AdobeCampaignWorkbench\src\com\campaignworkbench\ide\ErrorLogPanel.java:22: error: cannot find symbol
+    private Map<TreeItem<String>, TemplateException> errorData = new HashMap<>();
+                ^
+  symbol:   class TreeItem
+  location: class ErrorLogPanel
+E:\Dev\AdobeCampaignWorkbench\src\com\campaignworkbench\ide\ErrorLogPanel.java:90: error: cannot find symbol
+    public Node getNode() {
+           ^
+  symbol:   class Node
+  location: class ErrorLogPanel
+E:\Dev\AdobeCampaignWorkbench\src\com\campaignworkbench\ide\LogPanel.java:18: error: cannot find symbol
+    private final TextArea logArea;
+                  ^
+  symbol:   class TextArea
+  location: class LogPanel
+E:\Dev\AdobeCampaignWorkbench\src\com\campaignworkbench\ide\LogPanel.java:19: error: cannot find symbol
+    VBox logPanel;
+    ^
+  symbol:   class VBox
+  location: class LogPanel
+E:\Dev\AdobeCampaignWorkbench\src\com\campaignworkbench\ide\LogPanel.java:39: error: cannot find symbol
+    public Node getNode() {
+           ^
+  symbol:   class Node
+  location: class LogPanel
+E:\Dev\AdobeCampaignWorkbench\src\com\campaignworkbench\ide\EditorTabPanel.java:16: error: cannot find symbol
+    private final TabPane tabPane;
+                  ^
+  symbol:   class TabPane
+  location: class EditorTabPanel
+E:\Dev\AdobeCampaignWorkbench\src\com\campaignworkbench\ide\EditorTabPanel.java:22: error: cannot find symbol
+    public EditorTabPanel(ChangeListener<Tab> tabChangedListener) {
+                          ^
+  symbol:   class ChangeListener
+  location: class EditorTabPanel
+E:\Dev\AdobeCampaignWorkbench\src\com\campaignworkbench\ide\EditorTabPanel.java:22: error: cannot find symbol
+    public EditorTabPanel(ChangeListener<Tab> tabChangedListener) {
+                                         ^
+  symbol:   class Tab
+  location: class EditorTabPanel
+E:\Dev\AdobeCampaignWorkbench\src\com\campaignworkbench\ide\EditorTabPanel.java:31: error: cannot find symbol
+    private void refreshTabEditor(Tab tab) {
+                                  ^
+  symbol:   class Tab
+  location: class EditorTabPanel
+E:\Dev\AdobeCampaignWorkbench\src\com\campaignworkbench\ide\EditorTabPanel.java:84: error: cannot find symbol
+    public Window getWindow() {
+           ^
+  symbol:   class Window
+  location: class EditorTabPanel
+E:\Dev\AdobeCampaignWorkbench\src\com\campaignworkbench\ide\EditorTab.java:6: error: package javafx.scene.control does not exist
+import javafx.scene.control.Tab;
+                           ^
+E:\Dev\AdobeCampaignWorkbench\src\com\campaignworkbench\ide\EditorTab.java:7: error: package javafx.scene.layout does not exist
+import javafx.scene.layout.BorderPane;
+                          ^
+E:\Dev\AdobeCampaignWorkbench\src\com\campaignworkbench\ide\EditorTab.java:14: error: cannot find symbol
+public final class EditorTab extends Tab {
+                                     ^
+  symbol: class Tab
+E:\Dev\AdobeCampaignWorkbench\src\com\campaignworkbench\ide\EditorTabPanel.java:134: error: cannot find symbol
+    public Node getNode() {
+           ^
+  symbol:   class Node
+  location: class EditorTabPanel
+E:\Dev\AdobeCampaignWorkbench\src\com\campaignworkbench\ide\ToolBar.java:17: error: cannot find symbol
+    private final HBox toolBar;
+                  ^
+  symbol:   class HBox
+  location: class ToolBar
+E:\Dev\AdobeCampaignWorkbench\src\com\campaignworkbench\ide\ToolBar.java:18: error: cannot find symbol
+    private final Button runButton;
+                  ^
+  symbol:   class Button
+  location: class ToolBar
+E:\Dev\AdobeCampaignWorkbench\src\com\campaignworkbench\ide\ToolBar.java:19: error: cannot find symbol
+    private final Button setXmlButton;
+                  ^
+  symbol:   class Button
+  location: class ToolBar
+E:\Dev\AdobeCampaignWorkbench\src\com\campaignworkbench\ide\ToolBar.java:20: error: cannot find symbol
+    private final Label contextXmlLabel;
+                  ^
+  symbol:   class Label
+  location: class ToolBar
+E:\Dev\AdobeCampaignWorkbench\src\com\campaignworkbench\ide\ToolBar.java:29: error: cannot find symbol
+            EventHandler<ActionEvent> openWorkspaceHandler,
+            ^
+  symbol:   class EventHandler
+  location: class ToolBar
+100 errors

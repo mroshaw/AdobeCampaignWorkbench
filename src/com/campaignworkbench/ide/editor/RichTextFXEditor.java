@@ -38,4 +38,9 @@ public class RichTextFXEditor implements ICodeEditor {
     public void setCaretAtStart() {
 
     }
+
+    @Override
+    public void gotoLine(int line) {
+
+    }
 }
