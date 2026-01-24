@@ -1,5 +1,6 @@
 package com.campaignworkbench.ide.editor;
 
+import com.campaignworkbench.ide.IDETheme;
 import javafx.scene.Node;
 
 /**
@@ -58,5 +59,11 @@ public interface ICodeEditor {
      * @param line the line number to move the caret to
      */
     public void gotoLine(int line);
+
+    /**
+     * Applies a theme to the editor
+     * @param theme the theme to apply
+     */
+    public void applyTheme(IDETheme theme);
 
 }

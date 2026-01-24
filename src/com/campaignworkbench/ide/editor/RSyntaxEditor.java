@@ -151,10 +151,7 @@ public class RSyntaxEditor implements ICodeEditor {
         });
     }
 
-    /**
-     * Applies a light or dark theme to all controls in the UI
-     * @param ideTheme enum of the LIGHT or DARK theme
-     */
+    @Override
     public void applyTheme(IDETheme ideTheme) {
         try {
             String themePath = switch (ideTheme) {

@@ -1,6 +1,8 @@
 package com.campaignworkbench.ide;
 
+import com.campaignworkbench.ide.editor.ICodeEditor;
 import com.campaignworkbench.ide.editor.RSyntaxEditor;
+import com.campaignworkbench.ide.editor.RichTextFXEditor;
 import com.campaignworkbench.ide.editor.SyntaxType;
 import javafx.geometry.Insets;
 import javafx.scene.Node;
@@ -10,8 +12,9 @@ import javafx.scene.layout.VBox;
 /**
  * Implements a User Interface control to preview the JavaScript source generated
  */
-public class SourcePreviewPanel extends RSyntaxEditor implements IJavaFxNode {
+public class SourcePreviewPanel implements IJavaFxNode {
 
+    private final ICodeEditor editor;
     /**
      * The panel containing the source preview
      */
@@ -27,15 +30,20 @@ public class SourcePreviewPanel extends RSyntaxEditor implements IJavaFxNode {
      * @param syntaxType The syntax highlighting type to use
      */
     public SourcePreviewPanel(String label, SyntaxType syntaxType) {
-        super();
+        // this.editor = new RichTextFXEditor();
+        this.editor = new RSyntaxEditor();
         sourcePreviewLabel = new Label(label);
         sourcePreviewLabel.setPadding(new Insets(0,0, 0,5));
         sourcePreviewLabel.setStyle("-fx-font-weight: bold;");
-        sourcePreviewPanel = new VBox(5, sourcePreviewLabel, super.getNode());
+        sourcePreviewPanel = new VBox(5, sourcePreviewLabel, editor.getNode());
         sourcePreviewPanel.setPadding(new Insets(0,0, 0,5));
 
-        super.setEditable(true);
-        super.setSyntax(syntaxType);
+        editor.setEditable(true);
+        editor.setSyntax(syntaxType);
+    }
+
+    public void setText(String text) {
+        editor.setText(text);
     }
 
     public Node getNode() {

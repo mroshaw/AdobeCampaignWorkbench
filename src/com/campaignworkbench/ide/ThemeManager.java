@@ -1,6 +1,6 @@
 package com.campaignworkbench.ide;
 
-import com.campaignworkbench.ide.editor.RSyntaxEditor;
+import com.campaignworkbench.ide.editor.ICodeEditor;
 import javafx.scene.Scene;
 
 import java.util.ArrayList;
@@ -12,7 +12,7 @@ import java.util.List;
 public final class ThemeManager {
 
     private static IDETheme currentTheme = IDETheme.DARK;
-    private static final List<RSyntaxEditor> editors = new ArrayList<>();
+    private static final List<ICodeEditor> editors = new ArrayList<>();
 
     private ThemeManager() {}
 
@@ -20,7 +20,7 @@ public final class ThemeManager {
      * Registers an editor to receive theme updates
      * @param editor the editor to register
      */
-    public static void register(RSyntaxEditor editor) {
+    public static void register(ICodeEditor editor) {
         editors.add(editor);
         editor.applyTheme(currentTheme);
     }
@@ -39,7 +39,7 @@ public final class ThemeManager {
     public static void setTheme(IDETheme theme) {
         currentTheme = theme;
 
-        for (RSyntaxEditor editor : editors) {
+        for (ICodeEditor editor : editors) {
             editor.applyTheme(theme);
         }
         CampaignWorkbenchIDE.setTheme(theme);
