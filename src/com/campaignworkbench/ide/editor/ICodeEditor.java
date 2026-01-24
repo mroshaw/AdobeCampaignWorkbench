@@ -55,7 +55,7 @@ public interface ICodeEditor {
     public void setCaretAtStart();
 
     /**
-     * Moves the caret to the specified line number
+     * Moves the caret to the specified line number and selects it
      * @param line the line number to move the caret to
      */
     public void gotoLine(int line);

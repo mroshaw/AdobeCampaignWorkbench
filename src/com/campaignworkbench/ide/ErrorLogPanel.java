@@ -87,7 +87,7 @@ public class ErrorLogPanel implements IJavaFxNode {
             clearErrors();
         }
 
-        TreeItem<String> errorNode = new TreeItem<>(ex.getMessage());
+        TreeItem<String> errorNode = new TreeItem<>(ex.getMessage() + " at line " +  (ex.getTemplateLine() == -1 ? "N/A" : ex.getTemplateLine()));
         errorNode.setExpanded(false);
         errorData.put(errorNode, ex);
 

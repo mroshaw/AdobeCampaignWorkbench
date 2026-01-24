@@ -103,6 +103,10 @@ public class CampaignWorkbenchIDE extends Application {
                     // Wait a bit for the tab to be created and editor to be ready
                     Platform.runLater(() -> editorTabPanel.openFileAndGoToLine(filePath, line));
                 }
+            } else {
+                // If it's not a physical file, it might be the "RenderedTemplate" (the preprocessed staging source)
+                // in which case we don't open a file, but we might want to log it.
+                appendLog("Could not find file: " + fileName);
             }
         });
         SplitPane logSplitPane = new SplitPane();
@@ -462,6 +466,13 @@ public class CampaignWorkbenchIDE extends Application {
      */
     private Path findFileInWorkspace(String fileName) {
         if (currentWorkspace == null) return null;
+        
+        // Handle absolute paths if fileName is one
+        File f = new File(fileName);
+        if (f.isAbsolute() && f.exists()) {
+            return f.toPath();
+        }
+
         for (File file : currentWorkspace.getAllFiles()) {
             if (file.getName().equals(fileName)) {
                 return file.toPath();

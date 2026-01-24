@@ -4,7 +4,7 @@
 <body style="background-color:MediumSeaGreen;">
 Hello <%= rtEvent.ctx.customer.name %><BR>
 <%@ include module='TestModule' %>
-<% var today = getCurrentDate(); %>
+<% var today = getCurrentDate(; %>
 Today is: <%= today %>
 </body>
 </html>

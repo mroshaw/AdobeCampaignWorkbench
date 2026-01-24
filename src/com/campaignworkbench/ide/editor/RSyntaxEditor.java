@@ -117,7 +117,9 @@ public class RSyntaxEditor implements ICodeEditor {
         runOrQueue(() -> {
             try {
                 int lineStartOffset = rSyntaxTextArea.getLineStartOffset(line - 1);
+                int lineEndOffset = rSyntaxTextArea.getLineEndOffset(line - 1);
                 rSyntaxTextArea.setCaretPosition(lineStartOffset);
+                rSyntaxTextArea.moveCaretPosition(lineEndOffset);
                 rSyntaxTextArea.requestFocusInWindow();
             } catch (Exception e) {
                 // Ignore invalid line numbers

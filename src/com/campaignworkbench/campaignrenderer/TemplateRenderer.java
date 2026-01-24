@@ -18,10 +18,22 @@ public final class TemplateRenderer {
     private record SourceMapping(String sourceName, int startLineInExpanded, int endLineInExpanded, int lineOffsetInOriginal) {
     }
 
+    private static class PreprocessedLine {
+        final String sourceName;
+        final int originalLine;
+        
+        PreprocessedLine(String sourceName, int originalLine) {
+            this.sourceName = sourceName;
+            this.originalLine = originalLine;
+        }
+    }
+
     /**
      * Thread local storage for source mappings to ensure thread safety during rendering
      */
     private static final ThreadLocal<List<SourceMapping>> sourceMappings = ThreadLocal.withInitial(ArrayList::new);
+    private static final ThreadLocal<List<PreprocessedLine>> lineMappings = ThreadLocal.withInitial(ArrayList::new);
+    private static final ThreadLocal<List<PreprocessedLine>> jsLineToPreprocessedLine = ThreadLocal.withInitial(ArrayList::new);
 
     private TemplateRenderer() {}
 
@@ -42,6 +54,8 @@ public final class TemplateRenderer {
             String sourceName
     ) {
         sourceMappings.get().clear();
+        lineMappings.get().clear();
+        jsLineToPreprocessedLine.get().clear();
         String expanded = "";
         try {
             injectStandardFunctions(cx, scope);
@@ -73,6 +87,22 @@ public final class TemplateRenderer {
             
             int mappedLine = mapping != null ? (e.lineNumber() - mapping.startLineInExpanded() + 1 + mapping.lineOffsetInOriginal()) : e.lineNumber();
             String mappedSourceName = mapping != null ? mapping.sourceName() : sourceName;
+
+            // Use the new jsLineToPreprocessedLine for precise mapping
+            List<PreprocessedLine> jsMappings = jsLineToPreprocessedLine.get();
+            if (e.lineNumber() > 0 && e.lineNumber() <= jsMappings.size()) {
+                PreprocessedLine preInfo = jsMappings.get(e.lineNumber() - 1);
+                if (preInfo != null) {
+                    int preLine = preInfo.originalLine;
+                    if (preLine > 0 && preLine <= lineMappings.get().size()) {
+                        PreprocessedLine originalInfo = lineMappings.get().get(preLine - 1);
+                        if (originalInfo != null) {
+                            mappedLine = originalInfo.originalLine;
+                            mappedSourceName = originalInfo.sourceName;
+                        }
+                    }
+                }
+            }
 
             if (e instanceof org.mozilla.javascript.EvaluatorException evaluatorException) {
                 throw new TemplateParseException(
@@ -137,6 +167,134 @@ public final class TemplateRenderer {
      * @param sourceName name of the source being processed
      * @return preprocessed template source
      */
+    private static void preprocessInternal(
+            Workspace workspace,
+            String source,
+            Context cx,
+            Scriptable scope,
+            String sourceName,
+            StringBuilder out
+    ) {
+        int pos = 0;
+        int currentOriginalLine = 1;
+
+        while (pos < source.length()) {
+            int start = source.indexOf("<%@", pos);
+            if (start == -1) {
+                String tail = source.substring(pos);
+                for (char c : tail.toCharArray()) {
+                    out.append(c);
+                    if (c == '\n') {
+                        lineMappings.get().add(new PreprocessedLine(sourceName, currentOriginalLine++));
+                    }
+                }
+                break;
+            }
+
+            // Append text before directive
+            String textBefore = source.substring(pos, start);
+            for (char c : textBefore.toCharArray()) {
+                out.append(c);
+                if (c == '\n') {
+                    lineMappings.get().add(new PreprocessedLine(sourceName, currentOriginalLine++));
+                }
+            }
+
+            int end = source.indexOf("%>", start);
+            if (end == -1) {
+                throw new TemplateParseException(
+                        "Unclosed <%@ directive",
+                        sourceName,
+                        source,
+                        currentOriginalLine,
+                        "Unclosed <%@ directive",
+                        "Ensure all directives are closed with '%>'.",
+                        null
+                );
+            }
+
+            String directive = source.substring(start + 3, end).trim();
+            int directiveLines = countLines(source.substring(start, end + 2));
+
+            if (directive.startsWith("include")) {
+                if (directive.contains("module=")) {
+                    String name = extractQuoted(directive, "module");
+                    Path p = workspace.getModulesPath().resolve(name + ".module");
+                    try {
+                        String moduleSource = FileUtil.read(p);
+                        String moduleOutput = ModuleRenderer.renderModule(moduleSource, cx, scope, p.toString());
+                        
+                        out.append("/* SOURCE:").append(p.getFileName()).append(" */\n");
+                        lineMappings.get().add(new PreprocessedLine(sourceName, currentOriginalLine));
+                        
+                        preprocessInternal(workspace, moduleOutput, cx, scope, p.toString(), out);
+                        
+                        if (out.length() > 0 && out.charAt(out.length() - 1) != '\n') {
+                            out.append('\n');
+                            lineMappings.get().add(new PreprocessedLine(p.toString(), countLines(moduleOutput) + 1));
+                        }
+                        out.append("/* END SOURCE:").append(p.getFileName()).append(" */\n");
+                        lineMappings.get().add(new PreprocessedLine(sourceName, currentOriginalLine + directiveLines));
+                    } catch (Exception e) {
+                        if (e instanceof TemplateException te) throw te;
+                        throw new TemplateParseException(
+                                "Failed to include/render module: " + name,
+                                sourceName,
+                                source,
+                                currentOriginalLine,
+                                e.getMessage(),
+                                "Check if the module file exists and is valid: " + p,
+                                e
+                        );
+                    }
+                }
+                else if (directive.contains("view=")) {
+                    String name = extractQuoted(directive, "view");
+                    Path p = workspace.getBlocksPath().resolve(name + ".block");
+                    try {
+                        String blockSource = FileUtil.read(p);
+                        
+                        out.append("/* SOURCE:").append(p.getFileName()).append(" */\n");
+                        lineMappings.get().add(new PreprocessedLine(sourceName, currentOriginalLine));
+                        
+                        preprocessInternal(workspace, blockSource, cx, scope, p.toString(), out);
+                        
+                        // If the block doesn't end with a newline, adding one might shift things.
+                        // But preprocessInternal ensures lines are mapped.
+                        if (out.length() > 0 && out.charAt(out.length() - 1) != '\n') {
+                            out.append('\n');
+                            // Map this extra newline to the last line of the block or EOF
+                            lineMappings.get().add(new PreprocessedLine(p.toString(), countLines(blockSource) + 1));
+                        }
+
+                        out.append("/* END SOURCE:").append(p.getFileName()).append(" */\n");
+                        lineMappings.get().add(new PreprocessedLine(sourceName, currentOriginalLine + directiveLines));
+                    } catch (Exception e) {
+                        if (e instanceof TemplateException te) throw te;
+                        throw new TemplateParseException(
+                                "Failed to include block: " + name,
+                                sourceName,
+                                source,
+                                currentOriginalLine,
+                                e.getMessage(),
+                                "Check if the block file exists: " + p,
+                                e
+                        );
+                    }
+                }
+                currentOriginalLine += directiveLines;
+            } else {
+                // Other directive - replace with newlines
+                for(int i=0; i < directiveLines; i++) {
+                    out.append('\n');
+                    lineMappings.get().add(new PreprocessedLine(sourceName, currentOriginalLine++));
+                }
+            }
+            
+            pos = end + 2;
+        }
+    }
+
     private static String preprocess(
             Workspace workspace,
             String source,
@@ -145,92 +303,12 @@ public final class TemplateRenderer {
             String sourceName
     ) {
         StringBuilder out = new StringBuilder();
-        int pos = 0;
-
-        while (pos < source.length()) {
-            int start = source.indexOf("<%@", pos);
-            if (start == -1) {
-                out.append(source.substring(pos));
-                break;
-            }
-
-            out.append(source, pos, start);
-
-            int end = source.indexOf("%>", start);
-            if (end == -1) {
-                int line = lineNumberAt(source, start);
-                throw new TemplateParseException(
-                        "Unclosed <%@ directive",
-                        sourceName,
-                        source,
-                        line,
-                        "Unclosed <%@ directive",
-                        "Ensure all directives are closed with '%>'.",
-                        null
-                );
-            }
-
-            String directive = source.substring(start + 3, end).trim();
-
-            if (directive.startsWith("include")) {
-                if (directive.contains("module=")) {
-                    String name = extractQuoted(directive, "module");
-                    Path p = workspace.getModulesPath().resolve(name + ".module");
-                try {
-                    String moduleSource = FileUtil.read(p);
-                    String moduleOutput =
-                            ModuleRenderer.renderModule(moduleSource, cx, scope, p.toString());
-                    out.append("/* SOURCE:").append(p.getFileName()).append(" */\n");
-                    out.append(preprocess(workspace, moduleOutput, cx, scope, p.toString()));
-                    out.append("\n/* END SOURCE:").append(p.getFileName()).append(" */");
-                } catch (Exception e) {
-                    if (e instanceof TemplateException te) throw te;
-                    throw new TemplateParseException(
-                            "Failed to include/render module: " + name,
-                            sourceName,
-                            source,
-                            lineNumberAt(source, start),
-                            e.getMessage(),
-                            "Check if the module file exists and is valid: " + p,
-                            e
-                    );
-                }
-                }
-                else if (directive.contains("view=")) {
-                    String name = extractQuoted(directive, "view");
-                    Path p = workspace.getBlocksPath().resolve(name + ".block");
-                    try {
-                        String blockSource = FileUtil.read(p);
-                        out.append("/* SOURCE:").append(p.getFileName()).append(" */\n");
-                        out.append(preprocess(workspace, blockSource, cx, scope, p.toString()));
-                        out.append("\n/* END SOURCE:").append(p.getFileName()).append(" */");
-                    } catch (Exception e) {
-                        if (e instanceof TemplateException te) throw te;
-                        throw new TemplateParseException(
-                                "Failed to include block: " + name,
-                                sourceName,
-                                source,
-                                lineNumberAt(source, start),
-                                e.getMessage(),
-                                "Check if the block file exists: " + p,
-                                e
-                        );
-                    }
-                }
-            } else {
-                // Replace other directives with exactly the same number of newlines they occupied
-                int directiveLines = countLines(source.substring(start, end + 2));
-                for(int i=0; i<directiveLines; i++) out.append("\n");
-            }
-            
-            // If the directive was on a line by itself (with a newline following it),
-            // we've already accounted for the directive's line with the above appends/newlines.
-            // But if we want to BE SURE that the NEXT line of content starts at the NEXT line number,
-            // we should replace the directive block exactly.
-            // The directive starts at 'start' and ends at 'end+2'.
-            // If we replace it with exactly ONE newline, it works if it was on its own line.
-
-            pos = end + 2;
+        preprocessInternal(workspace, source, cx, scope, sourceName, out);
+        
+        // Add one final newline mapping for EOF if needed
+        if (out.length() > 0 && out.charAt(out.length() - 1) != '\n') {
+            out.append('\n');
+            // Hard to know the exact original line here, but let's guess
         }
 
         return out.toString();
@@ -251,108 +329,99 @@ public final class TemplateRenderer {
 
     // ---------------------------------------------------------------------
 
-    /**
-     * Transforms the preprocessed source into executable JavaScript
-     * @param source preprocessed template source
-     * @param sourceName name of the source being processed
-     * @return executable JavaScript code
-     */
     private static String transformToJavaScript(String source, String sourceName) {
         StringBuilder js = new StringBuilder();
+        List<PreprocessedLine> jsMappings = jsLineToPreprocessedLine.get();
+        jsMappings.clear();
+        
         js.append("var out = new java.lang.StringBuilder();\n");
-
-        int currentExpandedLine = 2; // "var out..." is line 1.
+        jsMappings.add(new PreprocessedLine(sourceName, 1)); // Header line 1
 
         int pos = 0;
+        int currentPreprocessedLine = 1;
+
         while (pos < source.length()) {
             int start = source.indexOf("<%", pos);
             if (start == -1) {
                 String text = source.substring(pos);
-                appendText(js, text);
+                appendTextToJS(js, text, currentPreprocessedLine, jsMappings);
                 break;
             }
 
-            String text = source.substring(pos, start);
-            appendText(js, text);
-            currentExpandedLine += 1 + countLines(text);
+            String textBefore = source.substring(pos, start);
+            appendTextToJS(js, textBefore, currentPreprocessedLine, jsMappings);
+            
+            // Re-calculate line number exactly from source
+            currentPreprocessedLine = lineNumberAt(source, start);
 
             int end = source.indexOf("%>", start);
             if (end == -1) {
-                int line = lineNumberAt(source, start);
                 throw new TemplateParseException(
                         "Unclosed <% directive",
                         sourceName,
                         source,
-                        line,
+                        currentPreprocessedLine,
                         "Unclosed <% directive",
                         "Ensure all scriptlet blocks are closed with '%>'.",
                         null
                 );
             }
 
-            String code = source.substring(start + 2, end).trim();
-            int codeLinesInExpanded = 0;
+            String code = source.substring(start + 2, end);
+            int scriptletStartLine = currentPreprocessedLine;
 
             if (code.startsWith("=")) {
                 js.append("out.append(").append(code.substring(1).trim()).append(");\n");
-                codeLinesInExpanded = 1;
+                jsMappings.add(new PreprocessedLine("RenderedTemplate", scriptletStartLine));
             } else {
-                js.append(code).append("\n");
-                codeLinesInExpanded = 1 + countLines(code);
-            }
-
-            // --- SOURCE MAPPING LOGIC ---
-            String fileName = sourceName;
-            int sourceLineInPreprocessed = lineNumberAt(source, start);
-            
-            // Check if we are inside an included file by looking for SOURCE markers
-            int lastSourceMarker = source.lastIndexOf("/* SOURCE:", start);
-            int lastEndMarker = source.lastIndexOf("/* END SOURCE:", start);
-            
-            if (lastSourceMarker != -1 && (lastEndMarker == -1 || lastEndMarker < lastSourceMarker)) {
-                // We ARE inside an include
-                int markerEnd = source.indexOf(" */", lastSourceMarker);
-                if (markerEnd != -1 && markerEnd < start) {
-                    fileName = source.substring(lastSourceMarker + 10, markerEnd);
-                    // The line number in the original file is the line number in the preprocessed source
-                    // minus the line number where the SOURCE marker was found.
-                    int markerLine = lineNumberAt(source, lastSourceMarker);
-                    sourceLineInPreprocessed = sourceLineInPreprocessed - markerLine;
+                // We must preserve all lines in 'code' exactly
+                int lineInCode = 0;
+                StringBuilder lineBuf = new StringBuilder();
+                for (int i = 0; i < code.length(); i++) {
+                    char c = code.charAt(i);
+                    if (c == '\n') {
+                        js.append(lineBuf.toString()).append("\n");
+                        jsMappings.add(new PreprocessedLine("RenderedTemplate", scriptletStartLine + lineInCode));
+                        lineBuf.setLength(0);
+                        lineInCode++;
+                    } else if (c != '\r') {
+                        lineBuf.append(c);
+                    }
                 }
-            } else {
-                // If not in an include, account for markers that came before us in the main file
-                int shift = calculateMarkerLineShift(source, start);
-                sourceLineInPreprocessed -= shift;
+                js.append(lineBuf.toString()).append("\n");
+                jsMappings.add(new PreprocessedLine("RenderedTemplate", scriptletStartLine + lineInCode));
             }
-            
-            sourceMappings.get().add(new SourceMapping(fileName, currentExpandedLine, currentExpandedLine + codeLinesInExpanded - 1, sourceLineInPreprocessed - 1));
-            currentExpandedLine += codeLinesInExpanded;
 
             pos = end + 2;
+            currentPreprocessedLine = lineNumberAt(source, pos);
         }
 
         js.append("out.toString();");
+        jsMappings.add(new PreprocessedLine(sourceName, currentPreprocessedLine)); // Footer line
+        
         return js.toString().trim();
     }
 
-    /**
-     * Updates the end line of the last source mapping
-     * @param endLine the new end line number
-     */
-    private static void updateLastMappingEnd(int endLine) {
-        List<SourceMapping> mappings = sourceMappings.get();
-        if (!mappings.isEmpty()) {
-            SourceMapping last = mappings.get(mappings.size() - 1);
-            mappings.set(mappings.size() - 1, new SourceMapping(last.sourceName(), last.startLineInExpanded(), endLine, last.lineOffsetInOriginal()));
+    private static void appendTextToJS(StringBuilder js, String text, int startLine, List<PreprocessedLine> jsMappings) {
+        if (text.isEmpty()) return;
+        int lineCount = countLines(text);
+
+        String escaped = text.replace("\\", "\\\\")
+                .replace("\"", "\\\"")
+                .replace("\r\n", "\n")
+                .replace("\r", "\n")
+                .replace("\n", "\\n");
+        
+        js.append("out.append(\"").append(escaped).append("\");\n");
+        jsMappings.add(new PreprocessedLine("RenderedTemplate", startLine));
+
+        // Keep line numbers in sync by adding commented newlines for each newline in the text
+        for (int i = 0; i < lineCount; i++) {
+            js.append("//\n");
+            jsMappings.add(new PreprocessedLine("RenderedTemplate", startLine + i + 1));
         }
     }
 
-    /**
-     * Determines the line number in the source string at a specific character index
-     * @param source the source string
-     * @param charIndex the character index
-     * @return the line number (1-indexed)
-     */
     private static int lineNumberAt(String source, int charIndex) {
         int line = 1;
         for (int i = 0; i < charIndex && i < source.length(); i++) {
@@ -363,96 +432,17 @@ public final class TemplateRenderer {
         return line;
     }
 
-    /**
-     * Calculates the total line shift caused by source markers up to a specific character index
-     * @param expandedSource the expanded template source
-     * @param charIndex the character index
-     * @return the total line shift
-     */
-    private static int calculateMarkerLineShift(String expandedSource, int charIndex) {
-        return calculateMarkerLineShiftInRange(expandedSource, 0, charIndex);
-    }
-
-    /**
-     * Calculates the line shift caused by source markers within a specific range
-     * @param expandedSource the expanded template source
-     * @param start start character index
-     * @param end end character index
-     * @return the line shift in the specified range
-     */
-    private static int calculateMarkerLineShiftInRange(String expandedSource, int start, int end) {
-        int shift = 0;
-        int pos = start;
-        while (pos < end) {
-            int startMarker = expandedSource.indexOf("/* SOURCE:", pos);
-            if (startMarker == -1 || startMarker >= end) break;
-
-            int endOfStartMarker = expandedSource.indexOf(" */", startMarker);
-            if (endOfStartMarker == -1) break;
-            
-            int endMarker = expandedSource.indexOf("/* END SOURCE:", endOfStartMarker);
-            if (endMarker == -1) break;
-            
-            int endOfEndMarker = expandedSource.indexOf(" */", endMarker);
-            if (endOfEndMarker == -1) break;
-            
-            // Count lines from the start of the line containing startMarker
-            // up to and including the newline following endOfEndMarker.
-            int blockStartLine = lineNumberAt(expandedSource, startMarker);
-            
-            int nextNewline = expandedSource.indexOf('\n', endOfEndMarker);
-            int blockEndLine;
-            if (nextNewline == -1) {
-                blockEndLine = countLines(expandedSource) + 1;
-                pos = expandedSource.length();
-            } else {
-                blockEndLine = lineNumberAt(expandedSource, nextNewline);
-                pos = nextNewline + 1;
-            }
-            
-            int blockLines = blockEndLine - blockStartLine + 1;
-            // Subtract blockLines - 1 (because the directive occupied 1 line)
-            shift += (blockLines - 1);
-        }
-        return shift;
-    }
-
-    /**
-     * Finds the source mapping for a given line number in the expanded JavaScript
-     * @param expandedLine the line number in the expanded JavaScript
-     * @return the corresponding SourceMapping, or null if not found
-     */
     private static SourceMapping findSourceMapping(int expandedLine) {
         List<SourceMapping> map = sourceMappings.get();
-            SourceMapping best = null;
-            for (SourceMapping entry : map) {
-                if (entry.startLineInExpanded() <= expandedLine) {
-                    if (best == null || entry.startLineInExpanded() > best.startLineInExpanded()) {
-                        best = entry;
-                    }
+        SourceMapping best = null;
+        for (SourceMapping entry : map) {
+            if (entry.startLineInExpanded() <= expandedLine) {
+                if (best == null || entry.startLineInExpanded() > best.startLineInExpanded()) {
+                    best = entry;
                 }
             }
-            if (best != null && expandedLine > best.endLineInExpanded()) {
-                // It's after the end of this mapping, might be the next one or in "no man's land"
-            }
-            return best;
-    }
-
-    private static void appendText(StringBuilder js, String text) {
-        if (text.isEmpty()) return;
-        int lineCount = countLines(text);
-
-        text = text.replace("\\", "\\\\")
-                .replace("\"", "\\\"")
-                .replace("\r\n", "\n")
-                .replace("\r", "\n")
-                .replace("\n", "\\n");
-        js.append("out.append(\"").append(text).append("\");\n");
-
-        // Keep line numbers in sync by adding commented newlines for each newline in the text
-        for (int i = 0; i < lineCount; i++) {
-            js.append("//\n");
         }
+        return best;
     }
 
     /**

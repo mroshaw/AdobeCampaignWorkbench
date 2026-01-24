@@ -385,6 +385,7 @@ public class RichTextFXEditor implements ICodeEditor {
         if (line <= 0) return;
         int paragraphIndex = Math.min(line - 1, codeArea.getParagraphs().size() - 1);
         codeArea.moveTo(paragraphIndex, 0);
+        codeArea.selectLine();
         codeArea.requestFollowCaret();
     }
 
