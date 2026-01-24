@@ -36,7 +36,7 @@ public class ErrorLogPanel implements IJavaFxNode {
         }
 
         TreeItem<String> errorNode = new TreeItem<>(ex.getMessage());
-        errorNode.setExpanded(true);
+        errorNode.setExpanded(false);
 
         errorNode.getChildren().add(new TreeItem<>("Type: " + ex.getClass().getSimpleName()));
         errorNode.getChildren().add(new TreeItem<>("File: " + ex.getTemplateName()));

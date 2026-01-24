@@ -87,11 +87,20 @@ public final class ModuleRenderer {
 
     private static void appendText(StringBuilder js, String text) {
         if (text.isEmpty()) return;
+        int lineCount = 0;
+        for (int i = 0; i < text.length(); i++) {
+            if (text.charAt(i) == '\n') lineCount++;
+        }
+
         text = text.replace("\\", "\\\\")
                 .replace("\"", "\\\"")
                 .replace("\r\n", "\n")
                 .replace("\r", "\n")
                 .replace("\n", "\\n");
         js.append("out.append(\"").append(text).append("\");\n");
+
+        for (int i = 0; i < lineCount; i++) {
+            js.append("//\n");
+        }
     }
 }
