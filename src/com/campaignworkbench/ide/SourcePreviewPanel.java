@@ -1,9 +1,6 @@
 package com.campaignworkbench.ide;
 
-import com.campaignworkbench.ide.editor.ICodeEditor;
-import com.campaignworkbench.ide.editor.RSyntaxEditor;
-import com.campaignworkbench.ide.editor.RichTextFXEditor;
-import com.campaignworkbench.ide.editor.SyntaxType;
+import com.campaignworkbench.ide.editor.*;
 import javafx.geometry.Insets;
 import javafx.scene.Node;
 import javafx.scene.control.Label;
@@ -31,6 +28,7 @@ public class SourcePreviewPanel implements IJavaFxNode {
      * @param syntaxType The syntax highlighting type to use
      */
     public SourcePreviewPanel(String label, SyntaxType syntaxType) {
+        // this.editor = new MonacoFXEditor();
         this.editor = new RichTextFXEditor();
         // this.editor = new RSyntaxEditor();
         sourcePreviewLabel = new Label(label);

@@ -22,9 +22,7 @@ public interface ICodeEditor {
      * Set the  code content of the editor
      * @param text the content of the editor
      */
-    default void setText(String text) {
-
-    }
+    public void setText(String text);
 
     /**
      * Get the code context of the editor

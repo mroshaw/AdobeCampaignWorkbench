@@ -1,9 +1,6 @@
 package com.campaignworkbench.ide;
 
-import com.campaignworkbench.ide.editor.ICodeEditor;
-import com.campaignworkbench.ide.editor.RSyntaxEditor;
-import com.campaignworkbench.ide.editor.RichTextFXEditor;
-import com.campaignworkbench.ide.editor.SyntaxType;
+import com.campaignworkbench.ide.editor.*;
 import javafx.scene.control.Tab;
 import javafx.scene.layout.BorderPane;
 
@@ -26,6 +23,7 @@ public final class EditorTab extends Tab {
         this.file = file;
         this.editor = new RichTextFXEditor();
         // this.editor = new RSyntaxEditor();
+        // this.editor = new MonacoFXEditor();
         setText(file.getFileName().toString());
 
         BorderPane root = new BorderPane();

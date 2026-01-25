@@ -39,7 +39,7 @@ public class RichTextFXEditor implements ICodeEditor {
             "break", "case", "catch", "class", "const", "continue", "debugger", "default", "delete", "do",
             "else", "export", "extends", "finally", "for", "function", "if", "import", "in", "instanceof",
             "new", "return", "super", "switch", "this", "throw", "try", "typeof", "var", "void", "while", "with",
-            "yield", "let", "static", "enum", "await", "async"
+            "yield", "let", "static", "enum", "await", "async", "include"
     };
 
     private static final String JS_KEYWORD_PATTERN = "\\b(" + String.join("|", JS_KEYWORDS) + ")\\b";
@@ -90,7 +90,7 @@ public class RichTextFXEditor implements ICodeEditor {
     public RichTextFXEditor() {
         this.codeArea = new CodeArea();
         this.codeArea.setCursor(Cursor.TEXT);
-        
+
         this.scrollPane = new VirtualizedScrollPane<>(codeArea);
         VBox.setVgrow(codeArea, Priority.ALWAYS);
 
@@ -440,10 +440,12 @@ public class RichTextFXEditor implements ICodeEditor {
         String css = ".code-area { " +
         // "  -fx-background-color: linear-gradient(to right, -color-bg-subtle 0%, -color-bg-subtle 60px, -color-bg-default 60px, -color-bg-default 100%); " +
                 "-fx-background-color: -color-bg-subtle, linear-gradient(to right, -color-bg-default, -color-bg-default); " +
-                "-fx-background-insets: 0, 0 0 0 60;" +
+                "-fx-background-insets: 0, 0 0 0 40;" +
+                "-fx-tab-size: 4;" +
                 "}\n" +
                 ".virtualized-scroll-pane { -fx-background-color: -color-bg-default; }\n" +
                 ".code-area .text { -fx-fill: -color-fg-default; }\n" +
+                ".code-area .paragraph-text {-fx-tab-size: 2}; \n" +
                 ".paragraph-box { -fx-background-color: transparent; }\n" +
                 ".gutter { -fx-background-color: transparent; }\n" +
                 //".gutter { -fx-background-color: transparent; -fx-padding: 0 5 0 0; -fx-min-width: 60px; -fx-max-width: 60px; }\n" +
