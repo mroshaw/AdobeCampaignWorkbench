@@ -125,7 +125,7 @@ public class RichTextFXEditor implements ICodeEditor {
         public Node apply(int lineNumber) {
             Polygon triangle = new Polygon(0.0, 0.0, 8.0, 4.0, 0.0, 8.0);
             triangle.getStyleClass().add("folding-triangle");
-            HBox.setMargin(triangle, new javafx.geometry.Insets(0, 0, 0, 5));
+            HBox.setMargin(triangle, new javafx.geometry.Insets(0, 0, 0, -2));
             
             // Logic to check if this line is foldable
             if (isFoldable(lineNumber)) {
@@ -438,28 +438,30 @@ public class RichTextFXEditor implements ICodeEditor {
 
     private void applyHighlightingStyles(String keyword, String string, String comment, String tag, String attribute, String scriptlet, String symbol) {
         String css = ".code-area { " +
-                     "  -fx-background-color: linear-gradient(to right, -color-bg-subtle 0%, -color-bg-subtle 60px, -color-bg-default 60px, -color-bg-default 100%); " +
-                     "}\n" +
-                     ".virtualized-scroll-pane { -fx-background-color: -color-bg-default; }\n" +
-                     ".code-area .text { -fx-fill: -color-fg-default; }\n" +
-                     ".paragraph-box { -fx-background-color: transparent; }\n" +
-                     ".gutter { -fx-background-color: transparent; }\n" +
+        // "  -fx-background-color: linear-gradient(to right, -color-bg-subtle 0%, -color-bg-subtle 60px, -color-bg-default 60px, -color-bg-default 100%); " +
+                "-fx-background-color: -color-bg-subtle, linear-gradient(to right, -color-bg-default, -color-bg-default); " +
+                "-fx-background-insets: 0, 0 0 0 60;" +
+                "}\n" +
+                ".virtualized-scroll-pane { -fx-background-color: -color-bg-default; }\n" +
+                ".code-area .text { -fx-fill: -color-fg-default; }\n" +
+                ".paragraph-box { -fx-background-color: transparent; }\n" +
+                ".gutter { -fx-background-color: transparent; }\n" +
                 //".gutter { -fx-background-color: transparent; -fx-padding: 0 5 0 0; -fx-min-width: 60px; -fx-max-width: 60px; }\n" +
-                     ".keyword { -fx-fill: " + keyword + " !important; -fx-font-weight: bold; }\n" +
-                     ".string { -fx-fill: " + string + " !important; }\n" +
-                     ".comment { -fx-fill: " + comment + " !important; }\n" +
-                     ".tag { -fx-fill: " + tag + " !important; -fx-font-weight: bold; }\n" +
-                     ".attribute { -fx-fill: " + attribute + " !important; }\n" +
-                     ".scriptlet { -fx-background-color: -color-accent-subtle !important; }\n" +
-                     ".paren { -fx-fill: " + symbol + " !important; }\n" +
-                     ".brace { -fx-fill: " + symbol + " !important; }\n" +
-                     ".bracket { -fx-fill: " + symbol + " !important; }\n" +
-                     ".semicolon { -fx-fill: " + symbol + " !important; }\n" +
-                     ".caret { -fx-stroke: -color-fg-default !important; }\n" +
-                     ".folding-triangle { -fx-fill: -color-fg-muted !important; }\n" +
-                     ".folding-triangle:hover { -fx-fill: -color-accent-fg !important; }\n" +
-                     ".lineno { -fx-text-fill: -color-fg-muted !important; -fx-background-color: transparent !important; -fx-font-family: 'Consolas'; -fx-font-size: 11pt; }";
-        
+                ".keyword { -fx-fill: " + keyword + " !important; -fx-font-weight: bold; }\n" +
+                ".string { -fx-fill: " + string + " !important; }\n" +
+                ".comment { -fx-fill: " + comment + " !important; }\n" +
+                ".tag { -fx-fill: " + tag + " !important; -fx-font-weight: bold; }\n" +
+                ".attribute { -fx-fill: " + attribute + " !important; }\n" +
+                ".scriptlet { -fx-background-color: -color-accent-subtle !important; }\n" +
+                ".paren { -fx-fill: " + symbol + " !important; }\n" +
+                ".brace { -fx-fill: " + symbol + " !important; }\n" +
+                ".bracket { -fx-fill: " + symbol + " !important; }\n" +
+                ".semicolon { -fx-fill: " + symbol + " !important; }\n" +
+                ".caret { -fx-stroke: -color-fg-default !important; }\n" +
+                ".folding-triangle { -fx-fill: -color-fg-muted !important; }\n" +
+                ".folding-triangle:hover { -fx-fill: -color-accent-fg !important; }\n" +
+                ".lineno { -fx-text-fill: -color-fg-muted !important; -fx-background-color: transparent !important; -fx-font-family: 'Consolas'; -fx-font-size: 11pt; }";
+
         codeArea.getStylesheets().clear();
         scrollPane.getStylesheets().clear();
         try {
