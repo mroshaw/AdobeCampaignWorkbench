@@ -2,13 +2,13 @@
 <%@ include view='MoreTestFunctions' %>
 
 <html>
-<body style="background-color:MediumSeaGreen;">
-Hello <%= rtEvent.ctx.customer.name %> <%= test() %> <BR>
-<%
-	var test = test();
-	
-%>
-Test Result: <%= test %><br>
-Current Date: <%= getCurrentDate() %>
-</body>
+	<body style="background-color:MediumSeaGreen;">
+		Hello <%= rtEvent.ctx.customer.name %> <%= test() %> <BR>
+		<%
+			var test = test();
+		%>
+		Test Result: <%= test %>
+		<br>
+		Current Date: <%= getCurrentDate() %>
+	</body>
 </html>

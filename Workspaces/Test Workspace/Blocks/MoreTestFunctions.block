@@ -1,6 +1,6 @@
 <%
-    function getCurrentDate() {
-    		var today = new Date();
-        return today.toString();
-    }
+	function getCurrentDate() {
+		var today = new Date;
+		return today.toString();
+	}
 %>
