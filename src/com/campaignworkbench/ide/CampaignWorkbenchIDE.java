@@ -54,7 +54,7 @@ public class CampaignWorkbenchIDE extends Application {
      * Main entry point for the application
      * @param args command line arguments
      */
-    static void main(String[] args) {
+    public static void main(String[] args) {
         launch(args);
     }
 

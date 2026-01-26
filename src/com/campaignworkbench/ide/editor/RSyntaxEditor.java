@@ -17,6 +17,7 @@ import java.util.Queue;
 /**
  * Provided an implementation of the ICodeEditor interface using the RSyntaxTextArea control
  */
+@Deprecated
 public class RSyntaxEditor implements ICodeEditor {
 
     private final SwingNode swingNode = new SwingNode();
