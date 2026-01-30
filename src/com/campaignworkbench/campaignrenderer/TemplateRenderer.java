@@ -1,6 +1,6 @@
 package com.campaignworkbench.campaignrenderer;
 
-import com.campaignworkbench.ide.Workspace;
+import com.campaignworkbench.ide.IDEException;
 import com.campaignworkbench.util.FileUtil;
 import org.mozilla.javascript.Context;
 import org.mozilla.javascript.Scriptable;
@@ -40,31 +40,49 @@ public final class TemplateRenderer {
     /**
      * Renders a template into HTML
      * @param workspace the current workspace
-     * @param templateSource source code of the template to render
-     * @param cx Rhino context
-     * @param scope Rhino scope
-     * @param sourceName name of the source being processed
+     * @param workspaceContextFile workspace file being processed
      * @return HTML source of the rendered page
      */
     public static TemplateRenderResult render(
             Workspace workspace,
-            String templateSource,
-            Context cx,
-            Scriptable scope,
-            String sourceName
+            WorkspaceContextFile workspaceContextFile
     ) {
         sourceMappings.get().clear();
         lineMappings.get().clear();
         jsLineToPreprocessedLine.get().clear();
         String expanded = "";
+
+        // Get the template context
+        Path xmlContextFile = workspaceContextFile.getContextFilePath();
+        String xmlContextContent = workspaceContextFile.getContextContent();
+
+        String templateSource = workspaceContextFile.getWorkspaceFileContent();
+        String sourceName = workspaceContextFile.getFileName().toString();
+
         try {
+
+            Context cx = Context.enter();
+            cx.setOptimizationLevel(-1);
+
+            Scriptable scope = cx.initStandardObjects();
+
+            cx.evaluateString(
+                    scope,
+                    "var rtEvent = new XML(`" + xmlContextContent + "`);",
+                    xmlContextFile.getFileName().toString(),
+                    1,
+                    null
+            );
+
+            scope.put("xmlContext", scope, xmlContextContent);
+
             injectStandardFunctions(cx, scope);
 
             // 1. PREPROCESS (no JavaScript execution)
-            expanded = preprocess(workspace, templateSource, cx, scope, sourceName);
+            expanded = preprocess(workspace, workspaceContextFile, templateSource, cx, scope, sourceName);
 
             // 2. TRANSFORM TO JS
-            String js = transformToJavaScript(expanded, sourceName);
+            String js = transformToJavaScript(expanded, workspaceContextFile, sourceName);
 
             // 3. EXECUTE
             // We use line 2 because transformToJavaScript adds "var out..." at line 1.
@@ -105,9 +123,9 @@ public final class TemplateRenderer {
             }
 
             if (e instanceof org.mozilla.javascript.EvaluatorException evaluatorException) {
-                throw new TemplateParseException(
+                throw new RendererParseException(
                         message,
-                        mappedSourceName,
+                        workspaceContextFile,
                         expanded.isEmpty() ? templateSource : expanded,
                         mappedLine,
                         evaluatorException.details(),
@@ -115,9 +133,9 @@ public final class TemplateRenderer {
                         evaluatorException
                 );
             } else {
-                throw new TemplateExecutionException(
+                throw new RendererExecutionException(
                         message,
-                        mappedSourceName,
+                        workspaceContextFile,
                         expanded,
                         mappedLine,
                         e.details(),
@@ -128,13 +146,13 @@ public final class TemplateRenderer {
                 );
             }
         }
-        catch(TemplateException e) {
+        catch(RendererException e) {
             throw e;
         }
         catch(java.lang.IllegalArgumentException e) {
-            throw new TemplateParseException(
+            throw new RendererParseException(
                     "Validation Error: " + e.getMessage(),
-                    sourceName,
+                    workspaceContextFile,
                     templateSource,
                     -1,
                     e.getMessage(),
@@ -143,15 +161,17 @@ public final class TemplateRenderer {
             );
         }
         catch(Exception e) {
-            throw new TemplateExecutionException(
+            throw new RendererExecutionException(
                     "Unexpected error: " + e.getMessage(),
-                    sourceName,
+                    workspaceContextFile,
                     templateSource,
                     -1,
                     e.getClass().getSimpleName(),
                     "Check the logs for more details.",
                     e
             );
+        } finally {
+            Context.exit();
         }
 
     }
@@ -161,6 +181,7 @@ public final class TemplateRenderer {
     /**
      * Preprocesses the template source to handle includes and directives
      * @param workspace the current workspace
+     * @param workspaceFile the workspace file being processed
      * @param source the template source code
      * @param cx Rhino context
      * @param scope Rhino scope
@@ -169,6 +190,7 @@ public final class TemplateRenderer {
      */
     private static void preprocessInternal(
             Workspace workspace,
+            WorkspaceFile workspaceFile,
             String source,
             Context cx,
             Scriptable scope,
@@ -202,9 +224,9 @@ public final class TemplateRenderer {
 
             int end = source.indexOf("%>", start);
             if (end == -1) {
-                throw new TemplateParseException(
+                throw new RendererParseException(
                         "Unclosed <%@ directive",
-                        sourceName,
+                        workspaceFile,
                         source,
                         currentOriginalLine,
                         "Unclosed <%@ directive",
@@ -219,31 +241,47 @@ public final class TemplateRenderer {
             if (directive.startsWith("include")) {
                 if (directive.contains("module=")) {
                     String name = extractQuoted(directive, "module");
-                    Path p = workspace.getModulesPath().resolve(name + ".module");
+
+                    EtmModule module = workspace.getEtmModuleByName(name).orElseThrow(() ->
+                        new IDEException("Module file not found: " + name, null)
+                    );
+
                     try {
-                        String moduleSource = FileUtil.read(p);
-                        String moduleOutput = ModuleRenderer.renderModule(moduleSource, cx, scope, p.toString());
+
+                        if(!module.isContextSet()) {
+                            throw new RendererParseException(
+                                    "Context is not set on module: " + name,
+                                    workspaceFile,
+                                    source,
+                                    currentOriginalLine,
+                                    null,
+                                    "Check if the module file exists and is valid: " + module.getFileName(),
+                                    null);
+                        }
+
+                        String moduleOutput = ModuleRenderer.renderModule(module, cx, scope);
+                        Path trackingPath = module.getFilePath();
                         
-                        out.append("/* SOURCE:").append(p.getFileName()).append(" */\n");
+                        out.append("/* SOURCE:").append(trackingPath.getFileName()).append(" */\n");
                         lineMappings.get().add(new PreprocessedLine(sourceName, currentOriginalLine));
                         
-                        preprocessInternal(workspace, moduleOutput, cx, scope, p.toString(), out);
+                        preprocessInternal(workspace, workspaceFile, moduleOutput, cx, scope, trackingPath.toString(), out);
                         
                         if (out.length() > 0 && out.charAt(out.length() - 1) != '\n') {
                             out.append('\n');
-                            lineMappings.get().add(new PreprocessedLine(p.toString(), countLines(moduleOutput) + 1));
+                            lineMappings.get().add(new PreprocessedLine(trackingPath.toString(), countLines(moduleOutput) + 1));
                         }
-                        out.append("/* END SOURCE:").append(p.getFileName()).append(" */\n");
+                        out.append("/* END SOURCE:").append(trackingPath.getFileName()).append(" */\n");
                         lineMappings.get().add(new PreprocessedLine(sourceName, currentOriginalLine + directiveLines));
                     } catch (Exception e) {
-                        if (e instanceof TemplateException te) throw te;
-                        throw new TemplateParseException(
+                        if (e instanceof RendererException te) throw te;
+                        throw new RendererParseException(
                                 "Failed to include/render module: " + name,
-                                sourceName,
+                                workspaceFile,
                                 source,
                                 currentOriginalLine,
                                 e.getMessage(),
-                                "Check if the module file exists and is valid: " + p,
+                                "Check if the module file exists and is valid: " + module.getFileName(),
                                 e
                         );
                     }
@@ -257,7 +295,7 @@ public final class TemplateRenderer {
                         out.append("/* SOURCE:").append(p.getFileName()).append(" */\n");
                         lineMappings.get().add(new PreprocessedLine(sourceName, currentOriginalLine));
                         
-                        preprocessInternal(workspace, blockSource, cx, scope, p.toString(), out);
+                        preprocessInternal(workspace, workspaceFile, blockSource, cx, scope, p.toString(), out);
                         
                         // If the block doesn't end with a newline, adding one might shift things.
                         // But preprocessInternal ensures lines are mapped.
@@ -270,10 +308,10 @@ public final class TemplateRenderer {
                         out.append("/* END SOURCE:").append(p.getFileName()).append(" */\n");
                         lineMappings.get().add(new PreprocessedLine(sourceName, currentOriginalLine + directiveLines));
                     } catch (Exception e) {
-                        if (e instanceof TemplateException te) throw te;
-                        throw new TemplateParseException(
+                        if (e instanceof RendererException te) throw te;
+                        throw new RendererParseException(
                                 "Failed to include block: " + name,
-                                sourceName,
+                                workspaceFile,
                                 source,
                                 currentOriginalLine,
                                 e.getMessage(),
@@ -297,13 +335,14 @@ public final class TemplateRenderer {
 
     private static String preprocess(
             Workspace workspace,
+            WorkspaceFile workspaceFile,
             String source,
             Context cx,
             Scriptable scope,
             String sourceName
     ) {
         StringBuilder out = new StringBuilder();
-        preprocessInternal(workspace, source, cx, scope, sourceName, out);
+        preprocessInternal(workspace, workspaceFile, source, cx, scope, sourceName, out);
         
         // Add one final newline mapping for EOF if needed
         if (out.length() > 0 && out.charAt(out.length() - 1) != '\n') {
@@ -329,7 +368,7 @@ public final class TemplateRenderer {
 
     // ---------------------------------------------------------------------
 
-    private static String transformToJavaScript(String source, String sourceName) {
+    private static String transformToJavaScript(String source, WorkspaceFile workspaceFile, String sourceName) {
         StringBuilder js = new StringBuilder();
         List<PreprocessedLine> jsMappings = jsLineToPreprocessedLine.get();
         jsMappings.clear();
@@ -356,9 +395,9 @@ public final class TemplateRenderer {
 
             int end = source.indexOf("%>", start);
             if (end == -1) {
-                throw new TemplateParseException(
+                throw new RendererParseException(
                         "Unclosed <% directive",
-                        sourceName,
+                        workspaceFile,
                         source,
                         currentPreprocessedLine,
                         "Unclosed <% directive",

@@ -9,25 +9,25 @@ import javafx.application.Platform;
 import javafx.geometry.Orientation;
 import javafx.scene.Scene;
 import javafx.scene.control.*;
+import javafx.scene.image.Image;
 import javafx.scene.layout.BorderPane;
 import javafx.scene.layout.VBox;
-import javafx.stage.DirectoryChooser;
 import javafx.stage.FileChooser;
 import javafx.stage.Stage;
-import org.mozilla.javascript.Context;
-import org.mozilla.javascript.Scriptable;
+
 
 import java.io.File;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
 
+import static com.campaignworkbench.campaignrenderer.Workspace.WorkspaceFileType.*;
+
 /**
  * Builds a User Interface for the Campaign Workbench IDE
  */
 public class CampaignWorkbenchIDE extends Application {
 
-    private final String defaultWorkspacePath = "Workspaces/Test Workspace";
     /**
      * The current active workspace
      */
@@ -42,47 +42,60 @@ public class CampaignWorkbenchIDE extends Application {
     private SourcePreviewPanel preSourcePanel;
 
     /**
-     * File representing the current XML context for rendering
-     */
-    private File xmlContextFile;
-    /**
-     * Content of the current XML context file
-     */
-    private String xmlContextContent;
-
-    /**
      * Main entry point for the application
+     *
      * @param args command line arguments
      */
     public static void main(String[] args) {
         launch(args);
     }
 
+
     @Override
     public void start(Stage primaryStage) {
         primaryStage.setTitle("Campaign Workbench");
 
+        // Set the icon
+        Image iconImage = new Image(
+                getClass().getResourceAsStream("/app.png"));
+        primaryStage.getIcons().add(iconImage);
+
         // Menu and toolbar
-        MainMenuBar menuBar = new MainMenuBar( event -> openWorkspace(),
-                event -> openFile(getWorkspaceTemplatePath()),
-                event -> openFile(getWorkspaceModulePath()),
-                event -> openFile(getWorkspaceBlockPath()),
-                event -> openFile(getWorkspaceXmlPath()),
+        MainMenuBar menuBar = new MainMenuBar(
+                event -> newWorkspace(),
+                event -> openWorkspace(),
+                event -> saveWorkspace(),
+
+                event -> createNewFile(TEMPLATE),
+                event -> createNewFile(Workspace.WorkspaceFileType.MODULE),
+                event -> createNewFile(Workspace.WorkspaceFileType.BLOCK),
+                event -> createNewFile(Workspace.WorkspaceFileType.CONTEXT),
+
+                event -> addExistingFile(TEMPLATE),
+                event -> addExistingFile(Workspace.WorkspaceFileType.MODULE),
+                event -> addExistingFile(Workspace.WorkspaceFileType.BLOCK),
+                event -> addExistingFile(Workspace.WorkspaceFileType.CONTEXT),
+
                 event -> saveCurrent(),
+                event -> saveCurrentAs(),
+
                 event -> applyTheme(IDETheme.LIGHT),
-                event -> applyTheme(IDETheme.DARK)
+                event -> applyTheme(IDETheme.DARK),
+
+                event -> showAbout(),
+                event -> exitApplication()
         );
 
         toolBar = new ToolBar(event -> openWorkspace(),
                 event -> setContextXml(),
-                event -> clearXmlContext(),
+                event -> clearContextXml(),
                 event -> runTemplate());
 
         // Workspace Explorer
-        workspaceExplorer = new WorkspaceExplorer("Workspace Explorer", this::openFileFromWorkspace);
+        workspaceExplorer = new WorkspaceExplorer("Workspace Explorer", currentWorkspace, this::openFileFromWorkspace);
 
         // Editor tabs
-        editorTabPanel = new EditorTabPanel((obs, oldTab, newTab) -> updateRunButtonState(newTab));
+        editorTabPanel = new EditorTabPanel((obs, oldTab, newTab) -> tabPanelChanged(newTab));
 
         // Output panes
         previewPanel = new OutputPreviewPanel("Preview WebView");
@@ -92,21 +105,21 @@ public class CampaignWorkbenchIDE extends Application {
         // Log pane
         logPanel = new LogPanel("Logs");
         errorLogPanel = new ErrorLogPanel("Errors");
-        errorLogPanel.setOnErrorDoubleClicked((fileName, line) -> {
+        errorLogPanel.setOnErrorDoubleClicked((workspaceFile, line) -> {
             // Find the file in the workspace
-            Path filePath = findFileInWorkspace(fileName);
+            Path filePath = workspaceFile.getFilePath();
             if (filePath != null) {
                 if (editorTabPanel.isOpened(filePath)) {
                     editorTabPanel.openFileAndGoToLine(filePath, line);
                 } else {
-                    openFileInNewTab(filePath.toFile());
+                    openFileInNewTab(workspaceFile);
                     // Wait a bit for the tab to be created and editor to be ready
                     Platform.runLater(() -> editorTabPanel.openFileAndGoToLine(filePath, line));
                 }
             } else {
                 // If it's not a physical file, it might be the "RenderedTemplate" (the preprocessed staging source)
                 // in which case we don't open a file, but we might want to log it.
-                appendLog("Could not find file: " + fileName);
+                appendLog("Could not find file: " + filePath);
             }
         });
         SplitPane logSplitPane = new SplitPane();
@@ -120,6 +133,7 @@ public class CampaignWorkbenchIDE extends Application {
         previewSplitPane.getItems().addAll(previewPanel.getNode(), postSourcePanel.getNode(), preSourcePanel.getNode());
         previewSplitPane.setDividerPositions(0.33, 0.66);
         // Workspace explorer (left-most pane)
+
         // --- Split: Workspace Explorer | Editor Tabs ---
         SplitPane workspaceEditorSplit = new SplitPane();
         workspaceEditorSplit.setOrientation(Orientation.HORIZONTAL);
@@ -128,26 +142,27 @@ public class CampaignWorkbenchIDE extends Application {
                 editorTabPanel.getNode()
         );
         workspaceEditorSplit.setDividerPositions(0.3);
+        SplitPane.setResizableWithParent(workspaceExplorer.getNode(), false);
 
         // --- Right pane (holds preview split) ---
-        BorderPane rightPane = new BorderPane();
-        rightPane.setCenter(previewSplitPane);
+        BorderPane previewPane = new BorderPane();
+        previewPane.setCenter(previewSplitPane);
 
         // --- Split: (Workspace+Editor) | Preview ---
-        SplitPane mainSplitPane = new SplitPane();
-        mainSplitPane.setOrientation(Orientation.HORIZONTAL);
-        mainSplitPane.getItems().addAll(
+        SplitPane editorPreviewSplit = new SplitPane();
+        editorPreviewSplit.setOrientation(Orientation.HORIZONTAL);
+        editorPreviewSplit.getItems().addAll(
                 workspaceEditorSplit,
-                rightPane
+                previewPane
         );
-        mainSplitPane.setDividerPositions(0.6);
-
+        editorPreviewSplit.setDividerPositions(0.6);
+        SplitPane.setResizableWithParent(previewSplitPane, false);
 
         VBox topBar = new VBox(menuBar.getNode(), toolBar.getNode());
 
         SplitPane rootSplitPane = new SplitPane();
         rootSplitPane.setOrientation(Orientation.VERTICAL);
-        rootSplitPane.getItems().addAll(mainSplitPane, logSplitPane); // logBox = VBox with logLabel + logArea
+        rootSplitPane.getItems().addAll(editorPreviewSplit, logSplitPane); // logBox = VBox with logLabel + logArea
         rootSplitPane.setDividerPositions(0.8); // 80% main area, 20% log initially
 
         // --- Root BorderPane ---
@@ -169,13 +184,18 @@ public class CampaignWorkbenchIDE extends Application {
      * Stop the application
      */
     @Override
-    public void  stop() {
+    public void stop() {
+        exitApplication();
+    }
+
+    private void exitApplication() {
         Platform.exit();
         System.exit(0);
     }
 
     /**
      * Appends a message to the log panel
+     *
      * @param logMessage the message to append
      */
     private void appendLog(String logMessage) {
@@ -199,7 +219,7 @@ public class CampaignWorkbenchIDE extends Application {
     /**
      * @return the path to the context XML folder in the current workspace
      */
-    private String getWorkspaceXmlPath() {
+    private String getWorkspaceContextPath() {
         return currentWorkspace.getContextXmlPath().toString();
     }
 
@@ -212,6 +232,7 @@ public class CampaignWorkbenchIDE extends Application {
 
     /**
      * Applies a theme to the IDE
+     *
      * @param theme the theme to apply
      */
     private void applyTheme(IDETheme theme) {
@@ -220,6 +241,7 @@ public class CampaignWorkbenchIDE extends Application {
 
     /**
      * Sets the IDE theme
+     *
      * @param ideTheme theme, LIGHT or DARK, to apply to the IDE
      */
     public static void setTheme(IDETheme ideTheme) {
@@ -233,60 +255,95 @@ public class CampaignWorkbenchIDE extends Application {
 
     /**
      * Updates the run button state based on the current tab
+     *
      * @param tab the currently selected tab
      */
-    private void updateRunButtonState(Tab tab) {
+    private void tabPanelChanged(Tab tab) {
         if (tab instanceof EditorTab editorTab) {
-            String name = editorTab.getFile()
-                    .getFileName()
-                    .toString()
-                    .toLowerCase();
-            toolBar.setRunButtonState(name.endsWith(".template"));
-        } else {
-            toolBar.setRunButtonState(true);
+            toolBar.setRunButtonState(editorTab.isTemplateTab());
+            toolBar.setContextXmlState(editorTab.isContextApplicable());
+            toolBar.setClearContextXmlState(editorTab.isContextApplicable());
         }
+    }
+
+    private void newWorkspace() {
+        FileChooser fileChooser = new FileChooser();
+        fileChooser.setTitle("Save Workspace JSON file");
+        fileChooser.setInitialDirectory(
+                Workspace.getWorkspacesRootPath().toFile()
+        );
+        fileChooser.setInitialFileName("workspace.json");
+        fileChooser.getExtensionFilters().addAll(
+                new FileChooser.ExtensionFilter("Workbench JSON files", "*.json")
+        );
+
+        File selectedFile = fileChooser.showSaveDialog(editorTabPanel.getWindow());
+
+        if (selectedFile == null) {
+            return;
+        }
+
+        currentWorkspace = new Workspace(selectedFile.toPath(), true);
+        workspaceExplorer.setWorkspace(currentWorkspace);
+    }
+
+    private void saveWorkspace() {
+        if (currentWorkspace != null) {
+            try {
+                currentWorkspace.writeToJson();
+                logPanel.appendLog("Workspace saved successfully!");
+            } catch (IDEException ideException) {
+                reportError("Could not save workspace!", ideException, true);
+            }
+        }
+    }
+
+    private void saveWorkspaceAs() {
+
     }
 
     /**
      * Opens a workspace directory
      */
     private void openWorkspace() {
-        DirectoryChooser chooser = new DirectoryChooser();
-        File initialDir = new File(System.getProperty("user.dir"), "Workspaces");
-        if (!initialDir.exists()) {
-            initialDir.mkdirs(); // optional: create it if it doesn't exist
-        }
-        chooser.setInitialDirectory(initialDir);
 
-        chooser.setTitle("Open Workspace");
+        FileChooser fileChooser = new FileChooser();
+        fileChooser.setTitle("Open Workspace JSON file");
+        fileChooser.setInitialDirectory(
+                Workspace.getWorkspacesRootPath().toFile()
+        );
+        fileChooser.getExtensionFilters().addAll(
+                new FileChooser.ExtensionFilter("Workbench JSON files", "*.json")
+        );
 
-        File selected = chooser.showDialog(editorTabPanel.getWindow());
-        if (selected == null) return;
+        File selectedFile = fileChooser.showOpenDialog(editorTabPanel.getWindow());
 
-        Workspace ws = new Workspace(selected.toPath());
-        if (!ws.isValid()) {
-            showAlert("Selected folder is not a valid workspace.");
+        if (selectedFile == null) return;
+
+        if (selectedFile.getName().endsWith(".json")) {
+
+            currentWorkspace = new Workspace(selectedFile.toPath(), false);
+
+            currentWorkspace.openWorkspace(selectedFile.toPath());
+            workspaceExplorer.setWorkspace(currentWorkspace);
             return;
         }
 
-        this.currentWorkspace = ws;
-        workspaceExplorer.displayWorkspace(ws);
-
-        toolBar.setContextXmlState(true);
-
-        appendLog("Workspace opened: " + selected.getAbsolutePath());
+        showAlert("Selected file is not a valid workspace JSON file.");
+        appendLog("Workspace opened: " + selectedFile.getAbsolutePath());
     }
 
     /**
      * Opens a file from the workspace explorer
-     * @param file the file to open
+     *
+     * @param workspaceFile the file to open
      */
-    private void openFileFromWorkspace(File file) {
-            openFileInNewTab(file);
+    private void openFileFromWorkspace(WorkspaceFile workspaceFile) {
+        openFileInNewTab(workspaceFile);
     }
 
     /**
-     * Sets the XML context for rendering
+     * Sets the XML context for the currently selected tab file
      */
     private void setContextXml() {
         FileChooser fileChooser = new FileChooser();
@@ -302,56 +359,107 @@ public class CampaignWorkbenchIDE extends Application {
         File selectedFile = fileChooser.showOpenDialog(editorTabPanel.getWindow());
 
         if (selectedFile != null && selectedFile.getName().endsWith(".xml")) {
-            xmlContextFile = selectedFile;
-            toolBar.setContextXmlLabel(selectedFile.getName());
-            try {
-                xmlContextContent = Files.readString(xmlContextFile.toPath());
-            } catch (IOException ex) {
-                throw new RuntimeException(ex);
-            }
+
+            editorTabPanel.setSelectedContextFile(selectedFile.toPath());
         }
     }
 
     /**
      * Clears the current XML context
      */
-    private void clearXmlContext() {
-        xmlContextFile = null;
-        xmlContextContent = "";
-        toolBar.clearXmlContextLabel();
+    private void clearContextXml() {
+        editorTabPanel.clearSelectedContextFile();
     }
 
     /**
      * Opens a file from the file system
-     * @param defaultSubfolder the default folder to start the file chooser in
+     *
      */
-    private void openFile(String defaultSubfolder) {
+    private void addExistingFile(Workspace.WorkspaceFileType fileType) {
         FileChooser fileChooser = new FileChooser();
-        fileChooser.setTitle("Open File");
-        fileChooser.setInitialDirectory(
-                new File(System.getProperty("user.dir"), defaultSubfolder)
+        FileChooserConfig chooserConfig = getFileChooserConfig(fileType);
+
+        fileChooser.setTitle(chooserConfig.title());
+        fileChooser.setInitialDirectory(chooserConfig.defaultFolder());;
+        fileChooser.getExtensionFilters().addAll(
+                new FileChooser.ExtensionFilter(chooserConfig.description(), chooserConfig.extension())
         );
 
         File selectedFile = fileChooser.showOpenDialog(editorTabPanel.getWindow());
         if (selectedFile == null) return;
 
-        openFileInNewTab(selectedFile);
+        try {
+            currentWorkspace.addExistingWorkspaceFile(selectedFile.toPath(), fileType);
+            workspaceExplorer.refreshWorkspace();
+        } catch (IDEException ideEx) {
+            reportError("An error occurred while adding an existing file of type: " + fileType, ideEx, true);
+        }
     }
+
+    private void createNewFile(Workspace.WorkspaceFileType fileType) {
+        FileChooser fileChooser = new FileChooser();
+
+        FileChooserConfig chooserConfig = getFileChooserConfig(fileType);
+
+        fileChooser.setTitle(chooserConfig.title());
+        fileChooser.setInitialDirectory(chooserConfig.defaultFolder());
+        fileChooser.getExtensionFilters().addAll(
+                new FileChooser.ExtensionFilter(chooserConfig.description(), chooserConfig.extension())
+        );
+
+        File selectedFile = fileChooser.showSaveDialog(editorTabPanel.getWindow());
+
+        if (selectedFile == null) {
+            return;
+        }
+
+        if(currentWorkspace != null) {
+            try {
+                currentWorkspace.addNewWorkspaceFile(selectedFile.toPath(), fileType);
+                workspaceExplorer.refreshWorkspace();
+            } catch (IDEException ideEx) {
+                reportError("An error occurred while creating an new file of type: " + fileType, ideEx, true);
+            }
+        }
+    }
+
+    private FileChooserConfig getFileChooserConfig(Workspace.WorkspaceFileType fileType) {
+        return switch (fileType) {
+            case TEMPLATE -> new FileChooserConfig(
+                    "Create new template file",
+                    new File(getWorkspaceTemplatePath()),
+                    "Template files",
+                    "*.template"
+            );
+            case MODULE -> new FileChooserConfig(
+                    "Create new module file",
+                    new File(getWorkspaceModulePath()),
+                    "ETM Module files",
+                    "*.module"
+            );
+            case BLOCK -> new FileChooserConfig(
+                    "Create new block file",
+                    new File(getWorkspaceBlockPath()),
+                    "Block files",
+                    "*.block"
+            );
+            case CONTEXT -> new FileChooserConfig(
+                    "Create new context file",
+                    new File(getWorkspaceContextPath()),
+                    "Context XML files",
+                    "*.xml"
+            );
+        };
+    }
+
 
     /**
      * Opens a file in a new editor tab
-     * @param selectedFile the file to open
+     *
+     * @param workspaceFile the file to open
      */
-    private void openFileInNewTab(File selectedFile) {
-        try {
-            Path path = selectedFile.toPath();
-            String content = Files.readString(path);
-
-            editorTabPanel.addEditorTab(path, content);
-        } catch (IOException ex) {
-            ex.printStackTrace();
-            showAlert("Failed to open file: " + ex.getMessage());
-        }
+    private void openFileInNewTab(WorkspaceFile workspaceFile) {
+        editorTabPanel.addEditorTab(workspaceFile);
     }
 
     /**
@@ -378,75 +486,56 @@ public class CampaignWorkbenchIDE extends Application {
         }
     }
 
+    private void saveCurrentAs() {
+
+    }
+
     /**
      * Runs the template in the currently selected editor tab
      */
     private void runTemplate() {
-        if (xmlContextFile == null) {
+        if (!editorTabPanel.isSelectedTemplateAndReady()) {
             showAlert("No XML context file set!");
             appendLog("No XML context file set!");
-            return;
-        }
-
-        if (!editorTabPanel.isSelected()) {
-            showAlert("No template tab selected!");
-            appendLog("No template tab selected!");
             return;
         }
 
         errorLogPanel.clearErrors();
 
         try {
-            String templateSource = editorTabPanel.getSelectedText();
+            WorkspaceFile selectedWorkspaceFile = editorTabPanel.getSelectedWorkspaceFile();
 
-            Context cx = Context.enter();
-            cx.setOptimizationLevel(-1);
+            if(selectedWorkspaceFile instanceof WorkspaceContextFile workspaceContextFile) {
 
-            Scriptable scope = cx.initStandardObjects();
+                TemplateRenderResult renderResult = TemplateRenderer.render(
+                        currentWorkspace,
+                        workspaceContextFile
+                );
 
-            cx.evaluateString(
-                    scope,
-                    "var rtEvent = new XML(`" + xmlContextContent + "`);",
-                    xmlContextFile.getName(),
-                    1,
-                    null
-            );
+                String resultHtml = renderResult.renderedOutput();
+                String resultJs = renderResult.generatedJavaScript();
 
-            scope.put("xmlContext", scope, xmlContextContent);
-
-            TemplateRenderResult renderResult = TemplateRenderer.render(
-                    currentWorkspace,
-                    templateSource,
-                    cx,
-                    scope,
-                    editorTabPanel.getSelectedFileName()
-            );
-
-            String resultHtml = renderResult.renderedOutput();
-            String resultJs = renderResult.generatedJavaScript();
-
-            Platform.runLater(() -> {
-                previewPanel.setContent(resultHtml);
-                postSourcePanel.setText(resultHtml);
-                preSourcePanel.setText(resultJs);
-                appendLog("Template ran successfully: " + editorTabPanel.getSelectedFileName());
-            });
-        } catch (TemplateException ex) {
+                Platform.runLater(() -> {
+                    previewPanel.setContent(resultHtml);
+                    postSourcePanel.setText(resultHtml);
+                    preSourcePanel.setText(resultJs);
+                    appendLog("Template ran successfully: " + editorTabPanel.getSelectedFileName());
+                });
+            }
+        } catch (RendererException ex) {
             appendLog("An error occurred: " + ex.getMessage());
             errorLogPanel.addError(ex);
             preSourcePanel.setText(ex.getSourceCode());
-        }
-        catch (Exception ex) {
+        } catch (Exception ex) {
             ex.printStackTrace();
             showAlert("Error running template: " + ex.getMessage());
             appendLog("Error running template: " + ex.getMessage());
-        } finally {
-            Context.exit();
         }
     }
 
     /**
      * Shows an alert dialog with the specified message
+     *
      * @param msg the message to show
      */
     private void showAlert(String msg) {
@@ -460,27 +549,20 @@ public class CampaignWorkbenchIDE extends Application {
         });
     }
 
-    /**
-     * Finds a file in the workspace based on its name
-     * @param fileName the name of the file to find
-     * @return the path to the file, or null if not found
-     */
-    private Path findFileInWorkspace(String fileName) {
-        if (currentWorkspace == null) return null;
-        
-        // Handle absolute paths if fileName is one
-        File f = new File(fileName);
-        if (f.isAbsolute() && f.exists()) {
-            return f.toPath();
+    private void reportError(String message, boolean displayAlert) {
+        logPanel.appendLog(message);
+        if (displayAlert) {
+            showAlert(message);
         }
-
-        for (File file : currentWorkspace.getAllFiles()) {
-            if (file.getName().equals(fileName)) {
-                return file.toPath();
-            }
-        }
-        return null;
     }
 
+    private void reportError(String message, Exception exception, boolean showAlert) {
+        reportError(message, showAlert);
+        errorLogPanel.addError(exception);
 
+    }
+
+    private void showAbout() {
+
+    }
 }

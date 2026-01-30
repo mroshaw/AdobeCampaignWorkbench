@@ -30,7 +30,7 @@ public class OutputPreviewPanel implements IJavaFxNode {
 
         outputLabel = new Label(label);
         outputLabel.setPadding(new Insets(0,0, 0,5));
-        outputLabel.setStyle("-fx-font-weight: bold;");
+        // outputLabel.setStyle("-fx-font-weight: bold;");
 
         topPreviewBox = new VBox(5, outputLabel, preview);
         topPreviewBox.setPadding(new Insets(0,0, 0,5));

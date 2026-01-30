@@ -33,7 +33,7 @@ public class SourcePreviewPanel implements IJavaFxNode {
         // this.editor = new RSyntaxEditor();
         sourcePreviewLabel = new Label(label);
         sourcePreviewLabel.setPadding(new Insets(0,0, 0,5));
-        sourcePreviewLabel.setStyle("-fx-font-weight: bold;");
+        // sourcePreviewLabel.setStyle("-fx-font-weight: bold;");
         sourcePreviewPanel = new VBox(5, sourcePreviewLabel, editor.getNode());
         sourcePreviewPanel.setPadding(new Insets(0,0, 0,5));
         sourcePreviewPanel.setMinHeight(0);

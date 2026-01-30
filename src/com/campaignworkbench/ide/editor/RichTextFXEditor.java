@@ -61,10 +61,11 @@ public class RichTextFXEditor implements ICodeEditor {
     );
 
     // XML highlighting
-    private static final String XML_TAG_PATTERN = "(<(?<TAGNAME>/?[-_a-zA-Z0-9]+))|((?<TAGEND>/?|/)>)";
-    private static final String XML_ATTRIBUTE_PATTERN = "\\b(?<ATTRIBUTENAME>[-_a-zA-Z0-9]+)(?=\\s*=)";
-    private static final String XML_STRING_PATTERN = "\"([^\"\\\\]|\\\\.)*\"|'([^'\\\\]|\\\\.)*'";
-    private static final String XML_COMMENT_PATTERN = "<!--(.|\\R)*?-->";
+    private static final String XML_TAG_PATTERN = "<(/?[-_a-zA-Z0-9]+)"; // simpler, no nested groups
+    private static final String XML_ATTRIBUTE_PATTERN = "\\b([-_a-zA-Z0-9]+)(?=\\s*=)";
+    private static final String XML_STRING_PATTERN = "\"[^\"]*\"|'[^']*'"; // no backtracking over \\
+    private static final String XML_COMMENT_PATTERN = "<!--[^-]*(-[^-]+)*-->";
+
 
     private static final Pattern XML_PATTERN = Pattern.compile(
             "(?<TAG>" + XML_TAG_PATTERN + ")"

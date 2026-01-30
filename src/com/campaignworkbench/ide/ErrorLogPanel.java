@@ -1,10 +1,10 @@
 package com.campaignworkbench.ide;
 
-import com.campaignworkbench.campaignrenderer.TemplateException;
+import com.campaignworkbench.campaignrenderer.RendererException;
+import com.campaignworkbench.campaignrenderer.WorkspaceFile;
 import javafx.geometry.Insets;
 import javafx.scene.Node;
 import javafx.scene.control.Label;
-import javafx.scene.control.TreeCell;
 import javafx.scene.control.TreeItem;
 import javafx.scene.control.TreeView;
 import javafx.scene.input.MouseButton;
@@ -22,8 +22,8 @@ public class ErrorLogPanel implements IJavaFxNode {
      * The panel containing the error log
      */
     VBox logPanel;
-    private Map<TreeItem<String>, TemplateException> errorData = new HashMap<>();
-    private BiConsumer<String, Integer> onErrorDoubleClicked;
+    private Map<TreeItem<String>, RendererException> errorData = new HashMap<>();
+    private BiConsumer<WorkspaceFile, Integer> onErrorDoubleClicked;
 
     /**
      * Constructor
@@ -32,7 +32,7 @@ public class ErrorLogPanel implements IJavaFxNode {
     public ErrorLogPanel(String label) {
         Label logLabel = new Label(label);
         logLabel.setPadding(new Insets(0,0, 0,5));
-        logLabel.setStyle("-fx-font-weight: bold;");
+        // logLabel.setStyle("-fx-font-weight: bold;");
 
         errorTreeView = new TreeView<>();
         errorTreeView.setShowRoot(false);
@@ -48,9 +48,9 @@ public class ErrorLogPanel implements IJavaFxNode {
                     }
 
                     if (errorNode != null && errorData.containsKey(errorNode)) {
-                        TemplateException ex = errorData.get(errorNode);
+                        RendererException ex = errorData.get(errorNode);
                         if (onErrorDoubleClicked != null) {
-                            onErrorDoubleClicked.accept(ex.getTemplateName(), ex.getTemplateLine());
+                            onErrorDoubleClicked.accept(ex.getWorkspaceFile(), ex.getTemplateLine());
                         }
                     }
                 }
@@ -67,7 +67,7 @@ public class ErrorLogPanel implements IJavaFxNode {
      * Sets the callback for when an error is double-clicked
      * @param callback the callback function accepting template name and line number
      */
-    public void setOnErrorDoubleClicked(BiConsumer<String, Integer> callback) {
+    public void setOnErrorDoubleClicked(BiConsumer<WorkspaceFile, Integer> callback) {
         this.onErrorDoubleClicked = callback;
     }
 
@@ -81,28 +81,31 @@ public class ErrorLogPanel implements IJavaFxNode {
 
     /**
      * Adds an error to the tree view based on the provided exception
-     * @param ex the template exception to add
+     * @param exception the template exception to add
      */
-    public void addError(TemplateException ex) {
+    public void addError(Exception exception) {
         if (errorTreeView.getRoot() == null) {
             clearErrors();
         }
 
-        TreeItem<String> errorNode = new TreeItem<>(ex.getMessage() + " at line " +  (ex.getTemplateLine() == -1 ? "N/A" : ex.getTemplateLine()));
-        errorNode.setExpanded(false);
-        errorData.put(errorNode, ex);
+        if(exception instanceof RendererException templateException) {
 
-        errorNode.getChildren().add(new TreeItem<>("Type: " + ex.getClass().getSimpleName()));
-        errorNode.getChildren().add(new TreeItem<>("File: " + ex.getTemplateName()));
-        errorNode.getChildren().add(new TreeItem<>("Line: " + (ex.getTemplateLine() == -1 ? "N/A" : ex.getTemplateLine())));
-        
-        TreeItem<String> rootCauseNode = new TreeItem<>("Root Cause: " + ex.getRootCause());
-        errorNode.getChildren().add(rootCauseNode);
+            TreeItem<String> errorNode = new TreeItem<>(templateException.getMessage() + " at line " + (templateException.getTemplateLine() == -1 ? "N/A" : templateException.getTemplateLine()));
+            errorNode.setExpanded(false);
+            errorData.put(errorNode, templateException);
 
-        TreeItem<String> solutionNode = new TreeItem<>("Recommended Solution: " + ex.getSolution());
-        errorNode.getChildren().add(solutionNode);
+            errorNode.getChildren().add(new TreeItem<>("Type: " + templateException.getClass().getSimpleName()));
+            errorNode.getChildren().add(new TreeItem<>("File: " + templateException.getWorkspaceFile().getFileName()));
+            errorNode.getChildren().add(new TreeItem<>("Line: " + (templateException.getTemplateLine() == -1 ? "N/A" : templateException.getTemplateLine())));
 
-        errorTreeView.getRoot().getChildren().add(errorNode);
+            TreeItem<String> rootCauseNode = new TreeItem<>("Root Cause: " + templateException.getRootCause());
+            errorNode.getChildren().add(rootCauseNode);
+
+            TreeItem<String> solutionNode = new TreeItem<>("Recommended Solution: " + templateException.getSolution());
+            errorNode.getChildren().add(solutionNode);
+
+            errorTreeView.getRoot().getChildren().add(errorNode);
+        }
     }
 
     @Override

@@ -3,16 +3,16 @@ package com.campaignworkbench.campaignrenderer;
 /**
  * Top level exception with detailed information about the process that caused the exception
  */
-public abstract sealed class TemplateException extends RuntimeException permits TemplateExecutionException, TemplateGenerationException, TemplateParseException {
-    private final String templateName;
+public abstract sealed class RendererException extends RuntimeException permits RendererExecutionException, RendererGenerationException, RendererParseException {
+    private final WorkspaceFile sourceFile;
     private final String sourceCode;
     private final int templateLine;
     private final String rootCause;
     private final String solution;
 
-    protected TemplateException(String message, String templateName, String sourceCode, int templateLine, String rootCause, String solution, Throwable cause) {
+    protected RendererException(String message, WorkspaceFile sourceFile, String sourceCode, int templateLine, String rootCause, String solution, Throwable cause) {
         super(message, cause);
-        this.templateName = templateName;
+        this.sourceFile = sourceFile;
         this.sourceCode = sourceCode;
         this.templateLine = templateLine;
         this.rootCause = rootCause;
@@ -20,10 +20,10 @@ public abstract sealed class TemplateException extends RuntimeException permits 
     }
 
     /**
-     * Returns the name of the template that was running when the exception occurred
-     * @return templateName as a string
+     * Returns the WorkfspaceFile that generated the exception
+     * @return sourceFile as a WorkspaceFile
      */
-    public String getTemplateName() { return templateName; }
+    public WorkspaceFile getWorkspaceFile() { return sourceFile; }
 
     /**
      * Returns the line number that caused the exception to occur

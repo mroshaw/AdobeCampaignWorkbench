@@ -24,82 +24,104 @@ public class MainMenuBar implements IJavaFxNode {
     /**
      * Constructor
      * @param openWorkspaceHandler action to run when open workspace menu is selected
-     * @param openTemplateFileHandler action to run when open template menu is selected
-     * @param openModuleFileHandler action to run when open module menu is selected
-     * @param openBlockFileHandler action to run when open block menu is selected
-     * @param openXMLFileHandler action to run when open XML menu is selected
+     * @param addTemplateFileHandler action to run when open template menu is selected
+     * @param addModuleFileHandler action to run when open module menu is selected
+     * @param addBlockFileHandler action to run when open block menu is selected
+     * @param addContextFileHandler action to run when open XML menu is selected
      * @param saveCurrentFileHandler action to run when save current file menu is selected
      * @param applyLightThemeHandler action to run when apply light theme menu is selected
      * @param applyDarkThemeHandler action to run when apply dark theme menu is selected
      */
     public MainMenuBar(
+            EventHandler<ActionEvent> newWorkspaceHandler,
             EventHandler<ActionEvent> openWorkspaceHandler,
-            EventHandler<ActionEvent> openTemplateFileHandler,
-            EventHandler<ActionEvent> openModuleFileHandler,
-            EventHandler<ActionEvent> openBlockFileHandler,
-            EventHandler<ActionEvent> openXMLFileHandler,
+            EventHandler<ActionEvent> saveWorkspaceHandler,
+
+            EventHandler<ActionEvent> newTemplateFileHandler,
+            EventHandler<ActionEvent> newModuleFileHandler,
+            EventHandler<ActionEvent> newBlockFileHandler,
+            EventHandler<ActionEvent> newContextFileHandler,
+
+            EventHandler<ActionEvent> addTemplateFileHandler,
+            EventHandler<ActionEvent> addModuleFileHandler,
+            EventHandler<ActionEvent> addBlockFileHandler,
+            EventHandler<ActionEvent> addContextFileHandler,
+
             EventHandler<ActionEvent> saveCurrentFileHandler,
+            EventHandler<ActionEvent> saveCurrentAsFileHandler,
 
             EventHandler<ActionEvent> applyLightThemeHandler,
-            EventHandler<ActionEvent> applyDarkThemeHandler
+            EventHandler<ActionEvent> applyDarkThemeHandler,
+
+            EventHandler<ActionEvent> helpAboutHandler,
+            EventHandler<ActionEvent> exitHandler
     ) {
         menuBar = new MenuBar();
 
-        // --- File Menu ---
+        // File Menu
         Menu fileMenu = new Menu("File");
 
+        // File sub menu
+        Menu openMenu = new Menu("Open");
+        Menu newMenu = new Menu("New");
+        Menu addMenu = new Menu("Add Existing");
+
+        MenuItem openWorkspaceMenu = new MenuItem("Workspace");
+
+
+        MenuItem saveWorkspaceMenu = new MenuItem("Save Workspace");
+        MenuItem closeWorkspaceMenu = new MenuItem("Close Workspace");
+
+
+        openWorkspaceMenu.setOnAction(openWorkspaceHandler);
+        saveWorkspaceMenu.setOnAction(saveWorkspaceHandler);
+
+        // New sub menu
+        MenuItem newWorkspaceMenu = new MenuItem("Workspace");
+        MenuItem newTemplateMenu = new MenuItem("Template");
+        MenuItem newModuleMenu = new MenuItem("Module");
+        MenuItem newBlockMenu = new MenuItem("Block");
+        MenuItem newXmlContextMenu = new MenuItem("Context XML");
+        MenuItem exitItem = new MenuItem("Exit");
+
+        newMenu.getItems().addAll(newWorkspaceMenu, new SeparatorMenuItem(), newTemplateMenu, newModuleMenu, newBlockMenu, newXmlContextMenu);
+
+        newWorkspaceMenu.setOnAction(newWorkspaceHandler);
+        newTemplateMenu.setOnAction(newTemplateFileHandler);
+        newModuleMenu.setOnAction(newModuleFileHandler);
+        newBlockMenu.setOnAction(newBlockFileHandler);
+        newXmlContextMenu.setOnAction(newContextFileHandler);
+
         // Open submenu
-        Menu openSub = new Menu("Open");
-        MenuItem openWorkspace = new MenuItem("Workspace");
-        MenuItem openTemplate = new MenuItem("Template");
-        MenuItem openModule = new MenuItem("Module");
-        MenuItem openBlock = new MenuItem("Block");
-        MenuItem openXmlContext = new MenuItem("Context XML");
+        openMenu.getItems().add(openWorkspaceMenu);
 
-        openWorkspace.setOnAction(openWorkspaceHandler);
-        openTemplate.setOnAction(openTemplateFileHandler);
-        openModule.setOnAction(openModuleFileHandler);
-        openBlock.setOnAction(openBlockFileHandler);
-        openXmlContext.setOnAction(openXMLFileHandler);
+        // Add existing submenu
+        MenuItem addTemplateMenu = new MenuItem("Template");
+        MenuItem addModuleMenu = new MenuItem("Module");
+        MenuItem addBlockMenu = new MenuItem("Block");
+        MenuItem addXmlContextMenu = new MenuItem("Context XML");
 
-        openSub.getItems().addAll(openWorkspace, openTemplate, openModule, openBlock, openXmlContext);
+        addMenu.getItems().addAll(addTemplateMenu, addModuleMenu, addBlockMenu, addXmlContextMenu);
 
-        // New submenu
-        Menu newSub = new Menu("New");
-        MenuItem newWorkspace = new MenuItem("Workspace");
-        MenuItem newTemplate = new MenuItem("Template");
-        MenuItem newModule = new MenuItem("Module");
-        MenuItem newBlock = new MenuItem("Block");
-        MenuItem newXmlContext = new MenuItem("Context XML");
+        addTemplateMenu.setOnAction(addTemplateFileHandler);
+        addModuleMenu.setOnAction(addModuleFileHandler);
+        addBlockMenu.setOnAction(addBlockFileHandler);
+        addXmlContextMenu.setOnAction(addContextFileHandler);
 
-        newWorkspace.setOnAction(event -> dummyHandler());
-        newTemplate.setOnAction(event -> dummyHandler());
-        newModule.setOnAction(event -> dummyHandler());
-        newBlock.setOnAction(event -> dummyHandler());
-        newXmlContext.setOnAction(event -> dummyHandler());
-
-        newSub.getItems().addAll(newWorkspace, newTemplate, newModule, newBlock, newXmlContext);
-
-        // Save items
         MenuItem saveCurrent = new MenuItem("Save Current");
+
         saveCurrent.setAccelerator(
                 new KeyCodeCombination(KeyCode.S, KeyCombination.CONTROL_DOWN)
         );
         MenuItem saveCurrentAs = new MenuItem("Save Current As");
-        MenuItem exitItem = new MenuItem("Exit");
 
         saveCurrent.setOnAction(saveCurrentFileHandler);
-        saveCurrentAs.setOnAction(event -> dummyHandler());
-        exitItem.setOnAction(event -> Platform.exit());
+        saveCurrentAs.setOnAction(saveCurrentAsFileHandler);
+        exitItem.setOnAction(exitHandler);
 
-        fileMenu.getItems().addAll(openSub, newSub, saveCurrent, saveCurrentAs, new SeparatorMenuItem(), exitItem);
+        fileMenu.getItems().addAll(newMenu, openMenu, addMenu, new SeparatorMenuItem(), saveCurrent, saveCurrentAs, saveWorkspaceMenu, new SeparatorMenuItem(), exitItem);
 
-        // --- Help Menu ---
-        Menu helpMenu = new Menu("Help");
-        MenuItem aboutItem = new MenuItem("About");
-        aboutItem.setOnAction(event -> dummyHandler());
-        helpMenu.getItems().add(aboutItem);
-
+        // View menu
         Menu viewMenu = new Menu("View");
         MenuItem darkThemeItem = new MenuItem("Dark Theme");
         darkThemeItem.setOnAction(applyDarkThemeHandler);
@@ -108,6 +130,12 @@ public class MainMenuBar implements IJavaFxNode {
         MenuItem lightThemeItem = new MenuItem("Light Theme");
         lightThemeItem.setOnAction(applyLightThemeHandler);
         viewMenu.getItems().add(lightThemeItem);
+
+        //Help Menu
+        Menu helpMenu = new Menu("Help");
+        MenuItem aboutItem = new MenuItem("About");
+        aboutItem.setOnAction(helpAboutHandler);
+        helpMenu.getItems().add(aboutItem);
 
 
         // --- Add menus to menu bar ---

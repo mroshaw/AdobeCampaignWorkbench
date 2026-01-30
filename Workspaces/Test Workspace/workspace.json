@@ -1,0 +1,32 @@
+{
+  "blocks" : [ {
+    "workspaceFilePath" : "file:///E:/Dev/AdobeCampaignWorkbench/Workspaces/Test%20Workspace/Blocks/TestFunctions.block",
+    "workspaceFileType" : "BLOCK"
+  }, {
+    "workspaceFilePath" : "file:///E:/Dev/AdobeCampaignWorkbench/Workspaces/Test%20Workspace/Blocks/MoreTestFunctions.block",
+    "workspaceFileType" : "BLOCK"
+  } ],
+  "configFilePath" : "file:///E:/Dev/AdobeCampaignWorkbench/Workspaces/Test%20Workspace/workspace.json",
+  "contexts" : [ {
+    "workspaceFilePath" : "file:///E:/Dev/AdobeCampaignWorkbench/Workspaces/Test%20Workspace/ContextXml/TestEvent.xml",
+    "workspaceFileType" : "CONTEXT"
+  }, {
+    "workspaceFilePath" : "file:///E:/Dev/AdobeCampaignWorkbench/Workspaces/Test%20Workspace/ContextXml/TestModule.xml",
+    "workspaceFileType" : "CONTEXT"
+  } ],
+  "modules" : [ {
+    "contextFilePath" : "file:///E:/Dev/AdobeCampaignWorkbench/Workspaces/Test%20Workspace/ContextXml/TestModule.xml",
+    "workspaceFilePath" : "file:///E:/Dev/AdobeCampaignWorkbench/Workspaces/Test%20Workspace/Modules/TestModule.module",
+    "workspaceFileType" : "MODULE"
+  } ],
+  "rootFolderPath" : "file:///E:/Dev/AdobeCampaignWorkbench/Workspaces/Test%20Workspace/",
+  "templates" : [ {
+    "contextFilePath" : "file:///E:/Dev/AdobeCampaignWorkbench/Workspaces/Test%20Workspace/ContextXml/TestEvent.xml",
+    "workspaceFilePath" : "file:///E:/Dev/AdobeCampaignWorkbench/Workspaces/Test%20Workspace/Templates/TestTemplate.template",
+    "workspaceFileType" : "TEMPLATE"
+  }, {
+    "contextFilePath" : "file:///E:/Dev/AdobeCampaignWorkbench/Workspaces/Test%20Workspace/ContextXml/TestEvent.xml",
+    "workspaceFilePath" : "file:///E:/Dev/AdobeCampaignWorkbench/Workspaces/Test%20Workspace/Templates/ModuleTestTemplate.template",
+    "workspaceFileType" : "TEMPLATE"
+  } ]
+}

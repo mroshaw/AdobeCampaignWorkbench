@@ -16,10 +16,8 @@ var end = '%' + '&gt;';
 }
 
 %>
-<%=bloc('TestFunctions')%>
-
-<%= ctx.moduleParam %>
-
+<%=bloc('ssgMessageCenterCommonFunctions')%>
+<%=perso('=formatDateMC(rtEvent.ctx.order.createdAt,"test-gb")')%>
 <table>
 	<tr>
 		<th>Col1</th>
@@ -27,7 +25,6 @@ var end = '%' + '&gt;';
 	</tr>
 	<tr>
 		<td>Hello</td>
-		<td><%=perso('=test()')%>
-</td>
+		<td>Goodbye</td>
 	</tr>
 </table>

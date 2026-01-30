@@ -38,8 +38,8 @@ public class ModuleRenderTest {
             );
 
             // Render module
-            String renderResult = ModuleRenderer.renderModule(module, cx, scope, modulePath.toString());
-            System.out.println(renderResult);
+            // String renderResult = ModuleRenderer.renderModule(module, workspaceFile, cx, scope, modulePath.toString());
+            // System.out.println(renderResult);
 
         } finally {
             Context.exit();

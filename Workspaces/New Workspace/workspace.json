@@ -1,0 +1,26 @@
+{
+  "blocks" : [ ],
+  "configFilePath" : "file:///E:/Dev/AdobeCampaignWorkbench/Workspaces/New%20Workspace/workspace.json",
+  "contexts" : [ {
+    "workspaceFilePath" : "file:///E:/Dev/AdobeCampaignWorkbench/Workspaces/New%20Workspace/ContextXml/Order_Acknowledged_Glasses.xml",
+    "workspaceFileType" : "CONTEXT"
+  }, {
+    "workspaceFilePath" : "file:///E:/Dev/AdobeCampaignWorkbench/Workspaces/New%20Workspace/ContextXml/M12_CTA.xml",
+    "workspaceFileType" : "CONTEXT"
+  } ],
+  "modules" : [ {
+    "contextFilePath" : null,
+    "workspaceFilePath" : "file:///E:/Dev/AdobeCampaignWorkbench/Workspaces/New%20Workspace/Modules/ETM_M12_CTA.module",
+    "workspaceFileType" : "MODULE"
+  }, {
+    "contextFilePath" : null,
+    "workspaceFilePath" : "file:///E:/Dev/AdobeCampaignWorkbench/Workspaces/New%20Workspace/Modules/TestModule.module",
+    "workspaceFileType" : "MODULE"
+  } ],
+  "rootFolderPath" : "file:///E:/Dev/AdobeCampaignWorkbench/Workspaces/New%20Workspace/",
+  "templates" : [ {
+    "contextFilePath" : "file:///E:/Dev/AdobeCampaignWorkbench/Workspaces/New%20Workspace/ContextXml/Order_Acknowledged_Glasses.xml",
+    "workspaceFilePath" : "file:///E:/Dev/AdobeCampaignWorkbench/Workspaces/New%20Workspace/Templates/TestTemplate.template",
+    "workspaceFileType" : "TEMPLATE"
+  } ]
+}

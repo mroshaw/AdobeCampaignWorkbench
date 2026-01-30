@@ -1,5 +1,6 @@
 package com.campaignworkbench.ide;
 
+import com.campaignworkbench.campaignrenderer.*;
 import com.campaignworkbench.ide.editor.*;
 import javafx.scene.control.Tab;
 import javafx.scene.layout.BorderPane;
@@ -11,38 +12,96 @@ import java.nio.file.Path;
  */
 public final class EditorTab extends Tab {
 
-    private final Path file;
+    private final WorkspaceFile workspaceFile;
     private final ICodeEditor editor;
 
     /**
      * Constructor
-     * @param file that the editor is editing
-     * @param initialText any default, initial code to include in the new editor
+     *
+     * @param workspaceFile that the editor is editing
      */
-    public EditorTab(Path file, String initialText) {
-        this.file = file;
+    public EditorTab(WorkspaceFile workspaceFile) {
+
+        this.workspaceFile = workspaceFile;
+
         this.editor = new RichTextFXEditor();
-        // this.editor = new RSyntaxEditor();
-        // this.editor = new MonacoFXEditor();
-        setText(file.getFileName().toString());
+        updateTabText();
 
         BorderPane root = new BorderPane();
         root.setCenter(editor.getNode());
         setContent(root);
 
-        editor.setText(initialText);
-        editor.setSyntax(determineSyntax(file));
+        editor.setText(workspaceFile.getWorkspaceFileContent());
+        editor.setSyntax(determineSyntax(workspaceFile.getFilePath()));
         editor.setCaretAtStart();
+    }
+
+    public void setContextFile(Path contextFile) {
+        if (workspaceFile instanceof WorkspaceContextFile workspaceContextFile) {
+            workspaceContextFile.setXmlContextFile(contextFile);
+            updateTabText();
+        } else {
+            throw new IDEException("Attempted to set context on a non-context based EditorTab!", null);
+        }
+    }
+
+    public void clearContextFile() {
+        setContextFile(null);
+    }
+
+    private void updateTabText() {
+        String tabName = workspaceFile.getFileName().toString();
+
+        // If context is set, append that
+        if (workspaceFile instanceof WorkspaceContextFile workspaceContextFile) {
+            if (workspaceContextFile.isContextSet()) {
+                tabName += " (" + workspaceContextFile.getContextFileName().toString() + ")";
+            } else {
+                tabName += " (NOT CONTEXT SET)";
+            }
+        }
+        setText(tabName);
+    }
+
+    /**
+     * @return workspace file associated with this editor tab
+     */
+    public WorkspaceFile getWorkspaceFile() {
+        return workspaceFile;
     }
 
     /**
      * Get the file associated with this editor tab
+     *
      * @return the file associated with this editor tab
      */
     public Path getFile() {
-        return file;
+        return workspaceFile.getFilePath();
     }
 
+    public boolean isContextSet() {
+        if (workspaceFile instanceof WorkspaceContextFile workspaceContextFile) {
+            return workspaceContextFile.isContextSet();
+        } else {
+            return false;
+        }
+    }
+
+    public Path getContextFilePath() {
+        if (workspaceFile instanceof WorkspaceContextFile workspaceContextFile) {
+            return workspaceContextFile.getFilePath();
+        } else {
+            throw new IDEException("Attempted to get context from a non-context based EditorTab!", null);
+        }
+    }
+
+    public String getContextFileContent() {
+        if (workspaceFile instanceof WorkspaceContextFile workspaceContextFile) {
+            return workspaceContextFile.getContextContent();
+        } else {
+            throw new IDEException("Attempted to get context from a non-context based EditorTab!", null);
+        }
+    }
 
     /**
      * Refresh the context of the tab
@@ -53,6 +112,7 @@ public final class EditorTab extends Tab {
 
     /**
      * Return the text of this editor tab
+     *
      * @return text of the editor tab
      */
     public String getEditorText() {
@@ -62,10 +122,13 @@ public final class EditorTab extends Tab {
     /**
      * @return the editor within the editor tab
      */
-    public ICodeEditor getEditor() { return editor ; }
+    public ICodeEditor getEditor() {
+        return editor;
+    }
 
     /**
      * Derive the underlying SyntaxType for the editor
+     *
      * @param file the path to the file to determine syntax for
      * @return the determined syntax type
      */
@@ -82,9 +145,15 @@ public final class EditorTab extends Tab {
 
     /**
      * Helper for quick check for template type editor
+     *
      * @return boolean true if editor has a template file open
      */
-    public boolean isTemplate() {
-        return determineSyntax(file) == SyntaxType.TEMPLATE;
+    public boolean isTemplateTab() {
+        return workspaceFile.isTemplate();
     }
+
+    public boolean isContextApplicable() {
+        return workspaceFile.isContextApplicable();
+    }
+
 }

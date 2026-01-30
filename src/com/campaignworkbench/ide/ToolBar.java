@@ -17,10 +17,7 @@ public class ToolBar implements IJavaFxNode {
     private final HBox toolBar;
     private final Button runButton;
     private final Button setXmlButton;
-    /**
-     * Label displaying the current context XML file
-     */
-    private final Label contextXmlLabel;
+    private final Button clearXmlButton;
 
     /**
      * Constructor
@@ -38,8 +35,9 @@ public class ToolBar implements IJavaFxNode {
         // Open Template button
         Button openWorkspaceButton = new Button("Open Workspace");
         openWorkspaceButton.setTooltip(new Tooltip("Open Workspace"));
-        Label newFileLabel = new Label("\uD83D\uDCC4");
-        newFileLabel.setStyle("-fx-font-size: 18px;");
+        Label newFileLabel = new Label("\uD83D\uDCC1");
+        newFileLabel.setStyle("-fx-text-fill: yellow; -fx-font-size: 18px;");
+
         openWorkspaceButton.setGraphic(newFileLabel);
         openWorkspaceButton.setOnAction(openWorkspaceHandler);
 
@@ -47,11 +45,12 @@ public class ToolBar implements IJavaFxNode {
         setXmlButton = new Button("Set Context XML");
         setXmlButton.setTooltip(new Tooltip("Set Context XML"));
         Label setContextLabel = new Label("\uD83D\uDD27");
+        setContextLabel.setStyle("-fx-text-fill: green; -fx-font-size: 18px;");
         setXmlButton.setGraphic(setContextLabel);
         setXmlButton.setOnAction(setContextXmlHandler);
 
         // Clear XML Context button
-        Button clearXmlButton = new Button("Clear Context XML");
+        clearXmlButton = new Button("Clear Context XML");
         clearXmlButton.setTooltip(new Tooltip("Clear Context XML"));
         Label clearXmlLabel = new Label("✖");
         clearXmlLabel.setStyle("-fx-text-fill: red; -fx-font-size: 18px;");
@@ -67,31 +66,16 @@ public class ToolBar implements IJavaFxNode {
         runButton.setDisable(true);
         runButton.setOnAction(runHandler);
 
-        Label xmlContextTitleLabel = new Label("Context XML: ");
-        contextXmlLabel = new Label();
-        clearXmlContextLabel();
-
         toolBar = new HBox(
                 10,
                 openWorkspaceButton,
                 setXmlButton,
                 clearXmlButton,
-                runButton,
-                xmlContextTitleLabel,
-                contextXmlLabel
+                runButton
         );
         toolBar.setAlignment(Pos.CENTER_LEFT);
         toolBar.getStyleClass().add("tool-bar");
     }
-
-    /**
-     * @param labelText file name of the XML file selected as context
-     */
-    public void setContextXmlLabel(String labelText) {
-        contextXmlLabel.setText(labelText);
-        contextXmlLabel.setStyle("-fx-text-fill: green;");
-    }
-
 
     /**
      * @param state enabled state of the "Set Context XML" button
@@ -100,12 +84,8 @@ public class ToolBar implements IJavaFxNode {
         setXmlButton.setDisable(!state);
     }
 
-    /**
-     * Resets the XML Context label to "none set"
-     */
-    public void clearXmlContextLabel() {
-        contextXmlLabel.setText("No XML context set");
-        contextXmlLabel.setStyle("-fx-text-fill: red;");
+    public void setClearContextXmlState(boolean state) {
+        clearXmlButton.setDisable(!state);
     }
 
     /**

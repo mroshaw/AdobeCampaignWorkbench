@@ -3,6 +3,8 @@ package com.campaignworkbench.campaignrenderer;
 import org.mozilla.javascript.Context;
 import org.mozilla.javascript.Scriptable;
 
+import java.nio.file.Path;
+
 /**
  * Renders a Module into template source.
  * A module is a "meta-template": its JavaScript produces template code.
@@ -13,19 +15,33 @@ public final class ModuleRenderer {
 
     /**
      * Processes and generates output for included modules
-     * @param moduleSource source code of the module
      * @param cx the Rhino context in which to process the code
      * @param scope the Rhino scope
-     * @param sourceName name of the source being processed
      * @return the evaluate code as a string
      */
     public static String renderModule(
-            String moduleSource,
+            WorkspaceContextFile workspaceContextFile,
             Context cx,
-            Scriptable scope,
-            String sourceName
+            Scriptable scope
     ) {
+
+        // Get the module context
+        Path xmlContextFile = workspaceContextFile.getContextFilePath();
+        String xmlContextContent = workspaceContextFile.getContextContent();
+
+        String moduleSource = workspaceContextFile.getWorkspaceFileContent();
+        String sourceName = workspaceContextFile.getFileName().toString();
+
         try {
+
+            cx.evaluateString(
+                    scope,
+                    "var ctx = new XML(`" + xmlContextContent + "`);",
+                    xmlContextFile.getFileName().toString(),
+                    1,
+                    null
+            );
+
             String js = """
                     var out = new java.lang.StringBuilder();
                     %s
@@ -35,9 +51,9 @@ public final class ModuleRenderer {
             return Context.toString(result);
         }
         catch (org.mozilla.javascript.RhinoException e) {
-            throw new TemplateExecutionException(
+            throw new RendererExecutionException(
                     "Error executing module: " + e.getMessage(),
-                    sourceName,
+                    workspaceContextFile,
                     moduleSource,
                     e.lineNumber(),
                     e.details(),

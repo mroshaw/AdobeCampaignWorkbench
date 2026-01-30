@@ -3,6 +3,7 @@
   <component name="NewModuleRootManager" inherit-compiler-output="true">
     <exclude-output />
     <content url="file://$MODULE_DIR$">
+      <sourceFolder url="file://$MODULE_DIR$/resources" type="java-resource" />
       <sourceFolder url="file://$MODULE_DIR$/src" isTestSource="false" />
     </content>
     <orderEntry type="inheritedJdk" />
@@ -11,5 +12,6 @@
     <orderEntry type="library" name="richtextfx-fat-0.11.7" level="project" />
     <orderEntry type="library" name="atlantafx-base-2.1.0" level="project" />
     <orderEntry type="library" name="fifesoft.rsyntaxtextarea" level="project" />
+    <orderEntry type="library" name="tools.jackson.core.databind" level="project" />
   </component>
 </module>

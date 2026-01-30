@@ -28,7 +28,7 @@ public class LogPanel implements IJavaFxNode {
     public LogPanel(String label) {
         Label logLabel = new Label(label);
         logLabel.setPadding(new Insets(0,0, 0,5));
-        logLabel.setStyle("-fx-font-weight: bold;");
+        // logLabel.setStyle("-fx-font-weight: bold;");
         logArea = new TextArea();
         logArea.setEditable(false);
         logArea.setWrapText(true);

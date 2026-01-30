@@ -1,5 +1,6 @@
 package com.campaignworkbench.ide;
 
+import com.campaignworkbench.campaignrenderer.WorkspaceFile;
 import javafx.beans.value.ChangeListener;
 import javafx.scene.Node;
 import javafx.scene.control.Tab;
@@ -86,17 +87,35 @@ public class EditorTabPanel implements IJavaFxNode {
 
     /**
      * Adds a new Editor Tab to the Tab Panel
-     * @param path full path of the file to open in the new editor tab
-     * @param content any default code to populate in the new editor tab
+     * @param workspaceFile workspace file to be edited in the tab
      */
-    public void addEditorTab(Path path, String content)
+    public void addEditorTab(WorkspaceFile workspaceFile)
     {
-        EditorTab tab = new EditorTab(path, content);
+        EditorTab tab = new EditorTab(workspaceFile);
         tab.setClosable(true);
         tabPane.getTabs().add(tab);
         tabPane.getSelectionModel().select(tab);
     }
 
+    public WorkspaceFile getSelectedWorkspaceFile() {
+        return getSelected().getWorkspaceFile();
+    }
+
+    public void clearSelectedContextFile() {
+        getSelected().clearContextFile();
+    }
+
+    public void setSelectedContextFile(Path contextFile) {
+        getSelected().setContextFile(contextFile);
+    }
+
+    public Path getSelectedContextFile() {
+        return getSelected().getContextFilePath();
+    }
+
+    public String getSelectedContextFileContent() {
+        return getSelected().getContextFileContent();
+    }
     /**
      * @return the file from the currently selected tab
      */
@@ -116,6 +135,11 @@ public class EditorTabPanel implements IJavaFxNode {
      */
     public String getSelectedFileName() {
         return getSelectedFile().getFileName().toString();
+    }
+
+    public boolean isSelectedTemplateAndReady() {
+        EditorTab selectedTab = getSelected();
+        return selectedTab.isTemplateTab() && selectedTab.isContextSet();
     }
 
     private EditorTab getSelected() {

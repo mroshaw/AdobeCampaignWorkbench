@@ -1,0 +1,243 @@
+    <%if(ctx.@P_STYLING=='simple-primary' && ctx.@P_BACKGROUNDCOLOR=='white'){%><!-- M12 CTA Simple Primary white -->
+    <tr>
+      <td align="center" valign="top">
+	<div id="CTA-with-link">
+	  <table class="wFull carbon-bg" cellpadding="0" cellspacing="0" border="0" role="presentation" style="width: 600px; background-color: #FEFEFE;">
+	    <tr>
+	      <td class="tPad-8" align="center" valign="top" style="padding: 16px 0 32px;">
+		<table cellspacing="0" cellpadding="0" border="0" role="presentation" style="width: 100%;">
+		  <tr>
+		    <td class="xPad-16" align="center" valign="top" style="padding: 0 32px">
+		      <!--[if !mso]><!-->
+		      <div style="display:none;">
+		      <!--<![endif]-->
+			<v:roundrect style="v-text-anchor:middle; mso-wrap-style:none;" arcsize="60%" strokecolor="#016C42" strokeweight="2pt" fillcolor="#016C42">
+			  <v:textbox style="mso-fit-shape-to-text:true">
+			    <center class="mso-keep-white" style="color:#FEFEFE; font-family:Helvetica, Arial, sans-serif; font-size:16px; font-weight:bold;">
+			      <a href="https://<%=ctx.@CTAURL1%>" target="_blank" style="color:#FEFEFE; text-decoration:none;"><!--[if mso]>
+				<i style="mso-font-width:90%; mso-text-raise:42%;" hidden>&emsp;</i>
+				<span style="mso-text-raise:25%;"><![endif]--><%=ctx.@CTATEXT1%><!--[if mso]></span>
+				<i style="mso-font-width:100%;" hidden>&emsp;&#8203;</i>
+			      <![endif]--></a>
+			    </center>
+			  </v:textbox>
+			</v:roundrect>
+		      <!--[if !mso]><!-->
+		      </div>
+		      <!--<![endif]-->
+		      <!--[if !mso]><!-->
+		      <a href="https://<%=ctx.@CTAURL1%>" target="_blank" class="cta-btn primary" style="background-color: #016C42; background: linear-gradient(#016C42, #016C42); color: #FEFEFE;">
+			<div class="gmail-keep-white-screen"><div class="gmail-keep-white-difference">
+			  <span style="color: #FEFEFE;"><%=ctx.@CTATEXT1%></span>
+			</div></div>
+		      </a>
+		      <!--<![endif]-->
+		    </td>
+		  </tr>
+    <%} else if(ctx.@P_STYLING=='simple-primary' && ctx.@P_BACKGROUNDCOLOR!='white'){%><!-- M12 CTA Simple Primary colour -->
+    <tr>
+      <td align="center" valign="top">
+	<div id="CTA-with-link-colour">
+	  <table class="wFull smoke-bg" cellpadding="0" cellspacing="0" border="0" role="presentation" style="width: 600px; background-color: <%=ctx.@P_BACKGROUNDCOLOR%>;">
+	    <tr>
+	      <td class="tPad-8" align="center" valign="top" style="padding: 16px 0 32px;">
+		<table cellspacing="0" cellpadding="0" border="0" role="presentation" style="width: 100%;">
+		  <tr>
+		    <td class="xPad-16" align="center" valign="top" style="padding: 0 32px">
+		      <!--[if !mso]><!-->
+			<div style="display:none;">
+			  <!--<![endif]-->
+			    <v:roundrect style="v-text-anchor:middle; mso-wrap-style:none;" arcsize="60%" strokecolor="#016C42" strokeweight="2pt" fillcolor="#016C42">
+			      <v:textbox style="mso-fit-shape-to-text:true">
+				<center class="mso-keep-white" style="color:#FEFEFE; font-family:Helvetica, Arial, sans-serif; font-size:16px; font-weight:bold;">
+				  <a href="https://<%=ctx.@CTAURL1%>" target="_blank" style="color:#FEFEFE; text-decoration:none;"><!--[if mso]>
+				    <i style="mso-font-width:90%; mso-text-raise:42%;" hidden>&emsp;</i>
+				    <span style="mso-text-raise:25%;"><![endif]--><%=ctx.@CTATEXT1%><!--[if mso]></span>
+				    <i style="mso-font-width:100%;" hidden>&emsp;&#8203;</i>
+				  <![endif]--></a>
+				</center>
+			      </v:textbox>
+			    </v:roundrect>
+			  <!--[if !mso]><!-->
+			  </div>
+			  <!--<![endif]-->
+		      <!--[if !mso]><!-->
+		      <a href="https://<%=ctx.@CTAURL1%>" target="_blank" class="cta-btn primary" style="background-color: #016C42; background: linear-gradient(#016C42, #016C42); color: #FEFEFE;">
+			<div class="gmail-keep-white-screen"><div class="gmail-keep-white-difference">
+			  <span style="color: #FEFEFE;"><%=ctx.@CTATEXT1%></span>
+			</div></div>
+		      </a>
+		      <!--<![endif]-->
+		    </td>
+		  </tr>
+    <%} else if(ctx.@P_STYLING=='simple-secondary' && ctx.@P_BACKGROUNDCOLOR=='white'){%><!-- M12 CTA Simple Secondary white -->
+    <tr>
+      <td align="center" valign="top">
+	<div id="CTA-secondary">
+	  <table class="wFull carbon-bg" cellpadding="0" cellspacing="0" border="0" role="presentation" style="width: 600px; background-color: #FEFEFE;">
+	    <tr>
+	      <td class="tPad-8" align="center" valign="top" style="padding: 16px 0 32px;">
+		<table cellspacing="0" cellpadding="0" border="0" role="presentation" style="width: 100%;">
+		  <tr>
+		    <td class="xPad-16" align="center" valign="top" style="padding: 0 32px">
+		      <!--[if !mso]><!-->
+		      <div style="display:none;">
+		      <!--<![endif]-->
+			<v:roundrect style="v-text-anchor:middle; mso-wrap-style:none;" arcsize="60%" strokecolor="#016C42" strokeweight="2pt" fillcolor="none">
+			  <v:textbox style="mso-fit-shape-to-text:true">
+			    <center class="mso-keep-racing-green" style="color:#016C42; font-family:Helvetica, Arial, sans-serif; font-size:16px; font-weight:bold;">
+			      <a href="https://<%=ctx.@CTAURL1%>" target="_blank" style="color:#016C42; text-decoration:none;"><!--[if mso]>
+				<i style="mso-font-width:90%; mso-text-raise:42%;" hidden>&emsp;</i>
+				<span style="mso-text-raise:25%;"><![endif]--><%=ctx.@CTATEXT1%><!--[if mso]></span>
+				<i style="mso-font-width:100%;" hidden>&emsp;&#8203;</i>
+			      <![endif]--></a>
+			    </center>
+			  </v:textbox>
+			</v:roundrect>
+		      <!--[if !mso]><!-->
+		      </div>
+		      <!--<![endif]-->
+		      <!--[if !mso]><!-->
+		      <a href="https://<%=ctx.@CTAURL1%>" target="_blank" class="cta-btn secondary" style="color: #016C42; border: 2px solid #016C42; width: 170px;">
+			<span style="color: #016C42;"><%=ctx.@CTATEXT1%></span>
+		      </a>
+		      <!--<![endif]-->
+		    </td>
+		  </tr>
+    <%} else if(ctx.@P_STYLING=='simple-secondary' && ctx.@P_BACKGROUNDCOLOR!='white'){%><!-- M12 CTA Simple Secondary colour -->
+    <tr>
+      <td align="center" valign="top">
+	<div id="CTA-secondary-colour">
+	  <table class="wFull carbon-bg" cellpadding="0" cellspacing="0" border="0" role="presentation" style="width: 600px; background-color: <%=ctx.@P_BACKGROUNDCOLOR%>;">
+	    <tr>
+	      <td class="tPad-8" align="center" valign="top" style="padding: 16px 0 32px;">
+		<table cellspacing="0" cellpadding="0" border="0" role="presentation" style="width: 100%;">
+		  <tr>
+		    <td class="xPad-16" align="center" valign="top" style="padding: 0 32px">
+		      <!--[if !mso]><!-->
+		      <div style="display:none;">
+		      <!--<![endif]-->
+			<v:roundrect style="v-text-anchor:middle; mso-wrap-style:none;" arcsize="60%" strokecolor="#016C42" strokeweight="2pt" fillcolor="none">
+			  <v:textbox style="mso-fit-shape-to-text:true">
+			    <center class="mso-keep-racing-green" style="color:#016C42; font-family:Helvetica, Arial, sans-serif; font-size:16px; font-weight:bold;">
+			      <a href="https://<%=ctx.@CTAURL1%>" target="_blank" style="color:#016C42; text-decoration:none;"><!--[if mso]>
+				<i style="mso-font-width:90%; mso-text-raise:42%;" hidden>&emsp;</i>
+				<span style="mso-text-raise:25%;"><![endif]--><%=ctx.@CTATEXT1%><!--[if mso]></span>
+				<i style="mso-font-width:100%;" hidden>&emsp;&#8203;</i>
+			      <![endif]--></a>
+			    </center>
+			  </v:textbox>
+			</v:roundrect>
+		      <!--[if !mso]><!-->
+		      </div>
+		      <!--<![endif]-->
+		      <!--[if !mso]><!-->
+		      <a href="https://<%=ctx.@CTAURL1%>" target="_blank" class="cta-btn secondary" style="color: #016C42; border: 2px solid #016C42; width: 170px;">
+			<span style="color: #016C42;"><%=ctx.@CTATEXT1%></span>
+		      </a>
+		      <!--<![endif]-->
+		    </td>
+		  </tr> 
+    <%} if (ctx.@P_STYLING=='simple-primary' || ctx.@P_STYLING=='simple-secondary'){%>
+		  <%if (ctx.@COPYTEXT!=''){%>
+		  <tr>
+		    <td class="white-txt" align="center" valign="top">
+		      <%=ctx.@COPYTEXT%>
+		    </td>
+		  </tr>
+		  <%}%>
+		</table>
+	      </td>
+	    </tr>
+	 </table>
+	</div>
+      </td>
+    </tr>
+    <%}%>
+    <% if (ctx.@P_STYLING!='simple-primary' && ctx.@P_STYLING!='simple-secondary'){ if (ctx.@P_BACKGROUNDCOLOR=='white') {%><!-- M12 CTA Double White -->
+    <tr>
+      <td align="center" valign="top">
+	<div id="CTA-double">
+	  <table class="wFull carbon-bg" cellpadding="0" cellspacing="0" border="0" role="presentation" style="width: 600px; background-color: #FEFEFE;"><%}else{%><!-- M12 CTA Double Colour -->
+    <tr>
+      <td align="center" valign="top">
+	<div id="CTA-double-colour">
+	  <table class="wFull smoke-bg" cellpadding="0" cellspacing="0" border="0" role="presentation" style="width: 600px; background-color: <%=ctx.@P_BACKGROUNDCOLOR%>;"><%}%>
+	    <tr>
+	      <td class="xPad-16 tPad-8" align="center" valign="top" style="font-size:0; padding: 16px 20px 32px;"> <!--font-size:0; for div columns xPad=20px to allow button spacing -->
+		<!--[if (gte mso 9)|(IE)]>
+		<table cellpadding="0" cellspacing="0" border="0" role="presentation">
+		<tr><td valign="middle">
+		<![endif]-->
+		<div class="wFull mobile" style="display: table-cell; vertical-align: middle; width: auto;">
+		  <table cellspacing="0" cellpadding="0" border="0" role="presentation" style="width: 100%;">
+		    <tr>
+		      <td class="xPad-0" align="center" valign="top" style="padding: 0 12px;">
+			<!--[if !mso]><!-->
+			<div style="display:none">
+			<!--<![endif]-->
+			<v:roundrect xmlns:v="urn:schemas-microsoft-com:vml" xmlns:w="urn:schemas-microsoft-com:office:word" style="v-text-anchor:middle; width:250px; display:inline-block; border-radius:40px;" arcsize="60%" strokecolor="#016C42" strokeweight="2pt" fillcolor="#016C42">
+			<w:anchorlock/>
+			  <center class="mso-keep-white" style="color:#FEFEFE; font-family:Helvetica, Arial, sans-serif; font-size:16px; font-weight:bold;">
+			    <a href="https://<%=ctx.@CTAURL1%>" target="_blank" style="color:#FEFEFE; text-decoration:none;"><!--[if mso]>
+			      <i style="mso-font-width:90%; mso-text-raise:42%;" hidden>&emsp;</i>
+			      <span style="mso-text-raise:25%;"><![endif]--><%=ctx.@CTATEXT1%><!--[if mso]></span>
+			      <i style="mso-font-width:100%;" hidden>&emsp;&#8203;</i>
+			    <![endif]--></a>
+			  </center>
+			</v:roundrect>
+			<!--[if !mso]><!-->
+			</div>
+			<!--<![endif]-->
+			<!--[if !mso]><!-->
+			<a href="https://<%=ctx.@CTAURL1%>" target="_blank" class="cta-btn primary" style="background-color: #016C42; background: linear-gradient(#016C42, #016C42); color: #FEFEFE; width: 170px;">
+			  <div class="gmail-keep-white-screen"><div class="gmail-keep-white-difference">
+			    <span style="color: #FEFEFE;"><%=ctx.@CTATEXT1%></span>
+			  </div></div>
+			</a>
+			<!--<![endif]-->
+		      </td>
+		    </tr>
+		  </table>
+		</div>
+		<!--[if (gte mso 9)|(IE)]>
+		</td><td valign="middle">
+		<![endif]-->
+		<div class="wFull mobile" style="display: table-cell; vertical-align: middle; width: auto;">
+		  <table cellspacing="0" cellpadding="0" border="0" role="presentation" style="width: 100%;">
+		    <tr>
+		      <td class="xPad-0 tPad-24" align="center" valign="top" style="padding: 0 12px;">
+			<!--[if !mso]><!-->
+			<div style="display:none">
+			<!--<![endif]-->
+			<v:roundrect xmlns:v="urn:schemas-microsoft-com:vml" xmlns:w="urn:schemas-microsoft-com:office:word" style="v-text-anchor:middle; width:250px; display:inline-block; border-radius:40px;" arcsize="60%" strokecolor="#016C42" strokeweight="2pt" fillcolor="none">
+			<w:anchorlock/>
+			  <center class="mso-keep-racing-green" style="color:#016C42; font-family:Helvetica, Arial, sans-serif; font-size:16px; font-weight:bold;">
+			    <a href="https://<%=ctx.@CTAURL2%>" target="_blank" style="color:#016C42; text-decoration:none;"><!--[if mso]>
+			      <i style="mso-font-width:90%; mso-text-raise:42%;" hidden>&emsp;</i>
+			      <span style="mso-text-raise:25%;"><![endif]--><%=ctx.@CTATEXT2%><!--[if mso]></span>
+			      <i style="mso-font-width:100%;" hidden>&emsp;&#8203;</i>
+			    <![endif]--></a>
+			  </center>    
+			</v:roundrect>
+			<!--[if !mso]><!-->
+			</div>
+			<!--<![endif]-->
+			<!--[if !mso]><!-->
+			<a href="https://<%=ctx.@CTAURL2%>" target="_blank" class="cta-btn secondary" style="color: #016C42; border: 2px solid #016C42; width: 170px;">
+			  <span style="color: #016C42;"><%=ctx.@CTATEXT2%></span>
+			</a>
+			<!--<![endif]-->
+		      </td>
+		    </tr>
+		  </table>
+		</div>
+		<!--[if (gte mso 9)|(IE)]>
+		</td></tr></table>
+		<![endif]-->
+	      </td>
+	    </tr>
+	  </table>
+	</div>
+      </td>
+    </tr><%}%>
