@@ -437,6 +437,11 @@ public class RichTextFXEditor implements ICodeEditor {
         }
     }
 
+    @Override
+    public void openFindDialog(String fileName) {
+
+    }
+
     private void applyHighlightingStyles(String keyword, String string, String comment, String tag, String attribute, String scriptlet, String symbol) {
         String css = ".code-area { " +
         // "  -fx-background-color: linear-gradient(to right, -color-bg-subtle 0%, -color-bg-subtle 60px, -color-bg-default 60px, -color-bg-default 100%); " +

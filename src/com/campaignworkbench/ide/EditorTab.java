@@ -24,7 +24,8 @@ public final class EditorTab extends Tab {
 
         this.workspaceFile = workspaceFile;
 
-        this.editor = new RichTextFXEditor();
+        // this.editor = new RichTextFXEditor();
+        this.editor = new RSyntaxEditor();
         updateTabText();
 
         BorderPane root = new BorderPane();
@@ -36,30 +37,44 @@ public final class EditorTab extends Tab {
         editor.setCaretAtStart();
     }
 
-    public void setContextFile(Path contextFile) {
+    public void setDataContextFile(Path contextFile) {
         if (workspaceFile instanceof WorkspaceContextFile workspaceContextFile) {
-            workspaceContextFile.setXmlContextFile(contextFile);
+            workspaceContextFile.setDataContextFile(contextFile);
             updateTabText();
         } else {
             throw new IDEException("Attempted to set context on a non-context based EditorTab!", null);
         }
     }
 
-    public void clearContextFile() {
-        setContextFile(null);
+    public void clearDataContextFile() {
+        setDataContextFile(null);
+    }
+
+    public void setMessageContextFile(Path contextFile) {
+        if (workspaceFile instanceof Template template) {
+            template.setMessageContextFile(contextFile);
+            updateTabText();
+        } else {
+            throw new IDEException("Attempted to set context on a non-context based EditorTab!", null);
+        }
+    }
+
+    public void clearMessageContextFile() {
+        setMessageContextFile(null);
     }
 
     private void updateTabText() {
         String tabName = workspaceFile.getFileName().toString();
-
+        /*
         // If context is set, append that
         if (workspaceFile instanceof WorkspaceContextFile workspaceContextFile) {
-            if (workspaceContextFile.isContextSet()) {
-                tabName += " (" + workspaceContextFile.getContextFileName().toString() + ")";
+            if (workspaceContextFile.isDataContextSet()) {
+                tabName += " (" + workspaceContextFile.getDataContextFileName().toString() + ")";
             } else {
                 tabName += " (NOT CONTEXT SET)";
             }
         }
+        */
         setText(tabName);
     }
 
@@ -81,13 +96,13 @@ public final class EditorTab extends Tab {
 
     public boolean isContextSet() {
         if (workspaceFile instanceof WorkspaceContextFile workspaceContextFile) {
-            return workspaceContextFile.isContextSet();
+            return workspaceContextFile.isDataContextSet();
         } else {
             return false;
         }
     }
 
-    public Path getContextFilePath() {
+    public Path getDataContextFilePath() {
         if (workspaceFile instanceof WorkspaceContextFile workspaceContextFile) {
             return workspaceContextFile.getFilePath();
         } else {
@@ -95,9 +110,9 @@ public final class EditorTab extends Tab {
         }
     }
 
-    public String getContextFileContent() {
+    public String getDataContextFileContent() {
         if (workspaceFile instanceof WorkspaceContextFile workspaceContextFile) {
-            return workspaceContextFile.getContextContent();
+            return workspaceContextFile.getDataContextContent();
         } else {
             throw new IDEException("Attempted to get context from a non-context based EditorTab!", null);
         }
@@ -152,8 +167,17 @@ public final class EditorTab extends Tab {
         return workspaceFile.isTemplate();
     }
 
-    public boolean isContextApplicable() {
-        return workspaceFile.isContextApplicable();
+    public boolean isDataContextApplicable() {
+        return workspaceFile.isDataContextApplicable();
+    }
+
+    public boolean isMessageContextApplicable() {
+        return workspaceFile.isMessageContextApplicable();
+    }
+
+    public void openFindDialog() {
+        String fileName = workspaceFile!= null? workspaceFile.getBaseFileName() : "New File";
+        editor.openFindDialog(fileName);
     }
 
 }

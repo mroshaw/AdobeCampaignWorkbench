@@ -50,6 +50,8 @@ public class MainMenuBar implements IJavaFxNode {
             EventHandler<ActionEvent> saveCurrentFileHandler,
             EventHandler<ActionEvent> saveCurrentAsFileHandler,
 
+            EventHandler<ActionEvent> findHandler,
+
             EventHandler<ActionEvent> applyLightThemeHandler,
             EventHandler<ActionEvent> applyDarkThemeHandler,
 
@@ -121,6 +123,16 @@ public class MainMenuBar implements IJavaFxNode {
 
         fileMenu.getItems().addAll(newMenu, openMenu, addMenu, new SeparatorMenuItem(), saveCurrent, saveCurrentAs, saveWorkspaceMenu, new SeparatorMenuItem(), exitItem);
 
+        // Edit menu
+        Menu editMenu = new Menu("Edit");
+        MenuItem findMenu = new MenuItem("Find");
+        findMenu.setAccelerator(
+                new KeyCodeCombination(KeyCode.F, KeyCombination.CONTROL_DOWN)
+        );
+        findMenu.setOnAction(findHandler);
+
+        editMenu.getItems().add(findMenu);
+
         // View menu
         Menu viewMenu = new Menu("View");
         MenuItem darkThemeItem = new MenuItem("Dark Theme");
@@ -139,7 +151,7 @@ public class MainMenuBar implements IJavaFxNode {
 
 
         // --- Add menus to menu bar ---
-        menuBar.getMenus().addAll(fileMenu, viewMenu, helpMenu);
+        menuBar.getMenus().addAll(fileMenu, editMenu, viewMenu, helpMenu);
     }
 
     /**

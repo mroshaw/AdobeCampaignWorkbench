@@ -3,6 +3,7 @@ package com.campaignworkbench.ide;
 import atlantafx.base.theme.CupertinoDark;
 import atlantafx.base.theme.CupertinoLight;
 import com.campaignworkbench.campaignrenderer.*;
+import com.campaignworkbench.ide.editor.RSyntaxFindDialog;
 import com.campaignworkbench.ide.editor.SyntaxType;
 import javafx.application.Application;
 import javafx.application.Platform;
@@ -33,13 +34,15 @@ public class CampaignWorkbenchIDE extends Application {
      */
     private Workspace currentWorkspace;
     private WorkspaceExplorer workspaceExplorer;
-    private ToolBar toolBar;
+    private MainToolBar toolBar;
     private EditorTabPanel editorTabPanel;
     private LogPanel logPanel;
     private ErrorLogPanel errorLogPanel;
     private OutputPreviewPanel previewPanel;
     private SourcePreviewPanel postSourcePanel;
     private SourcePreviewPanel preSourcePanel;
+
+    private EditorTab currentEditorTab;
 
     /**
      * Main entry point for the application
@@ -78,6 +81,7 @@ public class CampaignWorkbenchIDE extends Application {
 
                 event -> saveCurrent(),
                 event -> saveCurrentAs(),
+                event -> openFind(),
 
                 event -> applyTheme(IDETheme.LIGHT),
                 event -> applyTheme(IDETheme.DARK),
@@ -86,9 +90,11 @@ public class CampaignWorkbenchIDE extends Application {
                 event -> exitApplication()
         );
 
-        toolBar = new ToolBar(event -> openWorkspace(),
-                event -> setContextXml(),
-                event -> clearContextXml(),
+        toolBar = new MainToolBar(event -> openWorkspace(),
+                event -> setDataContext(),
+                event -> clearDataContext(),
+                event -> setMessageContext(),
+                event -> clearMessageContext(),
                 event -> runTemplate());
 
         // Workspace Explorer
@@ -131,7 +137,7 @@ public class CampaignWorkbenchIDE extends Application {
         SplitPane previewSplitPane = new SplitPane();
         previewSplitPane.setOrientation(Orientation.VERTICAL);
         previewSplitPane.getItems().addAll(previewPanel.getNode(), postSourcePanel.getNode(), preSourcePanel.getNode());
-        previewSplitPane.setDividerPositions(0.33, 0.66);
+        previewSplitPane.setDividerPositions(0.5, 0.75);
         // Workspace explorer (left-most pane)
 
         // --- Split: Workspace Explorer | Editor Tabs ---
@@ -141,7 +147,7 @@ public class CampaignWorkbenchIDE extends Application {
                 workspaceExplorer.getNode(),
                 editorTabPanel.getNode()
         );
-        workspaceEditorSplit.setDividerPositions(0.3);
+        workspaceEditorSplit.setDividerPositions(0.25);
         SplitPane.setResizableWithParent(workspaceExplorer.getNode(), false);
 
         // --- Right pane (holds preview split) ---
@@ -155,7 +161,7 @@ public class CampaignWorkbenchIDE extends Application {
                 workspaceEditorSplit,
                 previewPane
         );
-        editorPreviewSplit.setDividerPositions(0.6);
+        editorPreviewSplit.setDividerPositions(0.75);
         SplitPane.setResizableWithParent(previewSplitPane, false);
 
         VBox topBar = new VBox(menuBar.getNode(), toolBar.getNode());
@@ -163,17 +169,17 @@ public class CampaignWorkbenchIDE extends Application {
         SplitPane rootSplitPane = new SplitPane();
         rootSplitPane.setOrientation(Orientation.VERTICAL);
         rootSplitPane.getItems().addAll(editorPreviewSplit, logSplitPane); // logBox = VBox with logLabel + logArea
-        rootSplitPane.setDividerPositions(0.8); // 80% main area, 20% log initially
+        rootSplitPane.setDividerPositions(0.9);
 
         // --- Root BorderPane ---
         BorderPane root = new BorderPane();
         root.setTop(topBar);
         root.setCenter(rootSplitPane);
-        Scene scene = new Scene(root, 1200, 800);
+        Scene scene = new Scene(root, 1600, 900);
         primaryStage.setScene(scene);
         primaryStage.show();
 
-        toolBar.setContextXmlState(false);
+        toolBar.setDataContextState(false);
 
         ThemeManager.applyCurrentTheme();
 
@@ -261,8 +267,12 @@ public class CampaignWorkbenchIDE extends Application {
     private void tabPanelChanged(Tab tab) {
         if (tab instanceof EditorTab editorTab) {
             toolBar.setRunButtonState(editorTab.isTemplateTab());
-            toolBar.setContextXmlState(editorTab.isContextApplicable());
-            toolBar.setClearContextXmlState(editorTab.isContextApplicable());
+            toolBar.setDataContextState(editorTab.isDataContextApplicable());
+            toolBar.setMessageContextState(editorTab.isMessageContextApplicable());
+            toolBar.setClearDataContextState(editorTab.isDataContextApplicable());
+            toolBar.setClearMessageContextState(editorTab.isMessageContextApplicable());
+
+            currentEditorTab = editorTab;
         }
     }
 
@@ -345,7 +355,25 @@ public class CampaignWorkbenchIDE extends Application {
     /**
      * Sets the XML context for the currently selected tab file
      */
-    private void setContextXml() {
+    private void setDataContext() {
+        File selectedFile = openContextXmlFile();
+        if (selectedFile != null && selectedFile.getName().endsWith(".xml")) {
+            editorTabPanel.setSelectedDataContextFile(selectedFile.toPath());
+            workspaceExplorer.refreshWorkspace();
+            saveWorkspace();
+        }
+    }
+
+    private void setMessageContext() {
+        File selectedFile = openContextXmlFile();
+        if (selectedFile != null && selectedFile.getName().endsWith(".xml")) {
+            editorTabPanel.setSelectedMessageContextFile(selectedFile.toPath());
+            workspaceExplorer.refreshWorkspace();
+            saveWorkspace();
+        }
+    }
+
+    private File openContextXmlFile() {
         FileChooser fileChooser = new FileChooser();
         fileChooser.setTitle("Open File");
         fileChooser.setInitialDirectory(
@@ -360,15 +388,25 @@ public class CampaignWorkbenchIDE extends Application {
 
         if (selectedFile != null && selectedFile.getName().endsWith(".xml")) {
 
-            editorTabPanel.setSelectedContextFile(selectedFile.toPath());
+            return selectedFile;
         }
+        return null;
     }
+
 
     /**
      * Clears the current XML context
      */
-    private void clearContextXml() {
-        editorTabPanel.clearSelectedContextFile();
+    private void clearDataContext() {
+        editorTabPanel.clearSelectedDataContextFile();
+        workspaceExplorer.refreshWorkspace();
+        saveWorkspace();
+    }
+
+    private void clearMessageContext() {
+        editorTabPanel.clearSelectedMessageContextFile();
+        workspaceExplorer.refreshWorkspace();
+        saveWorkspace();
     }
 
     /**
@@ -380,7 +418,8 @@ public class CampaignWorkbenchIDE extends Application {
         FileChooserConfig chooserConfig = getFileChooserConfig(fileType);
 
         fileChooser.setTitle(chooserConfig.title());
-        fileChooser.setInitialDirectory(chooserConfig.defaultFolder());;
+        fileChooser.setInitialDirectory(chooserConfig.defaultFolder());
+        ;
         fileChooser.getExtensionFilters().addAll(
                 new FileChooser.ExtensionFilter(chooserConfig.description(), chooserConfig.extension())
         );
@@ -391,6 +430,7 @@ public class CampaignWorkbenchIDE extends Application {
         try {
             currentWorkspace.addExistingWorkspaceFile(selectedFile.toPath(), fileType);
             workspaceExplorer.refreshWorkspace();
+            saveWorkspace();
         } catch (IDEException ideEx) {
             reportError("An error occurred while adding an existing file of type: " + fileType, ideEx, true);
         }
@@ -413,10 +453,11 @@ public class CampaignWorkbenchIDE extends Application {
             return;
         }
 
-        if(currentWorkspace != null) {
+        if (currentWorkspace != null) {
             try {
                 currentWorkspace.addNewWorkspaceFile(selectedFile.toPath(), fileType);
                 workspaceExplorer.refreshWorkspace();
+                saveWorkspace();
             } catch (IDEException ideEx) {
                 reportError("An error occurred while creating an new file of type: " + fileType, ideEx, true);
             }
@@ -490,6 +531,12 @@ public class CampaignWorkbenchIDE extends Application {
 
     }
 
+    private void openFind() {
+        if(currentEditorTab != null) {
+            currentEditorTab.openFindDialog();
+        }
+    }
+
     /**
      * Runs the template in the currently selected editor tab
      */
@@ -501,11 +548,11 @@ public class CampaignWorkbenchIDE extends Application {
         }
 
         errorLogPanel.clearErrors();
-
+        saveWorkspace();
         try {
             WorkspaceFile selectedWorkspaceFile = editorTabPanel.getSelectedWorkspaceFile();
 
-            if(selectedWorkspaceFile instanceof WorkspaceContextFile workspaceContextFile) {
+            if (selectedWorkspaceFile instanceof Template workspaceContextFile) {
 
                 TemplateRenderResult renderResult = TemplateRenderer.render(
                         currentWorkspace,

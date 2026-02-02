@@ -1,15 +1,8 @@
 package com.campaignworkbench.campaignrenderer;
 import com.campaignworkbench.util.FileUtil;
-import com.fasterxml.jackson.annotation.JsonAutoDetect;
-import com.fasterxml.jackson.annotation.JsonProperty;
 
 import java.nio.file.Path;
-@JsonAutoDetect(
-        fieldVisibility = JsonAutoDetect.Visibility.ANY,
-        getterVisibility = JsonAutoDetect.Visibility.NONE,
-        setterVisibility = JsonAutoDetect.Visibility.NONE,
-        isGetterVisibility = JsonAutoDetect.Visibility.NONE
-)
+
 public class WorkspaceFile {
 
     private Path workspaceFilePath;
@@ -46,9 +39,13 @@ public class WorkspaceFile {
         return workspaceFileType == Workspace.WorkspaceFileType.TEMPLATE;
     }
 
-    public boolean isContextApplicable() {
+    public boolean isDataContextApplicable() {
         return workspaceFileType == Workspace.WorkspaceFileType.TEMPLATE ||
             workspaceFileType == Workspace.WorkspaceFileType.MODULE;
+    }
+
+    public boolean isMessageContextApplicable() {
+        return workspaceFileType == Workspace.WorkspaceFileType.TEMPLATE;
     }
 
     public Path getFilePath() {

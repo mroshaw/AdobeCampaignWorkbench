@@ -29,8 +29,8 @@ public class SourcePreviewPanel implements IJavaFxNode {
      */
     public SourcePreviewPanel(String label, SyntaxType syntaxType) {
         // this.editor = new MonacoFXEditor();
-        this.editor = new RichTextFXEditor();
-        // this.editor = new RSyntaxEditor();
+        // this.editor = new RichTextFXEditor();
+        this.editor = new RSyntaxEditor();
         sourcePreviewLabel = new Label(label);
         sourcePreviewLabel.setPadding(new Insets(0,0, 0,5));
         // sourcePreviewLabel.setStyle("-fx-font-weight: bold;");

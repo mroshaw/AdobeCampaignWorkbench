@@ -18,6 +18,7 @@ public class EditorTabPanel implements IJavaFxNode {
 
     /**
      * Constructor
+     *
      * @param tabChangedListener action to call when the tab is changed
      */
     public EditorTabPanel(ChangeListener<Tab> tabChangedListener) {
@@ -39,6 +40,7 @@ public class EditorTabPanel implements IJavaFxNode {
     /**
      * Finds and selects a tab by its file path, or opens it if not found.
      * Then jumps to the specified line.
+     *
      * @param path The path to the file
      * @param line The line number to jump to (1-indexed)
      */
@@ -79,6 +81,7 @@ public class EditorTabPanel implements IJavaFxNode {
 
     /**
      * Gets the window underlying the tab panel
+     *
      * @return the underlying tab window
      */
     public Window getWindow() {
@@ -87,10 +90,13 @@ public class EditorTabPanel implements IJavaFxNode {
 
     /**
      * Adds a new Editor Tab to the Tab Panel
+     *
      * @param workspaceFile workspace file to be edited in the tab
      */
-    public void addEditorTab(WorkspaceFile workspaceFile)
-    {
+    public void addEditorTab(WorkspaceFile workspaceFile) {
+        if (isOpened(workspaceFile.getFilePath())) {
+            return;
+        }
         EditorTab tab = new EditorTab(workspaceFile);
         tab.setClosable(true);
         tabPane.getTabs().add(tab);
@@ -101,21 +107,30 @@ public class EditorTabPanel implements IJavaFxNode {
         return getSelected().getWorkspaceFile();
     }
 
-    public void clearSelectedContextFile() {
-        getSelected().clearContextFile();
+    public void clearSelectedDataContextFile() {
+        getSelected().clearDataContextFile();
     }
 
-    public void setSelectedContextFile(Path contextFile) {
-        getSelected().setContextFile(contextFile);
+    public void setSelectedDataContextFile(Path contextFile) {
+        getSelected().setDataContextFile(contextFile);
     }
 
-    public Path getSelectedContextFile() {
-        return getSelected().getContextFilePath();
+    public void clearSelectedMessageContextFile() {
+        getSelected().clearDataContextFile();
     }
 
-    public String getSelectedContextFileContent() {
-        return getSelected().getContextFileContent();
+    public void setSelectedMessageContextFile(Path contextFile) {
+        getSelected().setMessageContextFile(contextFile);
     }
+
+    public Path getSelectedDataContextFile() {
+        return getSelected().getDataContextFilePath();
+    }
+
+    public String getSelectedDataContextFileContent() {
+        return getSelected().getDataContextFileContent();
+    }
+
     /**
      * @return the file from the currently selected tab
      */
@@ -143,7 +158,7 @@ public class EditorTabPanel implements IJavaFxNode {
     }
 
     private EditorTab getSelected() {
-        return (EditorTab)tabPane.getSelectionModel().getSelectedItem();
+        return (EditorTab) tabPane.getSelectionModel().getSelectedItem();
     }
 
     /**

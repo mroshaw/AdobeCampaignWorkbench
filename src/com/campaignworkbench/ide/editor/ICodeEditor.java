@@ -64,4 +64,6 @@ public interface ICodeEditor {
      */
     public void applyTheme(IDETheme theme);
 
+    public void openFindDialog(String fileName);
+
 }

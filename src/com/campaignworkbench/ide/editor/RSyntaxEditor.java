@@ -6,8 +6,13 @@ import javafx.application.Platform;
 import javafx.embed.swing.SwingNode;
 import javafx.scene.Node;
 
+import javafx.stage.Stage;
+import org.fife.rsta.ac.LanguageSupportFactory;
 import org.fife.ui.rsyntaxtextarea.*;
 import org.fife.ui.rtextarea.RTextScrollPane;
+import org.fife.ui.rtextarea.SearchContext;
+import org.fife.ui.rtextarea.SearchEngine;
+import org.fife.ui.rtextarea.SearchResult;
 
 import javax.swing.*;
 import java.io.IOException;
@@ -17,7 +22,6 @@ import java.util.Queue;
 /**
  * Provided an implementation of the ICodeEditor interface using the RSyntaxTextArea control
  */
-@Deprecated
 public class RSyntaxEditor implements ICodeEditor {
 
     private final SwingNode swingNode = new SwingNode();
@@ -25,6 +29,8 @@ public class RSyntaxEditor implements ICodeEditor {
      * The underlying RSyntaxTextArea component
      */
     private RSyntaxTextArea rSyntaxTextArea;
+
+    private RSyntaxFindDialog findDialog;
 
     // Queue all actions until RSyntaxTextArea is ready
     private final Queue<Runnable> pendingActions = new ArrayDeque<>();
@@ -37,6 +43,10 @@ public class RSyntaxEditor implements ICodeEditor {
             initSwing();
             ThemeManager.register(this);
         });
+    }
+
+    public RSyntaxTextArea getrSyntaxTextArea() {
+        return rSyntaxTextArea;
     }
 
     /**
@@ -52,9 +62,13 @@ public class RSyntaxEditor implements ICodeEditor {
             rSyntaxTextArea.setMarkOccurrences(true);
             rSyntaxTextArea.setClearWhitespaceLinesEnabled(false);
             rSyntaxTextArea.setCursor(java.awt.Cursor.getPredefinedCursor(java.awt.Cursor.TEXT_CURSOR));
+            rSyntaxTextArea.setLineWrap(true);
+            LanguageSupportFactory.get().register(rSyntaxTextArea);
 
             RTextScrollPane scrollPane = new RTextScrollPane(rSyntaxTextArea);
             scrollPane.setFoldIndicatorEnabled(true);
+
+            findDialog = new RSyntaxFindDialog(rSyntaxTextArea, (Stage) getNode().getScene().getWindow());
 
             swingNode.setContent(scrollPane);
             swingNode.setCursor(javafx.scene.Cursor.TEXT);
@@ -158,7 +172,7 @@ public class RSyntaxEditor implements ICodeEditor {
     public void applyTheme(IDETheme ideTheme) {
         try {
             String themePath = switch (ideTheme) {
-                case DARK -> "/rsyntaxtextarea/themes/dark.xml";
+                case DARK -> "/rsyntaxtextarea/themes/monokai.xml";
                 default -> "/rsyntaxtextarea/themes/default.xml";
             };
             Theme themeToApply = Theme.load(getClass().getResourceAsStream(themePath));
@@ -166,6 +180,11 @@ public class RSyntaxEditor implements ICodeEditor {
         } catch (IOException ioe) { // Never happens
             ioe.printStackTrace();
         }
+    }
+
+    @Override
+    public void openFindDialog(String fileName) {
+        findDialog.show(fileName);
     }
 
     /**

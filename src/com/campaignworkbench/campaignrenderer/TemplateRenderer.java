@@ -45,7 +45,7 @@ public final class TemplateRenderer {
      */
     public static TemplateRenderResult render(
             Workspace workspace,
-            WorkspaceContextFile workspaceContextFile
+            Template workspaceContextFile
     ) {
         sourceMappings.get().clear();
         lineMappings.get().clear();
@@ -53,8 +53,16 @@ public final class TemplateRenderer {
         String expanded = "";
 
         // Get the template context
-        Path xmlContextFile = workspaceContextFile.getContextFilePath();
-        String xmlContextContent = workspaceContextFile.getContextContent();
+        Path dataContextFile = workspaceContextFile.getDataContextFilePath();
+        String dataContextContent = workspaceContextFile.getDataContextContent();
+
+        // Add 'rtEvent' wrapper if give <ctx> root
+        if(dataContextContent.startsWith("<ctx>")) {
+            dataContextContent = "<rtEvent>" + dataContextContent + "</rtEvent>";
+        }
+
+        Path messageContextFile = workspaceContextFile.getMessageContextFilePath();
+        String messageContextContent = workspaceContextFile.getMessageContextContent();
 
         String templateSource = workspaceContextFile.getWorkspaceFileContent();
         String sourceName = workspaceContextFile.getFileName().toString();
@@ -66,15 +74,27 @@ public final class TemplateRenderer {
 
             Scriptable scope = cx.initStandardObjects();
 
+            // Add the Data Context
             cx.evaluateString(
                     scope,
-                    "var rtEvent = new XML(`" + xmlContextContent + "`);",
-                    xmlContextFile.getFileName().toString(),
+                    "var rtEvent = new XML(`" + dataContextContent + "`);",
+                    dataContextFile.getFileName().toString(),
                     1,
                     null
             );
 
-            scope.put("xmlContext", scope, xmlContextContent);
+            scope.put("xmlContext", scope, dataContextContent);
+
+            // Add the Message Context
+            cx.evaluateString(
+                    scope,
+                    "var message = new XML(`" + messageContextContent + "`);",
+                    messageContextFile.getFileName().toString(),
+                    1,
+                    null
+            );
+
+            scope.put("xmlContext", scope, messageContextContent);
 
             injectStandardFunctions(cx, scope);
 
@@ -248,7 +268,7 @@ public final class TemplateRenderer {
 
                     try {
 
-                        if(!module.isContextSet()) {
+                        if(!module.isDataContextSet()) {
                             throw new RendererParseException(
                                     "Context is not set on module: " + name,
                                     workspaceFile,

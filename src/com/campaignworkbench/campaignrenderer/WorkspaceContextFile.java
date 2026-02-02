@@ -1,17 +1,9 @@
 package com.campaignworkbench.campaignrenderer;
 
-import com.fasterxml.jackson.annotation.JsonAutoDetect;
-
 import java.nio.file.Path;
 
-@JsonAutoDetect(
-        fieldVisibility = JsonAutoDetect.Visibility.ANY,
-        getterVisibility = JsonAutoDetect.Visibility.NONE,
-        setterVisibility = JsonAutoDetect.Visibility.NONE,
-        isGetterVisibility = JsonAutoDetect.Visibility.NONE
-)
 public class WorkspaceContextFile extends WorkspaceFile {
-    private Path contextFilePath;
+    private Path dataContextFilePath;
 
     public WorkspaceContextFile() { super(); }
 
@@ -19,27 +11,27 @@ public class WorkspaceContextFile extends WorkspaceFile {
         super(filePath, fileType);
     }
 
-    public void setXmlContextFile(Path contextFilePath) {
-        this.contextFilePath = contextFilePath;
+    public void setDataContextFile(Path contextFilePath) {
+        this.dataContextFilePath = contextFilePath;
     }
 
-    public void clearContext() {
-        contextFilePath = null;
+    public void clearDataContext() {
+        dataContextFilePath = null;
     }
 
-    public boolean isContextSet() {
-        return contextFilePath != null;
+    public boolean isDataContextSet() {
+        return dataContextFilePath != null;
     }
 
-    public Path getContextFilePath() {
-        return contextFilePath;
+    public Path getDataContextFilePath() {
+        return dataContextFilePath;
     }
 
-    public Path getContextFileName() {
-        return contextFilePath.getFileName();
+    public Path getDataContextFileName() {
+        return dataContextFilePath == null ? null : dataContextFilePath.getFileName();
     }
 
-    public String getContextContent() {
-        return super.getFileContent(contextFilePath);
+    public String getDataContextContent() {
+        return super.getFileContent(dataContextFilePath);
     }
 }

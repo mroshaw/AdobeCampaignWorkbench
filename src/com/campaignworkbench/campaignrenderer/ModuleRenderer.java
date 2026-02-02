@@ -26,8 +26,8 @@ public final class ModuleRenderer {
     ) {
 
         // Get the module context
-        Path xmlContextFile = workspaceContextFile.getContextFilePath();
-        String xmlContextContent = workspaceContextFile.getContextContent();
+        Path xmlContextFile = workspaceContextFile.getDataContextFilePath();
+        String xmlContextContent = workspaceContextFile.getDataContextContent();
 
         String moduleSource = workspaceContextFile.getWorkspaceFileContent();
         String sourceName = workspaceContextFile.getFileName().toString();
