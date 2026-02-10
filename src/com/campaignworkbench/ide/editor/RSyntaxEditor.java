@@ -1,11 +1,13 @@
 package com.campaignworkbench.ide.editor;
 
 import com.campaignworkbench.ide.IDETheme;
+import com.campaignworkbench.ide.IThemeable;
 import com.campaignworkbench.ide.ThemeManager;
 import javafx.application.Platform;
 import javafx.embed.swing.SwingNode;
 import javafx.scene.Node;
 
+import javafx.scene.Parent;
 import javafx.stage.Stage;
 import org.fife.rsta.ac.LanguageSupportFactory;
 import org.fife.ui.rsyntaxtextarea.*;
@@ -22,7 +24,7 @@ import java.util.Queue;
 /**
  * Provided an implementation of the ICodeEditor interface using the RSyntaxTextArea control
  */
-public class RSyntaxEditor implements ICodeEditor {
+public class RSyntaxEditor implements ICodeEditor, IThemeable {
 
     private final SwingNode swingNode = new SwingNode();
     /**
@@ -62,7 +64,7 @@ public class RSyntaxEditor implements ICodeEditor {
             rSyntaxTextArea.setMarkOccurrences(true);
             rSyntaxTextArea.setClearWhitespaceLinesEnabled(false);
             rSyntaxTextArea.setCursor(java.awt.Cursor.getPredefinedCursor(java.awt.Cursor.TEXT_CURSOR));
-            rSyntaxTextArea.setLineWrap(true);
+            // rSyntaxTextArea.setLineWrap(true);
             LanguageSupportFactory.get().register(rSyntaxTextArea);
 
             RTextScrollPane scrollPane = new RTextScrollPane(rSyntaxTextArea);
@@ -87,12 +89,18 @@ public class RSyntaxEditor implements ICodeEditor {
 
     @Override
     public void refreshContent() {
-        runOrQueue(this::validateAndRepaint);
-    }
+        Platform.runLater(() -> {
+            Parent parent = (Parent) swingNode.getParent();
+            if (parent != null) {
+                parent.requestLayout();   // public API
+            }
 
-    private void validateAndRepaint() {
-        rSyntaxTextArea.revalidate();
-        rSyntaxTextArea.repaint();
+            SwingUtilities.invokeLater(() -> {
+                rSyntaxTextArea.revalidate();
+                rSyntaxTextArea.repaint();
+            });
+        });
+
     }
 
     @Override
@@ -168,7 +176,6 @@ public class RSyntaxEditor implements ICodeEditor {
         });
     }
 
-    @Override
     public void applyTheme(IDETheme ideTheme) {
         try {
             String themePath = switch (ideTheme) {

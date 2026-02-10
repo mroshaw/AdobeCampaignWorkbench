@@ -3,6 +3,7 @@ package com.campaignworkbench.ide;
 import com.campaignworkbench.campaignrenderer.*;
 import com.campaignworkbench.ide.editor.*;
 import javafx.scene.control.Tab;
+import javafx.scene.control.ToolBar;
 import javafx.scene.layout.BorderPane;
 
 import java.nio.file.Path;
@@ -12,6 +13,7 @@ import java.nio.file.Path;
  */
 public final class EditorTab extends Tab {
 
+    private final ToolBar toolBar;
     private final WorkspaceFile workspaceFile;
     private final ICodeEditor editor;
 
@@ -27,6 +29,8 @@ public final class EditorTab extends Tab {
         // this.editor = new RichTextFXEditor();
         this.editor = new RSyntaxEditor();
         updateTabText();
+
+        toolBar = new ToolBar();
 
         BorderPane root = new BorderPane();
         root.setCenter(editor.getNode());
@@ -65,16 +69,6 @@ public final class EditorTab extends Tab {
 
     private void updateTabText() {
         String tabName = workspaceFile.getFileName().toString();
-        /*
-        // If context is set, append that
-        if (workspaceFile instanceof WorkspaceContextFile workspaceContextFile) {
-            if (workspaceContextFile.isDataContextSet()) {
-                tabName += " (" + workspaceContextFile.getDataContextFileName().toString() + ")";
-            } else {
-                tabName += " (NOT CONTEXT SET)";
-            }
-        }
-        */
         setText(tabName);
     }
 

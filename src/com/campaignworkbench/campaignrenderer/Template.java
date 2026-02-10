@@ -12,34 +12,38 @@ import java.nio.file.Path;
 )
 public class Template extends WorkspaceContextFile {
     public Template(Path filePath) {
-        super(filePath, Workspace.WorkspaceFileType.TEMPLATE);
+        super(filePath, WorkspaceFileType.TEMPLATE);
     }
 
     public Template() {}
 
-    private Path messageContextFilePath;
+    private WorkspaceFile messageContextFile;
 
     public void setMessageContextFile(Path contextFilePath) {
-        messageContextFilePath = contextFilePath;
+        messageContextFile = new WorkspaceFile(contextFilePath, WorkspaceFileType.CONTEXT);
     }
 
     public void clearMessageContext() {
-        messageContextFilePath = null;
+        messageContextFile = null;
     }
 
     public boolean isMessageContextSet() {
-        return messageContextFilePath != null;
+        return messageContextFile != null;
+    }
+
+    public WorkspaceFile getMessageContextFile() {
+        return messageContextFile;
     }
 
     public Path getMessageContextFilePath() {
-        return messageContextFilePath;
+        return messageContextFile.getFilePath();
     }
 
     public Path getMessageContextFileName() {
-        return messageContextFilePath == null ? null : messageContextFilePath.getFileName();
+        return messageContextFile == null ? null : messageContextFile.getFileName();
     }
 
     public String getMessageContextContent() {
-        return super.getFileContent(messageContextFilePath);
+        return messageContextFile.getWorkspaceFileContent();
     }
 }

@@ -58,12 +58,6 @@ public interface ICodeEditor {
      */
     public void gotoLine(int line);
 
-    /**
-     * Applies a theme to the editor
-     * @param theme the theme to apply
-     */
-    public void applyTheme(IDETheme theme);
-
     public void openFindDialog(String fileName);
 
 }

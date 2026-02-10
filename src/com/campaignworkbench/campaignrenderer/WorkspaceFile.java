@@ -1,18 +1,24 @@
 package com.campaignworkbench.campaignrenderer;
 import com.campaignworkbench.util.FileUtil;
+import com.fasterxml.jackson.annotation.JsonAutoDetect;
 
 import java.nio.file.Path;
 
+@JsonAutoDetect(
+        fieldVisibility = JsonAutoDetect.Visibility.ANY,
+        getterVisibility = JsonAutoDetect.Visibility.NONE,
+        setterVisibility = JsonAutoDetect.Visibility.NONE,
+        isGetterVisibility = JsonAutoDetect.Visibility.NONE
+)
 public class WorkspaceFile {
 
     private Path workspaceFilePath;
-
-    private Workspace.WorkspaceFileType workspaceFileType;
+    private WorkspaceFileType workspaceFileType;
 
     public WorkspaceFile() {
     }
 
-    public WorkspaceFile(Path filePath, Workspace.WorkspaceFileType fileType) {
+    public WorkspaceFile(Path filePath, WorkspaceFileType fileType) {
         workspaceFilePath = filePath;
         workspaceFileType = fileType;
     }
@@ -31,21 +37,21 @@ public class WorkspaceFile {
         }
     }
 
-    public Workspace.WorkspaceFileType getWorkspaceFileType() {
+    public WorkspaceFileType getWorkspaceFileType() {
         return workspaceFileType;
     }
 
     public boolean isTemplate() {
-        return workspaceFileType == Workspace.WorkspaceFileType.TEMPLATE;
+        return workspaceFileType == WorkspaceFileType.TEMPLATE;
     }
 
     public boolean isDataContextApplicable() {
-        return workspaceFileType == Workspace.WorkspaceFileType.TEMPLATE ||
-            workspaceFileType == Workspace.WorkspaceFileType.MODULE;
+        return workspaceFileType == WorkspaceFileType.TEMPLATE ||
+            workspaceFileType == WorkspaceFileType.MODULE;
     }
 
     public boolean isMessageContextApplicable() {
-        return workspaceFileType == Workspace.WorkspaceFileType.TEMPLATE;
+        return workspaceFileType == WorkspaceFileType.TEMPLATE;
     }
 
     public Path getFilePath() {

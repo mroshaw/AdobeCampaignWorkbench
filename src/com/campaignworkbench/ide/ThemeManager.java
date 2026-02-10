@@ -1,7 +1,6 @@
 package com.campaignworkbench.ide;
 
 import com.campaignworkbench.ide.editor.ICodeEditor;
-import javafx.scene.Scene;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -12,7 +11,7 @@ import java.util.List;
 public final class ThemeManager {
 
     private static IDETheme currentTheme = IDETheme.DARK;
-    private static final List<ICodeEditor> editors = new ArrayList<>();
+    private static final List<IThemeable> themeables = new ArrayList<>();
 
     private ThemeManager() {}
 
@@ -20,8 +19,8 @@ public final class ThemeManager {
      * Registers an editor to receive theme updates
      * @param editor the editor to register
      */
-    public static void register(ICodeEditor editor) {
-        editors.add(editor);
+    public static void register(IThemeable editor) {
+        themeables.add(editor);
         editor.applyTheme(currentTheme);
     }
 
@@ -40,8 +39,8 @@ public final class ThemeManager {
         currentTheme = theme;
 
         CampaignWorkbenchIDE.setTheme(theme);
-        for (ICodeEditor editor : editors) {
-            editor.applyTheme(theme);
+        for (IThemeable themeable : themeables) {
+            themeable.applyTheme(theme);
         }
     }
 }

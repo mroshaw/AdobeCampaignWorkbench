@@ -1,6 +1,7 @@
 package com.campaignworkbench.ide.editor;
 
 import com.campaignworkbench.ide.IDETheme;
+import com.campaignworkbench.ide.IThemeable;
 import com.campaignworkbench.ide.ThemeManager;
 import javafx.application.Platform;
 import javafx.scene.Node;
@@ -25,7 +26,7 @@ import java.util.regex.Pattern;
 /**
  * Implementation of ICodeEditor using the RichTextFX library
  */
-public class RichTextFXEditor implements ICodeEditor {
+public class RichTextFXEditor implements ICodeEditor, IThemeable {
 
     private final CodeArea codeArea;
     private final VirtualizedScrollPane<CodeArea> scrollPane;

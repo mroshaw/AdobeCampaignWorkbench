@@ -27,8 +27,6 @@ public class Workspace {
 
     private static final String workspacesRootName = "Workspaces";
 
-    public enum WorkspaceFileType {TEMPLATE, MODULE, BLOCK, CONTEXT}
-
     private Path configFilePath;
     private Path rootFolderPath;
     private ArrayList<Template> templates;
@@ -166,24 +164,8 @@ public class Workspace {
     }
 
     /**
-     * @return all files in the current workspace
-     */
-    public List<File> getAllFiles() {
-        return REQUIRED.stream()
-                .flatMap(name -> {
-                    File d = rootFolderPath.resolve(name).toFile();
-                    return d.isDirectory()
-                            ? Arrays.stream(d.listFiles())
-                            : Stream.empty();
-                })
-                .toList();
-    }
-
-
-    /**
      * @param workspaceRootPath Root path of the workspace JSON file
      */
-
     public void openWorkspace(Path workspaceRootPath) {
         File workspaceJsonFile = rootFolderPath.resolve(workspaceRootPath).toFile();
         readFromJson(workspaceRootPath);
@@ -231,6 +213,13 @@ public class Workspace {
                 break;
         }
 
+    }
+
+    public void removeWorkspaceFile(WorkspaceFile fileToRemove, boolean deleteFromFileSystem) {
+        System.out.println("Removing: " + fileToRemove.getBaseFileName());
+        if(deleteFromFileSystem) {
+            System.out.println("Deleting: " + fileToRemove.getFilePath());
+        }
     }
 
     private boolean fileExists(Path filePath, WorkspaceFileType fileType) {
@@ -286,7 +275,7 @@ public class Workspace {
         } catch (IOException ioe) {
             throw new IDEException("An error occurred saving the workspace JSON file: " + jsonFilePath, ioe.getCause());
         } catch (Exception e) {
-            throw new IDEException("An unknown occurred saving the workspace JSON file: " + jsonFilePath.toString(), null);
+            throw new IDEException("An unknown occurred saving the workspace JSON file: " + jsonFilePath.toString(), e);
         }
     }
 

@@ -79,6 +79,18 @@ public class EditorTabPanel implements IJavaFxNode {
         return false;
     }
 
+    private EditorTab getExistingTab(Path path) {
+        for (Tab tab : tabPane.getTabs()) {
+            if (tab instanceof EditorTab) {
+                EditorTab editorTab = (EditorTab) tab;
+                if (editorTab.getFile().equals(path)) {
+                    return editorTab;
+                }
+            }
+        }
+        return null;
+    }
+
     /**
      * Gets the window underlying the tab panel
      *
@@ -94,9 +106,13 @@ public class EditorTabPanel implements IJavaFxNode {
      * @param workspaceFile workspace file to be edited in the tab
      */
     public void addEditorTab(WorkspaceFile workspaceFile) {
-        if (isOpened(workspaceFile.getFilePath())) {
+        EditorTab existingTab = getExistingTab(workspaceFile.getFilePath());
+        if(existingTab != null) {
+            // Set focus on tab
+            tabPane.getSelectionModel().select(existingTab);
             return;
         }
+
         EditorTab tab = new EditorTab(workspaceFile);
         tab.setClosable(true);
         tabPane.getTabs().add(tab);
