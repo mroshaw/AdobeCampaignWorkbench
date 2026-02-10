@@ -3,22 +3,23 @@ package com.campaignworkbench.campaignrenderer;
 import com.campaignworkbench.ide.IDEException;
 import com.campaignworkbench.util.JsonUtil;
 import com.fasterxml.jackson.annotation.JsonAutoDetect;
+import com.fasterxml.jackson.annotation.JsonIgnore;
+import com.fasterxml.jackson.annotation.JsonProperty;
+import javafx.collections.FXCollections;
+import javafx.collections.ObservableList;
 
 import java.io.File;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.List;
-import java.util.Optional;
+import java.util.*;
 import java.util.stream.Stream;
 
 /**
  * Class to support a working area with appropriate files
  */
 @JsonAutoDetect(
-        fieldVisibility = JsonAutoDetect.Visibility.ANY,
+        fieldVisibility = JsonAutoDetect.Visibility.NONE,
         getterVisibility = JsonAutoDetect.Visibility.NONE,
         setterVisibility = JsonAutoDetect.Visibility.NONE,
         isGetterVisibility = JsonAutoDetect.Visibility.NONE
@@ -27,12 +28,26 @@ public class Workspace {
 
     private static final String workspacesRootName = "Workspaces";
 
+    @JsonProperty
     private Path configFilePath;
+    @JsonProperty
     private Path rootFolderPath;
-    private ArrayList<Template> templates;
-    private ArrayList<EtmModule> modules;
-    private ArrayList<PersonalisationBlock> blocks;
-    private ArrayList<ContextXml> contexts;
+
+    @JsonIgnore
+    private final ObservableList<Template> templates =
+            FXCollections.observableArrayList();
+
+    @JsonIgnore
+    private final ObservableList<EtmModule> modules =
+            FXCollections.observableArrayList();
+
+    @JsonIgnore
+    private final ObservableList<PersonalisationBlock> blocks =
+            FXCollections.observableArrayList();
+
+    @JsonIgnore
+    private final ObservableList<ContextXml> contexts =
+            FXCollections.observableArrayList();
 
     /**
      * List of required subfolders in a valid workspace
@@ -47,7 +62,7 @@ public class Workspace {
 
         Path workspacesRootPath = getWorkspacesRootPath();
         // Create 'Workspaces' root, if not already present
-        if(!Files.exists(workspacesRootPath)) {
+        if (!Files.exists(workspacesRootPath)) {
             try {
                 Files.createDirectory(workspacesRootPath);
             } catch (IOException ioe) {
@@ -58,11 +73,6 @@ public class Workspace {
         configFilePath = workspaceFilePath;
         rootFolderPath = configFilePath.getParent();
 
-        templates = new ArrayList<>();
-        modules = new ArrayList<>();
-        blocks = new ArrayList<>();
-        contexts = new ArrayList<>();
-
         if (createNew) {
             createNewWorkspace();
         }
@@ -71,8 +81,55 @@ public class Workspace {
     public Workspace() {
     }
 
-    private void createWorkspaceRootFolder() {
+    /* =========================================================
+       JSON bridge methods (minimal, required)
+       ========================================================= */
 
+    @JsonProperty("templates")
+    private List<Template> getTemplatesForJson() {
+        return new ArrayList<>(templates);
+    }
+
+    @JsonProperty("templates")
+    private void setTemplatesForJson(List<Template> list) {
+        templates.setAll(list);
+    }
+
+    @JsonProperty("modules")
+    private List<EtmModule> getModulesForJson() {
+        return new ArrayList<>(modules);
+    }
+
+    @JsonProperty("modules")
+    private void setModulesForJson(List<EtmModule> list) {
+        modules.setAll(list);
+    }
+
+    @JsonProperty("blocks")
+    private List<PersonalisationBlock> getBlocksForJson() {
+        return new ArrayList<>(blocks);
+    }
+
+    @JsonProperty("blocks")
+    private void setBlocksForJson(List<PersonalisationBlock> list) {
+        blocks.setAll(list);
+    }
+
+    @JsonProperty("contexts")
+    private List<ContextXml> getContextsForJson() {
+        return new ArrayList<>(contexts);
+    }
+
+    @JsonProperty("contexts")
+    private void setContextsForJson(List<ContextXml> list) {
+        contexts.setAll(list);
+    }
+
+    /* =========================================================
+       Original code below (unchanged except where required)
+       ========================================================= */
+
+    private void createWorkspaceRootFolder() {
     }
 
     public static Path getWorkspacesRootPath() {
@@ -82,14 +139,16 @@ public class Workspace {
 
     public void createNewWorkspace() {
 
-        // Create folder structure
-        // Derive workspace folders
         Path templateFolder = rootFolderPath.resolve("Templates");
         Path moduleFolder = rootFolderPath.resolve("Modules");
         Path blocksFolder = rootFolderPath.resolve("Blocks");
         Path contextFolder = rootFolderPath.resolve("ContextXml");
 
-        if (Files.exists(configFilePath) || Files.exists(templateFolder) || Files.exists(moduleFolder) || Files.exists(blocksFolder) || Files.exists(contextFolder)) {
+        if (Files.exists(configFilePath)
+                || Files.exists(templateFolder)
+                || Files.exists(moduleFolder)
+                || Files.exists(blocksFolder)
+                || Files.exists(contextFolder)) {
             throw new IDEException("Invalid location selected for new workspace. Workspace files already exists!", null);
         }
 
@@ -98,64 +157,38 @@ public class Workspace {
             Files.createDirectory(moduleFolder);
             Files.createDirectory(blocksFolder);
             Files.createDirectory(contextFolder);
-
         } catch (IOException ioe) {
             throw new IDEException("An error occurred creating the new workspace: " + configFilePath, ioe.getCause());
         }
 
-        // Save config file
         writeToJson(configFilePath);
     }
 
-    /**
-     * @return path of the workspace root
-     */
     public Path getRootFolderPath() {
         return rootFolderPath;
     }
 
-    /**
-     * @return full path to the workspace Templates folder
-     */
     public Path getTemplatesPath() {
         return rootFolderPath.resolve("Templates");
     }
 
-    /**
-     * @return full path to the workspace Modules folder
-     */
     public Path getModulesPath() {
         return rootFolderPath.resolve("Modules");
     }
 
-    /**
-     * @return full path to the workspace Blocks folder
-     */
     public Path getBlocksPath() {
         return rootFolderPath.resolve("Blocks");
     }
 
-    /**
-     * @return full path to the workspace ContextXml folder
-     */
     public Path getContextXmlPath() {
         return rootFolderPath.resolve("ContextXml");
     }
 
-    /**
-     * Determine if the workspace work is valid
-     *
-     * @return true if valid, otherwise false
-     */
     public boolean isValid() {
         return REQUIRED.stream()
                 .allMatch(name -> rootFolderPath.resolve(name).toFile().isDirectory());
     }
 
-    /**
-     * @param subfolder from which files should be listed
-     * @return list of files in the subfolder
-     */
     public List<File> getFolderFiles(String subfolder) {
         File dir = rootFolderPath.resolve(subfolder).toFile();
         return dir.isDirectory()
@@ -163,9 +196,6 @@ public class Workspace {
                 : List.of();
     }
 
-    /**
-     * @param workspaceRootPath Root path of the workspace JSON file
-     */
     public void openWorkspace(Path workspaceRootPath) {
         File workspaceJsonFile = rootFolderPath.resolve(workspaceRootPath).toFile();
         readFromJson(workspaceRootPath);
@@ -173,7 +203,7 @@ public class Workspace {
 
     public void addNewWorkspaceFile(Path filePath, WorkspaceFileType fileType) throws IDEException {
 
-        if(fileExists(filePath, fileType)) {
+        if (fileExists(filePath, fileType)) {
             return;
         }
 
@@ -187,39 +217,39 @@ public class Workspace {
 
     public void addExistingWorkspaceFile(Path filePath, WorkspaceFileType fileType) {
 
-        if(fileExists(filePath, fileType)) {
+        if (fileExists(filePath, fileType)) {
             return;
         }
 
         switch (fileType) {
-            case TEMPLATE:
-                Template newTemplateFile = new Template(filePath);
-                templates.add(newTemplateFile);
-                break;
-
-            case MODULE:
-                EtmModule newModule = new EtmModule(filePath);
-                modules.add(newModule);
-                break;
-
-            case BLOCK:
-                PersonalisationBlock newBlock = new PersonalisationBlock(filePath);
-                blocks.add(newBlock);
-                break;
-
-            case CONTEXT:
-                ContextXml newContext = new ContextXml(filePath);
-                contexts.add(newContext);
-                break;
+            case TEMPLATE -> templates.add(new Template(filePath));
+            case MODULE -> modules.add(new EtmModule(filePath));
+            case BLOCK -> blocks.add(new PersonalisationBlock(filePath));
+            case CONTEXT -> contexts.add(new ContextXml(filePath));
         }
-
     }
 
     public void removeWorkspaceFile(WorkspaceFile fileToRemove, boolean deleteFromFileSystem) {
         System.out.println("Removing: " + fileToRemove.getBaseFileName());
-        if(deleteFromFileSystem) {
+        if (deleteFromFileSystem) {
             System.out.println("Deleting: " + fileToRemove.getFilePath());
         }
+
+        switch(fileToRemove.getWorkspaceFileType()) {
+            case TEMPLATE:
+                templates.remove(fileToRemove);
+                break;
+            case MODULE:
+                modules.remove(fileToRemove);
+                break;
+            case BLOCK:
+                blocks.remove(fileToRemove);
+                break;
+            case CONTEXT:
+                contexts.remove(fileToRemove);
+                break;
+        }
+        writeToJson();
     }
 
     private boolean fileExists(Path filePath, WorkspaceFileType fileType) {
@@ -246,7 +276,7 @@ public class Workspace {
 
     private Optional<ContextXml> getContext(String contextFilePath) {
         return contexts.stream()
-                .filter(module -> contextFilePath.equals(module.getFilePath().toString()))
+                .filter(context -> contextFilePath.equals(context.getFilePath().toString()))
                 .findFirst();
     }
 
@@ -264,67 +294,52 @@ public class Workspace {
                 .findFirst();
     }
 
-    /**
-     * Writes the workspace configuration to a JSON file
-     *
-     * @param jsonFilePath full path to the workspace JSON file
-     */
     public void writeToJson(Path jsonFilePath) {
         try {
             JsonUtil.writeToJson(jsonFilePath, this);
         } catch (IOException ioe) {
             throw new IDEException("An error occurred saving the workspace JSON file: " + jsonFilePath, ioe.getCause());
         } catch (Exception e) {
-            throw new IDEException("An unknown occurred saving the workspace JSON file: " + jsonFilePath.toString(), e);
+            throw new IDEException("An unknown occurred saving the workspace JSON file: " + jsonFilePath, e);
         }
     }
 
-
-    /**
-     * Overload to save current workspace file
-     */
     public void writeToJson() {
         writeToJson(configFilePath);
     }
 
-    public List<Template> getTemplates() {
+    public ObservableList<Template> getTemplates() {
         return templates;
     }
 
-    public List<EtmModule> getModules() {
+    public ObservableList<EtmModule> getModules() {
         return modules;
     }
 
-    public List<PersonalisationBlock> getBlocks() {
+    public ObservableList<PersonalisationBlock> getBlocks() {
         return blocks;
     }
 
-    public List<ContextXml> getContexts() {
+    public ObservableList<ContextXml> getContexts() {
         return contexts;
     }
 
-    /**
-     * Reads a workspace configuration from a JSON file
-     *
-     * @param jsonFilePath full path to the workspace JSON file
-     */
     public void readFromJson(Path jsonFilePath) {
         try {
             Workspace newWorkspace = JsonUtil.readFromJson(jsonFilePath, Workspace.class);
 
-            // Update the current workspace with new values
             this.rootFolderPath = newWorkspace.rootFolderPath;
             this.configFilePath = newWorkspace.configFilePath;
 
-            this.templates = newWorkspace.templates;
-            this.modules = newWorkspace.modules;
-            this.blocks = newWorkspace.blocks;
-            this.contexts = newWorkspace.contexts;
+            this.templates.setAll(newWorkspace.templates);
+            this.modules.setAll(newWorkspace.modules);
+            this.blocks.setAll(newWorkspace.blocks);
+            this.contexts.setAll(newWorkspace.contexts);
 
         } catch (IOException ioe) {
             throw new IDEException("An error occurred loading the workspace JSON file: " + jsonFilePath, ioe.getCause());
         } catch (Exception e) {
-            throw new IDEException("An unknown occurred loading the workspace JSON file: " + jsonFilePath.toString(), e);
+            throw new IDEException("An unknown occurred loading the workspace JSON file: " + jsonFilePath, e);
         }
     }
 }

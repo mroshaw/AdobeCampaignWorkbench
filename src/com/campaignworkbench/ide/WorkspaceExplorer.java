@@ -5,6 +5,7 @@ import com.campaignworkbench.util.FileUtil;
 import com.campaignworkbench.util.UiUtil;
 import de.jensd.fx.glyphs.fontawesome.FontAwesomeIcon;
 import javafx.beans.value.ObservableValue;
+import javafx.collections.ListChangeListener;
 import javafx.scene.Node;
 import javafx.scene.control.*;
 import javafx.scene.input.MouseButton;
@@ -33,6 +34,12 @@ public class WorkspaceExplorer implements IJavaFxNode {
     private Workspace workspace;
     private final TreeView<Object> treeView;
     private final Consumer<WorkspaceFile> fileOpenHandler;
+
+    private TreeItem<Object> root;
+    private TreeItem<Object> templateRoot;
+    private TreeItem<Object> moduleRoot;
+    private TreeItem<Object> blockRoot;
+    private TreeItem<Object> contextRoot;
 
     private final Button createNewButton;
     private final Button addExistingButton;
@@ -85,7 +92,7 @@ public class WorkspaceExplorer implements IJavaFxNode {
         workspaceExplorerPanel.setPadding(new Insets(0, 0, 0, 5));
 
         if (workspace != null) {
-            refreshWorkspace();
+            setWorkspace(workspace);
         }
 
         // Listen for selection changes, so we can add context to the toolbar buttons
@@ -94,23 +101,21 @@ public class WorkspaceExplorer implements IJavaFxNode {
         setToolbarContext();
     }
 
+
     private void selectionChangedHandler(ObservableValue obs, TreeItem oldItem, TreeItem newItem) {
         if (newItem != null) {
 
             if (newItem.getValue() instanceof WorkspaceExplorerItem.ContextTreeItem contextTreeItem) {
-                if (contextTreeItem.workspaceFile != null) {
+                selectedContextFile = contextTreeItem.workspaceFile;
 
-                    selectedContextFile = contextTreeItem.workspaceFile;
+                TreeItem parentItem = newItem.getParent();
 
-                    TreeItem parentItem = newItem.getParent();
-
-                    if (parentItem != null && parentItem.getValue() instanceof WorkspaceExplorerItem.WorkspaceFileTreeItem parentWorkspaceItem) {
-                        selectedFile = parentWorkspaceItem.workspaceFile;
-                        selectedFileType = selectedFile.getWorkspaceFileType();
-                    }
-
+                if (parentItem != null && parentItem.getValue() instanceof WorkspaceExplorerItem.WorkspaceFileTreeItem parentWorkspaceItem) {
+                    selectedFile = parentWorkspaceItem.workspaceFile;
                     selectedFileType = selectedFile.getWorkspaceFileType();
                 }
+
+                selectedFileType = selectedFile.getWorkspaceFileType();
             } else if (newItem.getValue() instanceof WorkspaceExplorerItem.WorkspaceFileTreeItem file) {
                 selectedFile = file.workspaceFile;
                 selectedFileType = selectedFile.getWorkspaceFileType();
@@ -194,7 +199,70 @@ public class WorkspaceExplorer implements IJavaFxNode {
 
     public void setWorkspace(Workspace workspace) {
         this.workspace = workspace;
-        createTreeView();
+
+        root = WorkspaceExplorerItem.createHeaderTreeItem(
+                FontAwesomeIcon.FOLDER,
+                workspace.getRootFolderPath().getFileName().toString(),
+                "16px", 5, Color.YELLOW, null
+        );
+
+        templateRoot = WorkspaceExplorerItem.createHeaderTreeItem(
+                FontAwesomeIcon.ENVELOPE, "Templates", "16px", 5, Color.FORESTGREEN, WorkspaceFileType.TEMPLATE
+        );
+
+        moduleRoot = WorkspaceExplorerItem.createHeaderTreeItem(
+                FontAwesomeIcon.TASKS, "Modules", "16px", 5, Color.CORNFLOWERBLUE, WorkspaceFileType.MODULE
+        );
+
+        blockRoot = WorkspaceExplorerItem.createHeaderTreeItem(
+                FontAwesomeIcon.LIST, "Blocks", "16px", 5, Color.PALEVIOLETRED, WorkspaceFileType.BLOCK
+        );
+
+        contextRoot = WorkspaceExplorerItem.createHeaderTreeItem(
+                FontAwesomeIcon.FILE_CODE_ALT, "Contexts", "16px", 5, Color.LIGHTCORAL, WorkspaceFileType.CONTEXT
+        );
+
+        root.getChildren().setAll(templateRoot, moduleRoot, blockRoot, contextRoot);
+        root.setExpanded(true);
+
+        treeView.setRoot(root);
+        WorkspaceExplorerItem.enableMixedContent(treeView, 2, 6);
+
+        // IMPORTANT: bind AFTER roots exist and are set on the TreeView
+        bindWorkspace();
+
+        // Populate initial content WITHOUT rebuilding roots:
+        populateInitial();
+    }
+
+    // Populate current workspace lists into the existing roots (no re-creation)
+    private void populateInitial() {
+        templateRoot.getChildren().clear();
+        for (Template t : workspace.getTemplates()) {
+            TreeItem<Object> item = WorkspaceExplorerItem.createWorkspaceFileTreeItem(t);
+            item.getChildren().add(WorkspaceExplorerItem.createContextFileTreeItem(t.getDataContextFile(), "Data"));
+            item.getChildren().add(WorkspaceExplorerItem.createContextFileTreeItem(t.getMessageContextFile(), "Message"));
+            item.setExpanded(true);
+            templateRoot.getChildren().add(item);
+        }
+        templateRoot.setExpanded(true);
+
+        moduleRoot.getChildren().clear();
+        for (EtmModule m : workspace.getModules()) {
+            TreeItem<Object> item = WorkspaceExplorerItem.createWorkspaceFileTreeItem(m);
+            item.getChildren().add(WorkspaceExplorerItem.createContextFileTreeItem(m.getDataContextFile(), "Data"));
+            moduleRoot.getChildren().add(item);
+        }
+
+        blockRoot.getChildren().clear();
+        for (PersonalisationBlock b : workspace.getBlocks()) {
+            blockRoot.getChildren().add(WorkspaceExplorerItem.createWorkspaceFileTreeItem(b));
+        }
+
+        contextRoot.getChildren().clear();
+        for (ContextXml cx : workspace.getContexts()) {
+            contextRoot.getChildren().add(WorkspaceExplorerItem.createWorkspaceFileTreeItem(cx));
+        }
     }
 
     public void createNewFile(WorkspaceFileType workspaceFileType) {
@@ -215,7 +283,6 @@ public class WorkspaceExplorer implements IJavaFxNode {
         }
 
         workspace.addNewWorkspaceFile(selectedFile.toPath(), workspaceFileType);
-        refreshWorkspace();
     }
 
     public void addExistingFile(WorkspaceFileType workspaceFileType) {
@@ -235,7 +302,6 @@ public class WorkspaceExplorer implements IJavaFxNode {
         }
 
         workspace.addExistingWorkspaceFile(selectedFile.toPath(), workspaceFileType);
-        refreshWorkspace();
     }
 
     private void createNewHandler() {
@@ -261,7 +327,7 @@ public class WorkspaceExplorer implements IJavaFxNode {
         }
         YesNoPopupDialog.YesNoCancel result = YesNoPopupDialog.show("Confirm Delete?", "Do you also want to delete the selected file (" + selectedFile.getBaseFileName() + ") from the file system?", (Stage) getNode().getScene().getWindow());
 
-        if(result == YesNoPopupDialog.YesNoCancel.CANCEL) {
+        if (result == YesNoPopupDialog.YesNoCancel.CANCEL) {
             return;
         }
 
@@ -273,9 +339,10 @@ public class WorkspaceExplorer implements IJavaFxNode {
         if (contextFile != null) {
             if (selectedFile instanceof WorkspaceContextFile workspaceFile) {
                 workspaceFile.setDataContextFile(contextFile.toPath());
+                refreshContextChild(selectedFile, "Data");
+                workspace.writeToJson();
             }
         }
-        refreshWorkspace();
     }
 
     private void setMessageContextHandler() {
@@ -283,98 +350,30 @@ public class WorkspaceExplorer implements IJavaFxNode {
         if (contextFile != null) {
             if (selectedFile instanceof Template workspaceFile) {
                 workspaceFile.setMessageContextFile(contextFile.toPath());
+                refreshContextChild(selectedFile, "Message");
+                workspace.writeToJson();
             }
         }
-        refreshWorkspace();
     }
 
     private void clearDataContextHandler() {
         if (selectedFile instanceof WorkspaceContextFile workspaceFile) {
             workspaceFile.clearDataContext();
+            refreshContextChild(selectedFile, "Data");
+            workspace.writeToJson();
         }
-        refreshWorkspace();
     }
 
     private void clearMessageContextHandler() {
         if (selectedFile instanceof Template workspaceFile) {
             workspaceFile.clearMessageContext();
+            refreshContextChild(selectedFile, "Message");
+            workspace.writeToJson();
         }
-        refreshWorkspace();
     }
 
     private Window getWindow() {
         return workspaceExplorerPanel.getScene().getWindow();
-    }
-
-    public void refreshWorkspace() {
-        // treeView.refresh();
-        createTreeView();
-    }
-
-    /**
-     * Refresh the workspace tree
-     */
-    public void createTreeView() {
-
-        if (workspace == null) {
-            return;
-        }
-
-        workspace.writeToJson();
-
-        String workspaceFolderName = workspace.getRootFolderPath().getFileName().toString();
-
-        TreeItem<Object> root = WorkspaceExplorerItem.createHeaderTreeItem(FontAwesomeIcon.FOLDER, workspaceFolderName, "16px", 5, Color.YELLOW, null);
-        TreeItem<Object> templateRoot = WorkspaceExplorerItem.createHeaderTreeItem(FontAwesomeIcon.ENVELOPE, "Templates", "16px", 5, Color.FORESTGREEN, WorkspaceFileType.TEMPLATE);
-        TreeItem<Object> moduleRoot = WorkspaceExplorerItem.createHeaderTreeItem(FontAwesomeIcon.TASKS, "Modules", "16px", 5, Color.CORNFLOWERBLUE, WorkspaceFileType.MODULE);
-        TreeItem<Object> blockRoot = WorkspaceExplorerItem.createHeaderTreeItem(FontAwesomeIcon.LIST, "Blocks", "16px", 5, Color.PALEVIOLETRED, WorkspaceFileType.BLOCK);
-        TreeItem<Object> contextRoot = WorkspaceExplorerItem.createHeaderTreeItem(FontAwesomeIcon.FILE_CODE_ALT, "Contexts", "16px", 5, Color.LIGHTCORAL, WorkspaceFileType.CONTEXT);
-
-        // Add templates
-        for (Template template : workspace.getTemplates()) {
-            TreeItem<Object> treeItem = WorkspaceExplorerItem.createWorkspaceFileTreeItem(template);
-            TreeItem<Object> dataContextItem = WorkspaceExplorerItem.createContextFileTreeItem(template.getDataContextFile(), "Data");
-            TreeItem<Object> messageContextItem = WorkspaceExplorerItem.createContextFileTreeItem(template.getMessageContextFile(), "Message");
-            treeItem.getChildren().add(dataContextItem);
-            treeItem.getChildren().add(messageContextItem);
-            treeItem.setExpanded(true);
-            templateRoot.getChildren().add(treeItem);
-        }
-        templateRoot.setExpanded(true);
-
-        WorkspaceExplorerItem.enableMixedContent(treeView, 2, 6);
-
-        // Add modules
-        for (EtmModule module : workspace.getModules()) {
-            TreeItem<Object> treeItem = WorkspaceExplorerItem.createWorkspaceFileTreeItem(module);
-            TreeItem<Object> dataContextItem = WorkspaceExplorerItem.createContextFileTreeItem(module.getDataContextFile(), "Data");
-            treeItem.getChildren().add(dataContextItem);
-            moduleRoot.getChildren().add(treeItem);
-            // treeItem.setExpanded(true);
-        }
-        // moduleRoot.setExpanded(true);
-
-        // Add blocks
-        for (PersonalisationBlock block : workspace.getBlocks()) {
-            TreeItem<Object> treeItem = WorkspaceExplorerItem.createWorkspaceFileTreeItem(block);
-            blockRoot.getChildren().add(treeItem);
-        }
-        // blockRoot.setExpanded(true);
-
-        // Add contexts
-        for (ContextXml context : workspace.getContexts()) {
-            TreeItem<Object> treeItem = WorkspaceExplorerItem.createWorkspaceFileTreeItem(context);
-            contextRoot.getChildren().add(treeItem);
-        }
-        // contextRoot.setExpanded(true);
-
-        root.getChildren().add(templateRoot);
-        root.getChildren().add(moduleRoot);
-        root.getChildren().add(blockRoot);
-        root.getChildren().add(contextRoot);
-
-        root.setExpanded(true);
-        treeView.setRoot(root);
     }
 
     private void setupDoubleClickHandler() {
@@ -449,6 +448,146 @@ public class WorkspaceExplorer implements IJavaFxNode {
                     "*.xml"
             );
         };
+    }
+
+    private void refreshContextChild(WorkspaceFile file, String label) {
+        TreeItem<Object> parent = findTreeItemForFile(file);
+        if (parent == null) return;
+
+
+        // Record current selection
+        int selectedIndex = treeView.getSelectionModel().getSelectedIndex();
+
+        // Find existing child by label
+        for (int i = 0; i < parent.getChildren().size(); i++) {
+            TreeItem<Object> child = parent.getChildren().get(i);
+
+            Object val = child.getValue();
+            if (val instanceof WorkspaceExplorerItem.ContextTreeItem ctxItem &&
+                    ctxItem.contextLabel.equals(label)) {
+
+                // Replace child TreeItem
+                parent.getChildren().set(
+                        i,
+                        WorkspaceExplorerItem.createContextFileTreeItem(
+                                file instanceof Template t && label.equals("Message") ? t.getMessageContextFile() :
+                                        file instanceof WorkspaceContextFile c && label.equals("Data") ? c.getDataContextFile() :
+                                                null,
+                                label
+                        )
+                );
+
+                // Restore selection
+                treeView.getSelectionModel().select(selectedIndex);
+
+                return;
+            }
+        }
+    }
+
+    private TreeItem<Object> findTreeItemForFile(WorkspaceFile file) {
+        // Search the whole tree recursively
+        return findTreeItemRecursive(treeView.getRoot(), file);
+    }
+
+    private TreeItem<Object> findTreeItemRecursive(TreeItem<Object> root, WorkspaceFile file) {
+        for (TreeItem<Object> child : root.getChildren()) {
+            Object val = child.getValue();
+            if (val instanceof WorkspaceExplorerItem.WorkspaceFileTreeItem wf &&
+                    wf.workspaceFile == file) {
+                return child;
+            }
+            TreeItem<Object> match = findTreeItemRecursive(child, file);
+            if (match != null) return match;
+        }
+        return null;
+    }
+
+
+    private void bindWorkspace() {
+
+        workspace.getTemplates().addListener((ListChangeListener<Template>) c -> {
+            while (c.next()) {
+                if (c.wasAdded()) {
+                    for (Template t : c.getAddedSubList()) {
+                        TreeItem<Object> item = WorkspaceExplorerItem.createWorkspaceFileTreeItem(t);
+                        item.getChildren().add(
+                                WorkspaceExplorerItem.createContextFileTreeItem(t.getDataContextFile(), "Data")
+                        );
+                        item.getChildren().add(
+                                WorkspaceExplorerItem.createContextFileTreeItem(t.getMessageContextFile(), "Message")
+                        );
+                        templateRoot.getChildren().add(item);
+                    }
+                }
+                if (c.wasRemoved()) {
+
+                    templateRoot.getChildren().removeIf(ti ->
+                            c.getRemoved().contains(((WorkspaceExplorerItem.WorkspaceFileTreeItem) ti.getValue()).workspaceFile)
+                    );
+
+                }
+            }
+        });
+
+        workspace.getModules().addListener((ListChangeListener<EtmModule>) c -> {
+            while (c.next()) {
+                if (c.wasAdded()) {
+                    for (EtmModule m : c.getAddedSubList()) {
+                        TreeItem<Object> item = WorkspaceExplorerItem.createWorkspaceFileTreeItem(m);
+                        item.getChildren().add(
+                                WorkspaceExplorerItem.createContextFileTreeItem(m.getDataContextFile(), "Data")
+                        );
+                        moduleRoot.getChildren().add(item);
+                    }
+                }
+                if (c.wasRemoved()) {
+                    moduleRoot.getChildren().removeIf(
+                            ti -> c.getRemoved().contains(
+                                    ((WorkspaceExplorerItem.WorkspaceFileTreeItem) ti.getValue()).workspaceFile
+                            )
+                    );
+                }
+            }
+        });
+
+        workspace.getBlocks().addListener((ListChangeListener<PersonalisationBlock>) c -> {
+            while (c.next()) {
+                if (c.wasAdded()) {
+                    for (PersonalisationBlock b : c.getAddedSubList()) {
+                        blockRoot.getChildren().add(
+                                WorkspaceExplorerItem.createWorkspaceFileTreeItem(b)
+                        );
+                    }
+                }
+                if (c.wasRemoved()) {
+                    blockRoot.getChildren().removeIf(
+                            ti -> c.getRemoved().contains(
+                                    ((WorkspaceExplorerItem.WorkspaceFileTreeItem) ti.getValue()).workspaceFile
+                            )
+                    );
+                }
+            }
+        });
+
+        workspace.getContexts().addListener((ListChangeListener<ContextXml>) c -> {
+            while (c.next()) {
+                if (c.wasAdded()) {
+                    for (ContextXml ctx : c.getAddedSubList()) {
+                        contextRoot.getChildren().add(
+                                WorkspaceExplorerItem.createWorkspaceFileTreeItem(ctx)
+                        );
+                    }
+                }
+                if (c.wasRemoved()) {
+                    contextRoot.getChildren().removeIf(
+                            ti -> c.getRemoved().contains(
+                                    ((WorkspaceExplorerItem.WorkspaceFileTreeItem) ti.getValue()).workspaceFile
+                            )
+                    );
+                }
+            }
+        });
     }
 
     @Override
