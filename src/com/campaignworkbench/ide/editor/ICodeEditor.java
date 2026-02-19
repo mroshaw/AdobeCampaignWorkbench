@@ -31,12 +31,6 @@ public interface ICodeEditor {
     public String getText();
 
     /**
-     * Set the syntax highlighting required by the editor
-     * @param syntax Language syntax to use for highlighting
-     */
-    public void setSyntax(SyntaxType syntax);
-
-    /**
      * Sets the read only nature of the code editor
      * @param editable whether the code is editable (true) or not (false)
      */

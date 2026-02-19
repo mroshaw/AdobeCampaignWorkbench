@@ -3,7 +3,7 @@ package com.campaignworkbench.campaignrenderer;
 /**
  * Top level exception with detailed information about the process that caused the exception
  */
-public abstract sealed class RendererException extends RuntimeException permits RendererExecutionException, RendererGenerationException, RendererParseException {
+public abstract sealed class RendererException extends RuntimeException permits RendererExecutionException, RendererGenerationException, RendererInitException, RendererParseException {
     private final WorkspaceFile sourceFile;
     private final String sourceCode;
     private final int templateLine;

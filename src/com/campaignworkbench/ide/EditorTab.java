@@ -2,6 +2,7 @@ package com.campaignworkbench.ide;
 
 import com.campaignworkbench.campaignrenderer.*;
 import com.campaignworkbench.ide.editor.*;
+import com.campaignworkbench.ide.editor.richtextfx.RichTextFXEditor;
 import javafx.scene.control.Tab;
 import javafx.scene.control.ToolBar;
 import javafx.scene.layout.BorderPane;
@@ -26,8 +27,9 @@ public final class EditorTab extends Tab {
 
         this.workspaceFile = workspaceFile;
 
-        // this.editor = new RichTextFXEditor();
-        this.editor = new RSyntaxEditor();
+        SyntaxType syntaxType = determineSyntax(workspaceFile.getFilePath());
+        System.out.println("Syntax: " + syntaxType);
+        this.editor = new RichTextFXEditor(determineSyntax(workspaceFile.getFilePath()));
         updateTabText();
 
         toolBar = new ToolBar();
@@ -37,7 +39,6 @@ public final class EditorTab extends Tab {
         setContent(root);
 
         editor.setText(workspaceFile.getWorkspaceFileContent());
-        editor.setSyntax(determineSyntax(workspaceFile.getFilePath()));
         editor.setCaretAtStart();
     }
 
@@ -145,8 +146,8 @@ public final class EditorTab extends Tab {
         String name = file.getFileName().toString().toLowerCase();
 
         return switch (name) {
-            case String s when s.endsWith(".template") || s.endsWith(".module") -> SyntaxType.TEMPLATE;
-            case String s when s.endsWith(".block") -> SyntaxType.BLOCK;
+            case String s when s.endsWith(".template") || s.endsWith(".module") -> SyntaxType.CAMPAIGN;
+            case String s when s.endsWith(".block") -> SyntaxType.CAMPAIGN;
             case String s when s.endsWith(".xml") -> SyntaxType.XML;
             default -> SyntaxType.PLAIN;
         };

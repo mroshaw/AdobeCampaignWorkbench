@@ -1,7 +1,5 @@
 package com.campaignworkbench.ide;
 
-import com.campaignworkbench.ide.editor.ICodeEditor;
-
 import java.util.ArrayList;
 import java.util.List;
 
@@ -38,7 +36,6 @@ public final class ThemeManager {
     public static void setTheme(IDETheme theme) {
         currentTheme = theme;
 
-        CampaignWorkbenchIDE.setTheme(theme);
         for (IThemeable themeable : themeables) {
             themeable.applyTheme(theme);
         }

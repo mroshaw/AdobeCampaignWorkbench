@@ -1,7 +1,5 @@
 package com.campaignworkbench.ide;
 
-import com.campaignworkbench.ide.editor.ICodeEditor;
-import com.campaignworkbench.ide.editor.RSyntaxEditor;
 import com.campaignworkbench.ide.editor.SyntaxType;
 import javafx.scene.Cursor;
 import javafx.scene.Node;
@@ -40,8 +38,8 @@ public class OutputTabPanel implements IJavaFxNode, IThemeable {
 
         webViewTab = new Tab("Web View", webView);
         webViewTab.setClosable(false);
-        sourceCodeTab = new OutputTab("HTML Source", SyntaxType.HTML_PREVIEW);
-        preSourceCodeTab = new OutputTab("JS Pre Source", SyntaxType.SOURCE_PREVIEW);
+        sourceCodeTab = new OutputTab("HTML Source", SyntaxType.HTML);
+        preSourceCodeTab = new OutputTab("JS Pre Source", SyntaxType.JAVASCRIPT);
 
         tabPane.getTabs().addAll(webViewTab, sourceCodeTab, preSourceCodeTab);
 
@@ -110,6 +108,11 @@ public class OutputTabPanel implements IJavaFxNode, IThemeable {
                         "})();";
 
         webView.getEngine().executeScript(script);
+    }
+
+    public void highlightJsLine(int lineNumber) {
+        tabPane.getSelectionModel().select(preSourceCodeTab);
+        preSourceCodeTab.gotoLine(lineNumber);
     }
 
 }

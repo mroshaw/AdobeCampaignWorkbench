@@ -1,0 +1,112 @@
+package com.campaignworkbench.ide.editor.richtextfx;
+
+import de.jensd.fx.glyphs.fontawesome.FontAwesomeIcon;
+import de.jensd.fx.glyphs.fontawesome.utils.FontAwesomeIconFactory;
+import javafx.geometry.Pos;
+import javafx.scene.Cursor;
+import javafx.scene.Node;
+import javafx.scene.control.Label;
+import javafx.scene.layout.HBox;
+import javafx.scene.text.Text;
+import org.fxmisc.richtext.CodeArea;
+
+import java.util.HashSet;
+import java.util.Set;
+import java.util.function.IntFunction;
+
+public class GutterFactory implements IntFunction<Node> {
+
+    private final CodeArea codeArea;
+    private final IFoldParser foldParser;
+    private FoldRegions foldRegions;
+    private final Set<Integer> foldedParagraphs;
+    private final Text iconRight = FontAwesomeIconFactory.get().createIcon(FontAwesomeIcon.ARROW_CIRCLE_RIGHT, "12px");
+    private final Text iconDown = FontAwesomeIconFactory.get().createIcon(FontAwesomeIcon.ARROW_CIRCLE_DOWN, "12px");
+
+    public GutterFactory(CodeArea codeArea, IFoldParser foldParser) {
+        this.codeArea = codeArea;
+        foldedParagraphs = new HashSet<>();
+        this.foldParser = foldParser;
+
+        codeArea.setParagraphGraphicFactory(this);
+    }
+
+    @Override
+    public Node apply(int paragraphIndex) {
+
+        // Refresh the folding state
+        foldRegions = foldParser.findFoldRegions(codeArea, foldedParagraphs);
+
+        if(foldRegions.isParagraphHidden(paragraphIndex)) {
+            return null;
+        }
+
+        // Create an HBox to contain the line number and fold indicator
+        HBox box = new HBox();
+        box.setAlignment(Pos.CENTER_LEFT);
+        box.setMinWidth(60);
+        box.getStyleClass().add("gutter");
+        // Get the line number node as a node
+        Label lineNo = (Label)PlainLineNumberFactory.get(codeArea).apply(paragraphIndex);
+        lineNo.setMinWidth(36);
+        lineNo.getStyleClass().add("line-number");
+        // Create a fold indicator label
+        Label foldIndicator = new Label();
+        // foldIndicator.setMinWidth(20);
+        foldIndicator.getStyleClass().add("custom-fold-indicator");
+
+        setFoldIndicator(foldIndicator, paragraphIndex);
+
+        // Add the line number and fold indicator to the container and return
+        box.getChildren().addAll(lineNo, foldIndicator);
+        return box;
+    }
+
+    private void setFoldIndicator(Label foldIndicator, int paragraphIndex) {
+        if (isParagraphFolded(paragraphIndex)) {
+
+            // foldIndicator.setGraphic(iconRight);
+            foldIndicator.setText("▶");
+            foldIndicator.setCursor(Cursor.HAND);
+            foldIndicator.setOnMouseClicked(e -> {
+                e.consume();
+                removeFromFolded(paragraphIndex);
+                // Refresh
+                codeArea.unfoldParagraphs(paragraphIndex);
+                codeArea.setParagraphGraphicFactory(codeArea.getParagraphGraphicFactory());
+            });
+        } else if (foldRegions.isParagraphFoldable(paragraphIndex)) {
+            // foldIndicator.setGraphic(iconDown);
+            foldIndicator.setText("▼");
+            foldIndicator.setCursor(Cursor.HAND);
+            foldIndicator.setOnMouseClicked(e -> {
+                e.consume();
+                addToFolded(paragraphIndex);
+                int end = foldRegions.getFoldedParagraphEnd(paragraphIndex);
+                codeArea.foldParagraphs(paragraphIndex, end );
+                // Refresh
+                codeArea.setParagraphGraphicFactory(codeArea.getParagraphGraphicFactory());
+            });
+        } else {
+            foldIndicator.setText("");
+            foldIndicator.setOnMouseClicked(null);
+        }
+    }
+
+    private boolean isParagraphFolded(int paragraphIndex) {
+        return foldedParagraphs.contains(paragraphIndex);
+    }
+
+    private void addToFolded(int paragraphIndex) {
+        if(foldedParagraphs.contains(paragraphIndex))
+        {
+            return;
+        }
+        foldedParagraphs.add(paragraphIndex);
+    }
+
+    private void removeFromFolded(int paragraphIndex) {
+        foldedParagraphs.remove(paragraphIndex);
+    }
+
+}

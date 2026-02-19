@@ -274,6 +274,14 @@ public class Workspace {
                 .findFirst();
     }
 
+    public Optional<PersonalisationBlock> getBlockByName(String blockName) {
+        blockName += ".block";
+        String finalBlockName = blockName;
+        return blocks.stream()
+                .filter(block -> finalBlockName.equals(block.getFileName().toString()))
+                .findFirst();
+    }
+
     private Optional<ContextXml> getContext(String contextFilePath) {
         return contexts.stream()
                 .filter(context -> contextFilePath.equals(context.getFilePath().toString()))

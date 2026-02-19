@@ -13,27 +13,19 @@ public final class ModuleRenderer {
 
     private ModuleRenderer() {}
 
-    /**
-     * Processes and generates output for included modules
-     * @param cx the Rhino context in which to process the code
-     * @param scope the Rhino scope
-     * @return the evaluate code as a string
-     */
     public static String renderModule(
-            WorkspaceContextFile workspaceContextFile,
+            EtmModule module,
             Context cx,
             Scriptable scope
     ) {
 
         // Get the module context
-        Path xmlContextFile = workspaceContextFile.getDataContextFilePath();
-        String xmlContextContent = workspaceContextFile.getDataContextContent();
+        Path xmlContextFile = module.getDataContextFilePath();
+        String xmlContextContent = module.getDataContextContent();
 
-        String moduleSource = workspaceContextFile.getWorkspaceFileContent();
-        String sourceName = workspaceContextFile.getFileName().toString();
-
+        String moduleSource = module.getWorkspaceFileContent();
+        String moduleFileName = module.getBaseFileName();
         try {
-
             cx.evaluateString(
                     scope,
                     "var ctx = new XML(`" + xmlContextContent + "`);",
@@ -42,23 +34,23 @@ public final class ModuleRenderer {
                     null
             );
 
-            String js = """
-                    var out = new java.lang.StringBuilder();
-                    %s
-                    out.toString();""".formatted(transformModuleToJavaScript(moduleSource));
+            String js =
+                    "var out = new java.lang.StringBuilder();\n" +
+                            transformModuleToJavaScript(moduleSource) +
+                            "out.toString();";
 
-            Object result = cx.evaluateString(scope, js, sourceName, 1, null);
+            Object result = cx.evaluateString(scope, js, moduleFileName, 1, null);
             return Context.toString(result);
         }
-        catch (org.mozilla.javascript.RhinoException e) {
+        catch (org.mozilla.javascript.RhinoException rhinoException) {
             throw new RendererExecutionException(
-                    "Error executing module: " + e.getMessage(),
-                    workspaceContextFile,
+                    "Error executing module: " + rhinoException.getMessage(),
+                    module,
                     moduleSource,
-                    e.lineNumber(),
-                    e.details(),
-                    "Check the module source for JavaScript errors.",
-                    e
+                    rhinoException.lineNumber(),
+                    rhinoException.details(),
+                    "Check module source code for errors",
+                    rhinoException
             );
         }
     }
@@ -103,20 +95,11 @@ public final class ModuleRenderer {
 
     private static void appendText(StringBuilder js, String text) {
         if (text.isEmpty()) return;
-        int lineCount = 0;
-        for (int i = 0; i < text.length(); i++) {
-            if (text.charAt(i) == '\n') lineCount++;
-        }
-
         text = text.replace("\\", "\\\\")
                 .replace("\"", "\\\"")
                 .replace("\r\n", "\n")
                 .replace("\r", "\n")
                 .replace("\n", "\\n");
         js.append("out.append(\"").append(text).append("\");\n");
-
-        for (int i = 0; i < lineCount; i++) {
-            js.append("//\n");
-        }
     }
 }

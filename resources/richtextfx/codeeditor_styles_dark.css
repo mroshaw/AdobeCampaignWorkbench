@@ -1,0 +1,29 @@
+// Code Area
+.code-editor .code-area {
+    /* -fx-background-color: linear-gradient(to right, -color-bg-subtle 0%, -color-bg-subtle 60px, -color-bg-default 60px, -color-bg-default 100%); */
+    -fx-background-color: -color-bg-subtle, linear-gradient(to right, -color-bg-default, -color-bg-default)!important ;
+    -fx-background-insets: 0, 0 0 0 50;
+    -fx-tab-size: 4;
+    -fx-font-family: 'Consolas';
+    -fx-font-size: 11pt;
+}
+
+.code-editor .code-area .paragraph-box .text {
+    -fx-tab-size: 4;
+}
+
+.code-editor .caret {
+    -fx-stroke: -color-fg-default !important;
+}
+
+// Gutter
+.code-editor .paragraph-box .gutter .line-number {
+    -fx-text-fill: #d4d4d4;
+    -fx-background-color: transparent;
+}
+
+.code-editor .paragraph-box .gutter .custom-fold-indicator {
+    -fx-background-color: transparent;
+    -fx-text-fill: #00ff00;
+    -fx-font-size: 12pt;
+}

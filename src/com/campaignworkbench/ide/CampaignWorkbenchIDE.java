@@ -14,7 +14,6 @@ import javafx.scene.layout.VBox;
 import javafx.stage.FileChooser;
 import javafx.stage.Stage;
 
-
 import java.io.File;
 import java.io.IOException;
 import java.nio.file.Files;
@@ -23,7 +22,7 @@ import java.nio.file.Path;
 /**
  * Builds a User Interface for the Campaign Workbench IDE
  */
-public class CampaignWorkbenchIDE extends Application {
+public class CampaignWorkbenchIDE extends Application implements IThemeable {
 
     /**
      * The current active workspace
@@ -50,6 +49,8 @@ public class CampaignWorkbenchIDE extends Application {
     @Override
     public void start(Stage primaryStage) {
         primaryStage.setTitle("Campaign Workbench");
+
+        ThemeManager.register(this);
 
         // Set the icon
         Image iconImage = new Image(
@@ -98,6 +99,12 @@ public class CampaignWorkbenchIDE extends Application {
         // Log pane
         logPanel = new LogPanel("Logs");
         errorLogPanel = new ErrorLogPanel("Errors");
+
+        errorLogPanel.setOnErrorDoubleClicked((workspaceFile, line) -> {
+            outputPanel.highlightJsLine(line);
+        });
+
+        /*
         errorLogPanel.setOnErrorDoubleClicked((workspaceFile, line) -> {
             // Find the file in the workspace
             Path filePath = workspaceFile.getFilePath();
@@ -115,6 +122,7 @@ public class CampaignWorkbenchIDE extends Application {
                 appendLog("Could not find file: " + filePath);
             }
         });
+        */
         SplitPane logSplitPane = new SplitPane();
         logSplitPane.setOrientation(Orientation.HORIZONTAL);
         logSplitPane.getItems().addAll(logPanel.getNode(), errorLogPanel.getNode());
@@ -145,7 +153,7 @@ public class CampaignWorkbenchIDE extends Application {
         SplitPane rootSplitPane = new SplitPane();
         rootSplitPane.setOrientation(Orientation.VERTICAL);
         rootSplitPane.getItems().addAll(editorPreviewSplit, logSplitPane); // logBox = VBox with logLabel + logArea
-        rootSplitPane.setDividerPositions(0.9);
+        rootSplitPane.setDividerPositions(0.8);
 
         // --- Root BorderPane ---
         BorderPane root = new BorderPane();
@@ -154,8 +162,6 @@ public class CampaignWorkbenchIDE extends Application {
         Scene scene = new Scene(root, 1600, 900);
         primaryStage.setScene(scene);
         primaryStage.show();
-
-        ThemeManager.applyCurrentTheme();
 
         appendLog("Welcome to Campaign workbench! Open a workspace, load a template, select an XML context, and hit run!");
     }
@@ -213,23 +219,14 @@ public class CampaignWorkbenchIDE extends Application {
     /**
      * Applies a theme to the IDE
      *
-     * @param theme the theme to apply
      */
-    private void applyTheme(IDETheme theme) {
-        ThemeManager.setTheme(theme);
-    }
-
-    /**
-     * Sets the IDE theme
-     *
-     * @param ideTheme theme, LIGHT or DARK, to apply to the IDE
-     */
-    public static void setTheme(IDETheme ideTheme) {
+    @Override
+    public void applyTheme(IDETheme ideTheme) {
         String stylesheet = switch (ideTheme) {
             case DARK -> new CupertinoDark().getUserAgentStylesheet();
             case LIGHT -> new CupertinoLight().getUserAgentStylesheet();
         };
-        Application.setUserAgentStylesheet(null);
+        // Application.setUserAgentStylesheet(null);
         Application.setUserAgentStylesheet(stylesheet);
     }
 

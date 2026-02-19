@@ -95,8 +95,8 @@ public class ErrorLogPanel implements IJavaFxNode {
             errorData.put(errorNode, templateException);
 
             errorNode.getChildren().add(new TreeItem<>("Type: " + templateException.getClass().getSimpleName()));
-            errorNode.getChildren().add(new TreeItem<>("File: " + templateException.getWorkspaceFile().getFileName()));
-            errorNode.getChildren().add(new TreeItem<>("Line: " + (templateException.getTemplateLine() == -1 ? "N/A" : templateException.getTemplateLine())));
+            errorNode.getChildren().add(new TreeItem<>("Template: " + (templateException.getWorkspaceFile() == null ? "" : templateException.getWorkspaceFile().getFileName())));
+            errorNode.getChildren().add(new TreeItem<>("Pre Process JS Line: " + (templateException.getTemplateLine() == -1 ? "N/A" : templateException.getTemplateLine())));
 
             TreeItem<String> rootCauseNode = new TreeItem<>("Root Cause: " + templateException.getRootCause());
             errorNode.getChildren().add(rootCauseNode);
