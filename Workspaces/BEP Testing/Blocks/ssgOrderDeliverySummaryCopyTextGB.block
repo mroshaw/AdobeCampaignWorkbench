@@ -1,0 +1,27 @@
+<%@ include view='ssgOrderShipmentFunctionsALL' %>
+<%@ include view='ssgMessageCenterOrderCommonFunctionsALL' %>
+
+<% 
+   // Show basic information for all lineItems in the "latest shipped" delivery in the order 
+   // Currently assumes that there can be more than one CONTACT_LENSES line item
+   // If so, we assume that there are two entries for any given name, one for
+   // Right Eye quantity, one for Left Eye quantity.
+
+  // Derive an array of lineItems from the "latest shipped" delivery
+  var delivery = getLatestDelivery();
+  var deliveryLineItems = getDeliveryLineItems(delivery);
+  
+  var {nonClCopy, clCopy} = getLineItemsSummary(deliveryLineItems);
+
+  // Output the non-CL sections (if any)
+  if (nonClCopy) { %>
+    <%= nonClCopy %>
+  <% } 
+
+  // Separator between non-CL and CL (only if both exist)
+  if (nonClCopy && clCopy) { %><br/><br/><% }
+  
+  // Output the CL sections (if any)
+  if (clCopy) { %>
+    <%= clCopy %>
+<% } %>

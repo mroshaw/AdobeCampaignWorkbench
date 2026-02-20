@@ -1,0 +1,37 @@
+{
+  "blocks" : [ {
+    "workspaceFilePath" : "file:///E:/Dev/AdobeCampaignWorkbench/Workspaces/BEP%20Testing/Blocks/ssgOrderShipmentFunctionsALL.block",
+    "workspaceFileType" : "BLOCK"
+  }, {
+    "workspaceFilePath" : "file:///E:/Dev/AdobeCampaignWorkbench/Workspaces/BEP%20Testing/Blocks/ssgMessageCenterCommonFunctionsALL.block",
+    "workspaceFileType" : "BLOCK"
+  }, {
+    "workspaceFilePath" : "file:///E:/Dev/AdobeCampaignWorkbench/Workspaces/BEP%20Testing/Blocks/ssgOrderDeliverySummaryCopyTextGB.block",
+    "workspaceFileType" : "BLOCK"
+  }, {
+    "workspaceFilePath" : "file:///E:/Dev/AdobeCampaignWorkbench/Workspaces/BEP%20Testing/Blocks/ssgMessageCenterOrderCommonFunctionsALL.block",
+    "workspaceFileType" : "BLOCK"
+  } ],
+  "configFilePath" : "file:///E:/Dev/AdobeCampaignWorkbench/Workspaces/BEP%20Testing/workspace.json",
+  "contexts" : [ {
+    "workspaceFilePath" : "file:///E:/Dev/AdobeCampaignWorkbench/Workspaces/BEP%20Testing/ContextXml/ShippingNotification.xml",
+    "workspaceFileType" : "CONTEXT"
+  }, {
+    "workspaceFilePath" : "file:///E:/Dev/AdobeCampaignWorkbench/Workspaces/BEP%20Testing/ContextXml/ShippingNotificationMessage.xml",
+    "workspaceFileType" : "CONTEXT"
+  } ],
+  "modules" : [ ],
+  "rootFolderPath" : "file:///E:/Dev/AdobeCampaignWorkbench/Workspaces/BEP%20Testing/",
+  "templates" : [ {
+    "dataContextFile" : {
+      "workspaceFilePath" : "file:///E:/Dev/AdobeCampaignWorkbench/Workspaces/BEP%20Testing/ContextXml/ShippingNotification.xml",
+      "workspaceFileType" : "CONTEXT"
+    },
+    "messageContextFile" : {
+      "workspaceFilePath" : "file:///E:/Dev/AdobeCampaignWorkbench/Workspaces/BEP%20Testing/ContextXml/ShippingNotificationMessage.xml",
+      "workspaceFileType" : "CONTEXT"
+    },
+    "workspaceFilePath" : "file:///E:/Dev/AdobeCampaignWorkbench/Workspaces/BEP%20Testing/Templates/ShippingNotificationTest.template",
+    "workspaceFileType" : "TEMPLATE"
+  } ]
+}

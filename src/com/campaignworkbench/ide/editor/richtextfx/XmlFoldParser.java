@@ -5,18 +5,16 @@ import java.util.*;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
-public class XmlFoldParser implements IFoldParser {
+public class XmlFoldParser extends FoldParser implements IFoldParser {
 
     private static final Pattern TAG_PATTERN =
             Pattern.compile("<(/?)([a-zA-Z0-9:_-]+)([^>]*)>");
 
-    private FoldRegions foldRegions;
-
     public XmlFoldParser(CodeArea codeArea) {
-        foldRegions = new FoldRegions(codeArea);
+        super(codeArea);
     }
 
-    public FoldRegions findFoldRegions(CodeArea codeArea, Set<Integer> foldedParagraphs) {
+    public FoldRegions findFoldRegions(CodeArea codeArea) {
 
         foldRegions = new FoldRegions(codeArea);
         String text = codeArea.getText();

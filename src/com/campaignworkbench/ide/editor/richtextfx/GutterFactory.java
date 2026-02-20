@@ -19,13 +19,12 @@ public class GutterFactory implements IntFunction<Node> {
     private final CodeArea codeArea;
     private final IFoldParser foldParser;
     private FoldRegions foldRegions;
-    private final Set<Integer> foldedParagraphs;
+
     private final Text iconRight = FontAwesomeIconFactory.get().createIcon(FontAwesomeIcon.ARROW_CIRCLE_RIGHT, "12px");
     private final Text iconDown = FontAwesomeIconFactory.get().createIcon(FontAwesomeIcon.ARROW_CIRCLE_DOWN, "12px");
 
     public GutterFactory(CodeArea codeArea, IFoldParser foldParser) {
         this.codeArea = codeArea;
-        foldedParagraphs = new HashSet<>();
         this.foldParser = foldParser;
 
         codeArea.setParagraphGraphicFactory(this);
@@ -35,7 +34,7 @@ public class GutterFactory implements IntFunction<Node> {
     public Node apply(int paragraphIndex) {
 
         // Refresh the folding state
-        foldRegions = foldParser.findFoldRegions(codeArea, foldedParagraphs);
+        foldRegions = foldParser.findFoldRegions(codeArea);
 
         if(foldRegions.isParagraphHidden(paragraphIndex)) {
             return null;
@@ -63,14 +62,14 @@ public class GutterFactory implements IntFunction<Node> {
     }
 
     private void setFoldIndicator(Label foldIndicator, int paragraphIndex) {
-        if (isParagraphFolded(paragraphIndex)) {
+        if (foldParser.isParagraphFolded(paragraphIndex)) {
 
             // foldIndicator.setGraphic(iconRight);
             foldIndicator.setText("▶");
             foldIndicator.setCursor(Cursor.HAND);
             foldIndicator.setOnMouseClicked(e -> {
                 e.consume();
-                removeFromFolded(paragraphIndex);
+                foldParser.removeFoldedParagraph(paragraphIndex);
                 // Refresh
                 codeArea.unfoldParagraphs(paragraphIndex);
                 codeArea.setParagraphGraphicFactory(codeArea.getParagraphGraphicFactory());
@@ -81,7 +80,7 @@ public class GutterFactory implements IntFunction<Node> {
             foldIndicator.setCursor(Cursor.HAND);
             foldIndicator.setOnMouseClicked(e -> {
                 e.consume();
-                addToFolded(paragraphIndex);
+                foldParser.addFoldedParagraph(paragraphIndex);
                 int end = foldRegions.getFoldedParagraphEnd(paragraphIndex);
                 codeArea.foldParagraphs(paragraphIndex, end );
                 // Refresh
@@ -92,21 +91,4 @@ public class GutterFactory implements IntFunction<Node> {
             foldIndicator.setOnMouseClicked(null);
         }
     }
-
-    private boolean isParagraphFolded(int paragraphIndex) {
-        return foldedParagraphs.contains(paragraphIndex);
-    }
-
-    private void addToFolded(int paragraphIndex) {
-        if(foldedParagraphs.contains(paragraphIndex))
-        {
-            return;
-        }
-        foldedParagraphs.add(paragraphIndex);
-    }
-
-    private void removeFromFolded(int paragraphIndex) {
-        foldedParagraphs.remove(paragraphIndex);
-    }
-
 }

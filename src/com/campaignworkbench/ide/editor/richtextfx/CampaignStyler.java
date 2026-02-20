@@ -64,8 +64,9 @@ public class CampaignStyler implements ISyntaxStyler {
     };
 
     private static final String KEYWORD_PATTERN = "\\b(" + String.join("|", KEYWORDS) + ")\\b";
+    private static final String HTML_PATTERN  = "<(/?\\w+)([^>]*)>";
     private static final String PAREN_PATTERN = "\\(|\\)";
-    private static final String BRACE_PATTERN = "\\{|\\}";
+    private static final String BRACE_PATTERN = "\\{|\\}|<%|%>";
     private static final String BRACKET_PATTERN = "\\[|\\]";
     private static final String SEMICOLON_PATTERN = "\\;";
     private static final String STRING_PATTERN =
@@ -75,6 +76,7 @@ public class CampaignStyler implements ISyntaxStyler {
             + "|" + "/\\*[^\\v]*" + "|" + "^\\h*\\*([^\\v]*|/)";  // for visible paragraph processing (line by line)
 
     private static final String GROUP_KEYWORD = "KEYWORD";
+    private static final String GROUP_HTML = "HTML";
     private static final String GROUP_PAREN = "PAREN";
     private static final String GROUP_BRACE = "BRACE";
     private static final String GROUP_BRACKET = "BRACKET";
@@ -87,12 +89,14 @@ public class CampaignStyler implements ISyntaxStyler {
     static {
         groupToStyleClass = new HashMap<>();
         groupToStyleClass.put(GROUP_KEYWORD, "keyword");
+        groupToStyleClass.put(GROUP_HTML, "keyword");
         groupToStyleClass.put(GROUP_PAREN, "paren");
         groupToStyleClass.put(GROUP_BRACE, "brace");
         groupToStyleClass.put(GROUP_BRACKET, "bracket");
         groupToStyleClass.put(GROUP_SEMICOLON, "semicolon");
         groupToStyleClass.put(GROUP_STRING, "string");
         groupToStyleClass.put(GROUP_COMMENT, "comment");
+
     }
 
     private static final Pattern PATTERN = Pattern.compile(
@@ -102,7 +106,8 @@ public class CampaignStyler implements ISyntaxStyler {
                     "|(?<" + GROUP_BRACKET + ">" + BRACKET_PATTERN + ")" +
                     "|(?<" + GROUP_SEMICOLON + ">" + SEMICOLON_PATTERN + ")" +
                     "|(?<" + GROUP_STRING + ">" + STRING_PATTERN + ")" +
-                    "|(?<" + GROUP_COMMENT + ">" + COMMENT_PATTERN + ")"
+                    "|(?<" + GROUP_COMMENT + ">" + COMMENT_PATTERN + ")" +
+                    "|(?<" + GROUP_HTML + ">" + HTML_PATTERN + ")"
     );
 
     private Matcher matcher;

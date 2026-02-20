@@ -80,7 +80,7 @@ public class RichTextFXEditor implements ICodeEditor, IThemeable {
                 foldParser = new XmlFoldParser(codeArea);
                 break;
             default:
-                foldParser = new CampaignFoldParser();
+                foldParser = new CampaignFoldParser(codeArea);
                 break;
         }
     }
@@ -90,15 +90,11 @@ public class RichTextFXEditor implements ICodeEditor, IThemeable {
 
         // Trigger highlighting
         switch (syntax) {
-            case CAMPAIGN, JAVASCRIPT:
-                syntaxStyler = new CampaignStyler();
-                break;
             case XML:
                 syntaxStyler = new XmlStyler();
                 break;
-            case HTML:
-
-                break;
+            default:
+                syntaxStyler = new CampaignStyler();
         }
     }
 
@@ -133,9 +129,11 @@ public class RichTextFXEditor implements ICodeEditor, IThemeable {
         if (theme == IDETheme.DARK) {
             if (syntaxStyler != null) {
                 String codeEditorCss = theme.getCodeEditorStyleSheet();
-                root.getScene().getStylesheets().add(codeEditorCss);
+                // root.getScene().getStylesheets().add(codeEditorCss);
                 String languageCss = syntaxStyler.getStyleSheet(theme);
-                root.getScene().getStylesheets().add(languageCss);
+                // root.getScene().getStylesheets().add(languageCss);
+                root.getStylesheets().add(codeEditorCss);
+                root.getStylesheets().add(languageCss);
             }
         }
     }

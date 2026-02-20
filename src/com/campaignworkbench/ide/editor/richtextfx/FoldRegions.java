@@ -11,19 +11,19 @@ import java.util.Set;
 public class FoldRegions implements Iterable<FoldRegion> {
 
     // CodeArea is needed here to translate line numbers into paragraph indexes
-    private CodeArea codeArea;
-    private HashMap<Integer, FoldRegion> foldRegionMap;
+    private final CodeArea codeArea;
+    private final HashMap<Integer, FoldRegion> foldRegionMap;
 
     public FoldRegions(CodeArea codeArea) {
         this.codeArea = codeArea;
         foldRegionMap = new HashMap<>();
     }
 
-    public void add(int startLine, int endLine, Set<Integer> foldedParagraphs) {
+    public void add(int startCharIndex, int endCharIndex, Set<Integer> foldedParagraphs) {
 
         // Get the lines as paragraph indexes
-        int startParagraphIndex = getParagraphIndex(startLine);
-        int endParagraphIndex = getParagraphIndex(endLine);
+        int startParagraphIndex = getParagraphIndex(startCharIndex);
+        int endParagraphIndex = getParagraphIndex(endCharIndex);
 
         // Check if it's already there or start and end are the same
         if (foldRegionMap.containsKey(startParagraphIndex) || startParagraphIndex == endParagraphIndex) {

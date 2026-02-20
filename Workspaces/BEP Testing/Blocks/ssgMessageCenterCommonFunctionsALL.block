@@ -1,0 +1,150 @@
+<%
+  // ***********************************************************************
+  // This perso block contains useful common functions for use in all
+  // Message Center Templates
+  // ***********************************************************************
+
+  // Parse XML date time like "2025-09-23T22:50:45.28Z" into a JS date
+  function getXmlDate(xmlDateString) {
+    return parseTimeStamp(xmlDateString);
+  }
+
+  // Gets the two character country code from the triggering event
+  function getEventCountryCode() {
+    var eventType = message.delivery.triggerMessage.eventType;
+    var len = eventType.length;
+    if (len === 0) return "";      // empty input
+    if (len === 1) return eventType.toLowerCase();  // single-char input
+    return eventType.substring(len - 2, len).toLowerCase();
+  }
+
+  // Returns the two character segment code, based on the country code of
+  // the event
+  function getSegmentCountryCode() {
+    var eventCountryCode = getEventCountryCode();
+    if(eventCountryCode == 'gb') {
+      return 'UK';
+    } else {
+      return eventCountryCode.toUpperCase();
+    }
+
+  }
+
+  // Returns a 'friendly' formatted date from the given XML Date
+  function formatDateMC(date, event)
+  {
+    //get country code from event
+    var countryCode=event.toString().slice(-2);
+    var formattedDate=formatDate(date, "%D %Bl %4Y");
+    var monthMap;
+    //English regions - no need to translate the month because is defaulted to English
+    if(countryCode=="gb" || countryCode=="ie" || countryCode=="au" || countryCode=="nz" || countryCode=="ca")
+    {
+      return formattedDate;
+    }
+    if(countryCode=="nl")
+    {
+  
+          monthMap = [
+            ["January",   "Januari"],
+            ["February",  "Februari"],
+            ["March",     "Maart"],
+            ["April",     "April"],
+            ["May",       "Mei"],
+            ["June",      "Juni"],
+            ["July",      "Juli"],
+            ["August",    "Augustus"],
+            ["September", "September"],
+            ["October",   "Oktober"],
+            ["November",  "November"],
+            ["December",  "December"]]; 
+     }
+     else if(countryCode=="dk")
+     {
+  
+          monthMap = [
+            ["January",   "Januar"],
+            ["February",  "Februar"],
+            ["March",     "Marts"],
+            ["April",     "April"],
+            ["May",       "Maj"],
+            ["June",      "Juni"],
+            ["July",      "Juli"],
+            ["August",    "August"],
+            ["September", "September"],
+            ["October",   "Oktober"],
+            ["November",  "November"],
+            ["December",  "December"]
+          ];
+  
+     }
+     else if(countryCode=="fi")
+     {
+  
+        monthMap = [
+          ["January",   "Tammikuu"],
+          ["February",  "Helmikuu"],
+          ["March",     "Maaliskuu"],
+          ["April",     "Huhtikuu"],
+          ["May",       "Toukokuu"],
+          ["June",      "Kesäkuu"],
+          ["July",      "Heinäkuu"],
+          ["August",    "Elokuu"],
+          ["September", "Syyskuu"],
+          ["October",   "Lokakuu"],
+          ["November",  "Marraskuu"],
+          ["December",  "Joulukuu"]
+         ]
+  
+     }
+     else if(countryCode=="se")
+     {
+  
+       monthMap = [
+        ["January",   "Januari"],
+        ["February",  "Februari"],
+        ["March",     "Mars"],
+        ["April",     "April"],
+        ["May",       "Maj"],
+        ["June",      "Juni"],
+        ["July",      "Juli"],
+        ["August",    "Augusti"],
+        ["September", "September"],
+        ["October",   "Oktober"],
+        ["November",  "November"],
+        ["December",  "December"]
+       ]
+  
+     }
+     else if(countryCode=="no")
+     {
+  
+        monthMap = [
+          ["January",   "Januar"],
+          ["February",  "Februar"],
+          ["March",     "Mars"],
+          ["April",     "April"],
+          ["May",       "Mai"],
+          ["June",      "Juni"],
+          ["July",      "Juli"],
+          ["August",    "August"],
+          ["September", "September"],
+          ["October",   "Oktober"],
+          ["November",  "November"],
+          ["December",  "Desember"]
+        ]
+  
+     }
+  
+      // Replace every occurrence of any English month in the string
+      for (i=0;i<monthMap.length;i++) {
+          if(formattedDate.toString().indexOf(monthMap[i][0]) != -1) {
+            formattedDate = formattedDate.replace(monthMap[i][0], monthMap[i][1]);
+            return formattedDate;
+          }
+      }
+
+    // If we cant' find a month match, just return the original
+    return date;
+  }
+%>
