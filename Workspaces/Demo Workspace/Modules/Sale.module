@@ -1,0 +1,26 @@
+<!-- Helper functions -->
+<%
+function perso(strPerso) {
+ var strStart = '<' + '%';
+ var strEnd = '%' + '>';
+ return strStart + strPerso + strEnd;
+}
+var begin = '&lt;' + '%';
+var end = '%' + '&gt;';
+
+function bloc(strPerso)
+{
+  var strStart = '<' + '%' + '@ include view="';
+  var strEnd = '" %' + '>';
+  return strStart + strPerso + strEnd;
+}
+%>
+
+<!-- Main Body -->
+<h3><%= ctx.@HEADER %></h3>
+<p>
+<%=perso('for each (item in rtEvent.ctx.sale.items.item) {')%>
+<strong><%= ctx.@ITEM %></strong>: <%=perso('=item.name') %>, <%=perso('=item.displayPrice') %> <br>
+<%=perso('}') %>
+</p>
+<h4><%= ctx.@TOTAL_PRICE %>: <%=perso('=rtEvent.ctx.sale.totalPrice') %></h4>

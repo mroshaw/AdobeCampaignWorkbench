@@ -1,0 +1,3 @@
+<p>Kind regards,</p>
+
+<h3>Your favourite <%= rtEvent.ctx.store.name %> store</h3>

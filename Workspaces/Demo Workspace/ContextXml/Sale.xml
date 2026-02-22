@@ -1,0 +1,22 @@
+<ctx>
+  <customer>
+    <firstName>Bob</firstName>
+    <lastName>Smith</lastName>
+  </customer>
+  <store>
+    <name>Arbroath</name>
+  </store>
+  <sale>
+    <items>
+      <item>
+        <name>HD Monitor</name>
+        <displayPrice>£199.99</displayPrice>
+      </item>
+      <item>
+        <name>Desktop PC</name>
+        <displayPrice>£899.99</displayPrice>
+      </item>
+    </items>
+    <totalPrice>1099.98</totalPrice>
+  </sale>
+</ctx>

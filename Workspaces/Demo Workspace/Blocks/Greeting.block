@@ -1,0 +1,1 @@
+<p>Hello <strong><%= rtEvent.ctx.customer.firstName %></strong>,</p>

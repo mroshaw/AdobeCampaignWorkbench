@@ -1,0 +1,3 @@
+<%@ include view="Greeting" %>
+<p>We hope you enjoy your purchase!</p>
+<%@ include view="SignOff" %>

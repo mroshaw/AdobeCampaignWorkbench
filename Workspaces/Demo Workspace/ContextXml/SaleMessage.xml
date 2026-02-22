@@ -1,0 +1,7 @@
+<message>
+  <delivery>
+    <triggerMessage>
+      <eventType>com.order.created-gb</eventType>
+    </triggerMessage>
+  </delivery>
+</message>

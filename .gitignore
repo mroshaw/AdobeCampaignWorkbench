@@ -29,5 +29,6 @@ bin/
 ### Mac OS ###
 .DS_Store
 
-# Test code
-/Workspaces/Specsavers Workspace/
+# Test Workspaces
+/Workspaces/*
+!/Workspaces/Demo Workspace/

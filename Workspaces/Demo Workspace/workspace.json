@@ -1,0 +1,69 @@
+{
+  "blocks" : [ {
+    "workspaceFilePath" : "file:///E:/Dev/AdobeCampaignWorkbench/Workspaces/Demo%20Workspace/Blocks/Greeting.block",
+    "workspaceFileType" : "BLOCK"
+  }, {
+    "workspaceFilePath" : "file:///E:/Dev/AdobeCampaignWorkbench/Workspaces/Demo%20Workspace/Blocks/SignOff.block",
+    "workspaceFileType" : "BLOCK"
+  } ],
+  "configFilePath" : "file:///E:/Dev/AdobeCampaignWorkbench/Workspaces/Demo%20Workspace/workspace.json",
+  "contexts" : [ {
+    "workspaceFilePath" : "file:///E:/Dev/AdobeCampaignWorkbench/Workspaces/Demo%20Workspace/ContextXml/Sale.xml",
+    "workspaceFileType" : "CONTEXT"
+  }, {
+    "workspaceFilePath" : "file:///E:/Dev/AdobeCampaignWorkbench/Workspaces/Demo%20Workspace/ContextXml/SaleMessage.xml",
+    "workspaceFileType" : "CONTEXT"
+  }, {
+    "workspaceFilePath" : "file:///E:/Dev/AdobeCampaignWorkbench/Workspaces/Demo%20Workspace/ContextXml/EmptyContext.xml",
+    "workspaceFileType" : "CONTEXT"
+  }, {
+    "workspaceFilePath" : "file:///E:/Dev/AdobeCampaignWorkbench/Workspaces/Demo%20Workspace/ContextXml/SaleModuleContext.xml",
+    "workspaceFileType" : "CONTEXT"
+  } ],
+  "modules" : [ {
+    "dataContextFile" : {
+      "workspaceFilePath" : "file:///E:/Dev/AdobeCampaignWorkbench/Workspaces/Demo%20Workspace/ContextXml/EmptyContext.xml",
+      "workspaceFileType" : "CONTEXT"
+    },
+    "workspaceFilePath" : "file:///E:/Dev/AdobeCampaignWorkbench/Workspaces/Demo%20Workspace/Modules/Start.module",
+    "workspaceFileType" : "MODULE"
+  }, {
+    "dataContextFile" : {
+      "workspaceFilePath" : "file:///E:/Dev/AdobeCampaignWorkbench/Workspaces/Demo%20Workspace/ContextXml/EmptyContext.xml",
+      "workspaceFileType" : "CONTEXT"
+    },
+    "workspaceFilePath" : "file:///E:/Dev/AdobeCampaignWorkbench/Workspaces/Demo%20Workspace/Modules/End.module",
+    "workspaceFileType" : "MODULE"
+  }, {
+    "dataContextFile" : {
+      "workspaceFilePath" : "file:///E:/Dev/AdobeCampaignWorkbench/Workspaces/Demo%20Workspace/ContextXml/SaleModuleContext.xml",
+      "workspaceFileType" : "CONTEXT"
+    },
+    "workspaceFilePath" : "file:///E:/Dev/AdobeCampaignWorkbench/Workspaces/Demo%20Workspace/Modules/Sale.module",
+    "workspaceFileType" : "MODULE"
+  } ],
+  "rootFolderPath" : "file:///E:/Dev/AdobeCampaignWorkbench/Workspaces/Demo%20Workspace/",
+  "templates" : [ {
+    "dataContextFile" : {
+      "workspaceFilePath" : "file:///E:/Dev/AdobeCampaignWorkbench/Workspaces/Demo%20Workspace/ContextXml/Sale.xml",
+      "workspaceFileType" : "CONTEXT"
+    },
+    "messageContextFile" : {
+      "workspaceFilePath" : "file:///E:/Dev/AdobeCampaignWorkbench/Workspaces/Demo%20Workspace/ContextXml/SaleMessage.xml",
+      "workspaceFileType" : "CONTEXT"
+    },
+    "workspaceFilePath" : "file:///E:/Dev/AdobeCampaignWorkbench/Workspaces/Demo%20Workspace/Templates/Sale.template",
+    "workspaceFileType" : "TEMPLATE"
+  }, {
+    "dataContextFile" : {
+      "workspaceFilePath" : "file:///E:/Dev/AdobeCampaignWorkbench/Workspaces/Demo%20Workspace/ContextXml/Sale.xml",
+      "workspaceFileType" : "CONTEXT"
+    },
+    "messageContextFile" : {
+      "workspaceFilePath" : "file:///E:/Dev/AdobeCampaignWorkbench/Workspaces/Demo%20Workspace/ContextXml/SaleMessage.xml",
+      "workspaceFileType" : "CONTEXT"
+    },
+    "workspaceFilePath" : "file:///E:/Dev/AdobeCampaignWorkbench/Workspaces/Demo%20Workspace/Templates/Basic.template",
+    "workspaceFileType" : "TEMPLATE"
+  } ]
+}
