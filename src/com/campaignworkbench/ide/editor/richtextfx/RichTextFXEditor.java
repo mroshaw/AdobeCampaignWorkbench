@@ -20,6 +20,7 @@ import org.fxmisc.richtext.model.TwoDimensional;
 
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.List;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -203,7 +204,10 @@ public class RichTextFXEditor implements ICodeEditor, IThemeable {
 
     @Override
     public void find(String text) {
-        if (text == null || text.isEmpty()) return;
+        if (text == null || text.isEmpty()){
+            clearFindHighlight();
+            return;
+        }
 
         String content = codeArea.getText();
         Pattern pattern = Pattern.compile(Pattern.quote(text), Pattern.CASE_INSENSITIVE);
@@ -214,6 +218,26 @@ public class RichTextFXEditor implements ICodeEditor, IThemeable {
             int end = matcher.end();
             for (int i = start; i < end; i++) {
                 codeArea.setStyle(i, i + 1, mergeStyles(codeArea.getStyleOfChar(i), "find-text"));
+            }
+        }
+    }
+
+    public void clearFindHighlight() {
+
+        int length = codeArea.getLength();
+
+        for (int i = 0; i < length; i++) {
+
+            Collection<String> styles = codeArea.getStyleOfChar(i);
+
+            if (styles.contains("find-text")) {
+
+                List<String> cleaned =
+                        styles.stream()
+                                .filter(s -> !s.equals("find-text"))
+                                .toList();
+
+                codeArea.setStyle(i, i + 1, cleaned);
             }
         }
     }

@@ -56,7 +56,8 @@ public final class EditorTab extends Tab {
         Label findLabel = new Label("Find:");
         findField = new TextField();
         Button findButton = UiUtil.createButton("", "Find all", FontAwesomeIcon.ARROW_CIRCLE_RIGHT, Color.GREEN, "12px", true, _ -> findHandler());
-        findReplaceToolBar = new ToolBar(findLabel, findField, findButton);
+        Button clearFindButton = UiUtil.createButton("", "Clear", FontAwesomeIcon.TIMES_CIRCLE, Color.RED, "12px", true, _ -> clearFindHandler());
+        findReplaceToolBar = new ToolBar(findLabel, findField, findButton, clearFindButton);
         toolsContainer.getChildren().addAll(formatToolBar, findReplaceToolBar);
         HBox.setHgrow(formatToolBar, Priority.ALWAYS);
 
@@ -160,6 +161,11 @@ public final class EditorTab extends Tab {
         if(!Objects.equals(textToFind, "")) {
             editor.find(textToFind);
         }
+    }
+
+    private void clearFindHandler() {
+        // findField.setText("");
+        editor.find("");
     }
 
     /**

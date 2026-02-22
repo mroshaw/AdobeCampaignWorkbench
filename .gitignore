@@ -32,3 +32,4 @@ bin/
 # Test Workspaces
 /Workspaces/*
 !/Workspaces/Demo Workspace/
+!/Workspaces/Demo Workspace/**
