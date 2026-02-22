@@ -10,8 +10,6 @@ import javafx.scene.layout.HBox;
 import javafx.scene.text.Text;
 import org.fxmisc.richtext.CodeArea;
 
-import java.util.HashSet;
-import java.util.Set;
 import java.util.function.IntFunction;
 
 public class GutterFactory implements IntFunction<Node> {
@@ -46,7 +44,7 @@ public class GutterFactory implements IntFunction<Node> {
         box.setMinWidth(60);
         box.getStyleClass().add("gutter");
         // Get the line number node as a node
-        Label lineNo = (Label)PlainLineNumberFactory.get(codeArea).apply(paragraphIndex);
+        Label lineNo = (Label) SimpleLineNumberFactory.get(codeArea).apply(paragraphIndex);
         lineNo.setMinWidth(36);
         lineNo.getStyleClass().add("line-number");
         // Create a fold indicator label
@@ -69,9 +67,12 @@ public class GutterFactory implements IntFunction<Node> {
             foldIndicator.setCursor(Cursor.HAND);
             foldIndicator.setOnMouseClicked(e -> {
                 e.consume();
-                foldParser.removeFoldedParagraph(paragraphIndex);
+                foldParser.unfoldParagraph(paragraphIndex);
+
+                // foldParser.removeFoldedParagraph(paragraphIndex);
+                // codeArea.unfoldParagraphs(paragraphIndex);
+
                 // Refresh
-                codeArea.unfoldParagraphs(paragraphIndex);
                 codeArea.setParagraphGraphicFactory(codeArea.getParagraphGraphicFactory());
             });
         } else if (foldRegions.isParagraphFoldable(paragraphIndex)) {
@@ -80,9 +81,12 @@ public class GutterFactory implements IntFunction<Node> {
             foldIndicator.setCursor(Cursor.HAND);
             foldIndicator.setOnMouseClicked(e -> {
                 e.consume();
-                foldParser.addFoldedParagraph(paragraphIndex);
-                int end = foldRegions.getFoldedParagraphEnd(paragraphIndex);
-                codeArea.foldParagraphs(paragraphIndex, end );
+                foldParser.foldParagraph(paragraphIndex);
+
+                // foldParser.addFoldedParagraph(paragraphIndex);
+                // int endParagraphIndex = foldRegions.getFoldedParagraphEnd(paragraphIndex);
+                // codeArea.foldParagraphs(paragraphIndex, endParagraphIndex);
+
                 // Refresh
                 codeArea.setParagraphGraphicFactory(codeArea.getParagraphGraphicFactory());
             });

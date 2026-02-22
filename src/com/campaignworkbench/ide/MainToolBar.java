@@ -4,9 +4,12 @@ import de.jensd.fx.glyphs.fontawesome.FontAwesomeIcon;
 import de.jensd.fx.glyphs.fontawesome.utils.FontAwesomeIconFactory;
 import javafx.event.ActionEvent;
 import javafx.event.EventHandler;
+import javafx.geometry.Orientation;
 import javafx.geometry.Pos;
 import javafx.scene.Node;
 import javafx.scene.control.Button;
+import javafx.scene.control.Separator;
+import javafx.scene.control.ToolBar;
 import javafx.scene.control.Tooltip;
 import javafx.scene.layout.HBox;
 import javafx.scene.paint.Color;
@@ -17,7 +20,7 @@ import javafx.scene.text.Text;
  */
 public class MainToolBar implements IJavaFxNode {
 
-    private final HBox toolBar;
+    private final ToolBar toolBar;
     private final Button runButton;
 
 
@@ -47,13 +50,13 @@ public class MainToolBar implements IJavaFxNode {
         runButton.setDisable(true);
         runButton.setOnAction(runHandler);
 
-        toolBar = new HBox(
-                10,
+        toolBar = new ToolBar(
                 openWorkspaceButton,
+                new Separator(Orientation.VERTICAL),
                 runButton
         );
-        toolBar.setAlignment(Pos.CENTER_LEFT);
-        toolBar.getStyleClass().add("tool-bar");
+
+        toolBar.getStyleClass().add("main-toolbar");
     }
 
     /**

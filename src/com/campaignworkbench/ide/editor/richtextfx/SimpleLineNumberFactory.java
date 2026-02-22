@@ -18,7 +18,7 @@ import org.reactfx.value.Val;
 
 import java.util.function.IntFunction;
 
-public class PlainLineNumberFactory<PS> implements IntFunction<Node> {
+public class SimpleLineNumberFactory<PS> implements IntFunction<Node> {
 
     private static final Insets DEFAULT_INSETS =
             new Insets(0.0, 5.0, 0.0, 5.0);
@@ -53,14 +53,14 @@ public class PlainLineNumberFactory<PS> implements IntFunction<Node> {
             GenericStyledArea<PS, ?, ?> area,
             IntFunction<String> format
     ) {
-        return new PlainLineNumberFactory<>(area, format);
+        return new SimpleLineNumberFactory<>(area, format);
     }
 
     /* =======================
        Constructor
        ======================= */
 
-    private PlainLineNumberFactory(
+    private SimpleLineNumberFactory(
             GenericStyledArea<PS, ?, ?> area,
             IntFunction<String> format
     ) {

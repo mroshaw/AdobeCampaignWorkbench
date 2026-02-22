@@ -1,5 +1,6 @@
 package com.campaignworkbench.ide.editor.richtextfx;
 
+import com.campaignworkbench.ide.IDEException;
 import com.campaignworkbench.ide.IDETheme;
 import com.campaignworkbench.ide.IThemeable;
 import com.campaignworkbench.ide.ThemeManager;
@@ -11,6 +12,10 @@ import javafx.scene.layout.BorderPane;
 import org.fxmisc.richtext.CodeArea;
 import org.fxmisc.flowless.VirtualizedScrollPane;
 import javafx.scene.Cursor;
+import org.fxmisc.richtext.model.Paragraph;
+import org.fxmisc.richtext.model.StyleSpans;
+
+import java.util.Collection;
 
 /**
  * Implementation of ICodeEditor using the RichTextFX library
@@ -27,6 +32,8 @@ public class RichTextFXEditor implements ICodeEditor, IThemeable {
     // Code Folding
     private IFoldParser foldParser;
 
+    // Code formatting
+    private ICodeFormatter codeFormatter;
 
     /**
      * Constructor
@@ -39,17 +46,18 @@ public class RichTextFXEditor implements ICodeEditor, IThemeable {
         root = new BorderPane(scrollPane);
         root.getStyleClass().add("code-editor");
 
-        setSyntaxStyler(syntaxType);
-        setFoldingParser(syntaxType);
-
-        // Re-highlight on text change
-        codeArea.textProperty().addListener((obs, oldText, newText) -> {
-            codeArea.setStyleSpans(0, syntaxStyler.style(codeArea.getText()));
-        });
+        setLanguageHelpers(syntaxType);
 
         GutterFactory gutterFactory = new GutterFactory(codeArea, foldParser);
         codeArea.setParagraphGraphicFactory(gutterFactory);
         Platform.runLater(() -> ThemeManager.register(this));
+
+        codeArea.textProperty().addListener((obs, oldText, newText) -> {
+            StyleSpans<Collection<String>> computedStyleSpans = syntaxStyler.style(newText);
+            if (computedStyleSpans != null) {
+                codeArea.setStyleSpans(0, computedStyleSpans);
+            }
+        });
     }
 
     @Override
@@ -64,8 +72,12 @@ public class RichTextFXEditor implements ICodeEditor, IThemeable {
 
     @Override
     public void setText(String text) {
+        codeArea.clear();
         codeArea.replaceText(text);
-        // codeArea.setStyleSpans(0, syntaxStyler.style(text));
+        StyleSpans<Collection<String>> computedStyleSpans = syntaxStyler.style(codeArea.getText());
+        if (computedStyleSpans != null) {
+            codeArea.setStyleSpans(0, computedStyleSpans);
+        }
     }
 
     @Override
@@ -73,28 +85,19 @@ public class RichTextFXEditor implements ICodeEditor, IThemeable {
         return codeArea.getText();
     }
 
-    private void setFoldingParser(SyntaxType syntax) {
+    private void setLanguageHelpers(SyntaxType syntax) {
         // Set folding class instance
         switch (syntax) {
             case XML:
+                codeFormatter = new XmlFormatter();
+                syntaxStyler = new XmlStyler();
                 foldParser = new XmlFoldParser(codeArea);
                 break;
             default:
+                codeFormatter = null;
+                syntaxStyler = new CampaignStyler();
                 foldParser = new CampaignFoldParser(codeArea);
                 break;
-        }
-    }
-
-    private void setSyntaxStyler(SyntaxType syntax) {
-        String newText = codeArea.getText();
-
-        // Trigger highlighting
-        switch (syntax) {
-            case XML:
-                syntaxStyler = new XmlStyler();
-                break;
-            default:
-                syntaxStyler = new CampaignStyler();
         }
     }
 
@@ -128,14 +131,36 @@ public class RichTextFXEditor implements ICodeEditor, IThemeable {
 
         if (theme == IDETheme.DARK) {
             if (syntaxStyler != null) {
-                String codeEditorCss = theme.getCodeEditorStyleSheet();
+                // String codeEditorCss = theme.getCodeEditorStyleSheet();
                 // root.getScene().getStylesheets().add(codeEditorCss);
                 String languageCss = syntaxStyler.getStyleSheet(theme);
                 // root.getScene().getStylesheets().add(languageCss);
-                root.getStylesheets().add(codeEditorCss);
+                // root.getStylesheets().add(codeEditorCss);
                 root.getStylesheets().add(languageCss);
             }
         }
+    }
+
+    public void formatCode(int indentSize) {
+        if (codeFormatter == null) {
+            return;
+        }
+        try {
+            String formattedCode = codeFormatter.format(getText(), indentSize);
+            setText(formattedCode);
+        } catch (Exception ex) {
+            throw new IDEException("Error formatting code", ex);
+        }
+    }
+
+    @Override
+    public void foldAll() {
+        foldParser.foldAll();
+    }
+
+    @Override
+    public void unfoldAll() {
+        foldParser.unfoldAll();
     }
 
     @Override

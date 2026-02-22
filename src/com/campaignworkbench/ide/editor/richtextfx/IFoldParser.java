@@ -12,6 +12,13 @@ public interface IFoldParser {
     FoldRegions findFoldRegions(CodeArea codeArea);
 
     boolean isParagraphFolded(int paragraphIndex);
-    void removeFoldedParagraph(int startParagraphIndex);
-    void addFoldedParagraph(int startParagraphIndex);
+    void foldParagraph(int startParagraphIndex);
+    void unfoldParagraph(int startParagraphIndex);
+
+    void addFoldedParagraph(int paragraphIndex);
+    void removeFoldedParagraph(int paragraphIndex);
+
+    void foldAll();
+
+    void unfoldAll();
 }

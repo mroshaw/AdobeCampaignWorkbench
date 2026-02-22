@@ -152,6 +152,9 @@ public class MainMenuBar implements IJavaFxNode {
 
         // --- Add menus to menu bar ---
         menuBar.getMenus().addAll(fileMenu, editMenu, viewMenu, helpMenu);
+
+        // Set styling
+        menuBar.getStyleClass().add("main-menu-bar");
     }
 
     /**

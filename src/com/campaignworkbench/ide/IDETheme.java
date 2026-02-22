@@ -1,52 +1,71 @@
 package com.campaignworkbench.ide;
 
+import atlantafx.base.theme.CupertinoDark;
+import atlantafx.base.theme.CupertinoLight;
+
+import java.net.URL;
+
 /**
  * Visual theme applicable to the entire IDE user interface
  */
 public enum IDETheme {
 
     DARK (
-            "/richtextfx/campaign_syntax_styles_dark.css",
-            "/richtextfx/xml_syntax_styles_dark.css",
-            "/richtextfx/html_styles_dark.css",
-            "/richtextfx/codeeditor_styles_dark.css"
+            new CupertinoDark().getUserAgentStylesheet(),
+            "/styles/richtextfx/ide_styles_dark.css",
+            "/styles/richtextfx/campaign_syntax_styles_dark.css",
+            "/styles/richtextfx/xml_syntax_styles_dark.css",
+            "/styles/richtextfx/html_syntax_styles_dark.css"
     ),
     LIGHT (
-            "/richtextfx/campaign_styles_light.css",
-            "/richtextfx/xml_styles_light.css",
-            "/richtextfx/html_styles_light.css",
-            "/richtextfx/codeeditor_styles_light.css"
+            new CupertinoLight().getUserAgentStylesheet(),
+            "/styles/richtextfx/ide_styles_light.css",
+            "/styles/richtextfx/campaign_syntax_styles_light.css",
+            "/styles/richtextfx/xml_syntax_styles_light.css",
+            "/styles/richtextfx/html_syntax_styles_light.css"
     );
 
-    private final String codeEditorStyleSheet;
-    private final String campaignStyleSheet;
-    private final String xmlStyleSheet;
-    private final String htmlStyleSheet;
+    private final String atlantaFxStyleSheet;
+    private final String ideStyleSheet;
+    private final String campaignSyntaxStyleSheet;
+    private final String xmlSyntaxStyleSheet;
+    private final String htmlSyntaxStyleSheet;
 
-    IDETheme(String campaignStyleSheet, String xmlStyleSheet, String htmlStyleSheet, String codeEditorStyleSheet) {
-        this.campaignStyleSheet = campaignStyleSheet;
-        this.xmlStyleSheet = xmlStyleSheet;
-        this.htmlStyleSheet = htmlStyleSheet;
-        this.codeEditorStyleSheet = codeEditorStyleSheet;
+    IDETheme(String atlantaFxStyleSheet, String ideStyleSheet, String campaignSyntaxStyleSheet, String xmlSyntaxStyleSheet, String htmlSyntaxStyleSheet) {
+        this.atlantaFxStyleSheet = atlantaFxStyleSheet;
+        this.campaignSyntaxStyleSheet = campaignSyntaxStyleSheet;
+        this.xmlSyntaxStyleSheet = xmlSyntaxStyleSheet;
+        this.htmlSyntaxStyleSheet = htmlSyntaxStyleSheet;
+        this.ideStyleSheet = ideStyleSheet;
     }
 
-    public String getCodeEditorStyleSheet() {
-        return codeEditorStyleSheet;
+    public String getIdeStyleSheet() {
+        return ideStyleSheet;
     }
 
-    public String getCampaignStyleSheet() {
-        return getStylesFromStyleSheet(campaignStyleSheet);
+    public String getCampaignSyntaxStyleSheet() {
+        return getStylesFromStyleSheet(campaignSyntaxStyleSheet);
     }
 
-    public String getXmlStyleSheet() {
-        return getStylesFromStyleSheet(xmlStyleSheet);
+    public String getXmlSyntaxStyleSheet() {
+        return getStylesFromStyleSheet(xmlSyntaxStyleSheet);
     }
 
-    public String getHtmlStyleSheet() {
-        return getStylesFromStyleSheet(htmlStyleSheet);
+    public String getHtmlSyntaxStyleSheet() {
+        return getStylesFromStyleSheet(htmlSyntaxStyleSheet);
+    }
+
+    public String getAtlantaFxStyleSheet() {
+        return atlantaFxStyleSheet;
     }
 
     private String getStylesFromStyleSheet(String styleSheet) {
-        return this.getClass().getResource(styleSheet).toExternalForm();
+        URL styleSheetUrl = this.getClass().getResource(styleSheet);
+        if( styleSheetUrl != null ) {
+            return styleSheetUrl.toExternalForm();
+        }
+        else {
+            throw new IDEException("Unable to locate style sheet: " + styleSheet, null);
+        }
     }
 }

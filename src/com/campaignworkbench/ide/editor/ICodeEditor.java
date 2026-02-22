@@ -54,4 +54,10 @@ public interface ICodeEditor {
 
     public void openFindDialog(String fileName);
 
+    public void formatCode(int indentSize);
+
+    public void foldAll();
+
+    public void unfoldAll();
+
 }

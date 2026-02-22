@@ -3,9 +3,15 @@ package com.campaignworkbench.ide;
 import com.campaignworkbench.campaignrenderer.*;
 import com.campaignworkbench.ide.editor.*;
 import com.campaignworkbench.ide.editor.richtextfx.RichTextFXEditor;
+import com.campaignworkbench.util.UiUtil;
+import de.jensd.fx.glyphs.fontawesome.FontAwesomeIcon;
+import javafx.scene.control.Button;
 import javafx.scene.control.Tab;
 import javafx.scene.control.ToolBar;
 import javafx.scene.layout.BorderPane;
+import javafx.scene.layout.Priority;
+import javafx.scene.layout.VBox;
+import javafx.scene.paint.Color;
 
 import java.nio.file.Path;
 
@@ -14,6 +20,7 @@ import java.nio.file.Path;
  */
 public final class EditorTab extends Tab {
 
+    private final VBox container;
     private final ToolBar toolBar;
     private final WorkspaceFile workspaceFile;
     private final ICodeEditor editor;
@@ -28,18 +35,27 @@ public final class EditorTab extends Tab {
         this.workspaceFile = workspaceFile;
 
         SyntaxType syntaxType = determineSyntax(workspaceFile.getFilePath());
-        System.out.println("Syntax: " + syntaxType);
         this.editor = new RichTextFXEditor(determineSyntax(workspaceFile.getFilePath()));
         updateTabText();
 
-        toolBar = new ToolBar();
+        Button formatButton = UiUtil.createButton("", "Format code", FontAwesomeIcon.ALIGN_LEFT, Color.GREEN, "12px", true, _ -> formatHandler());
+        Button foldAllButton = UiUtil.createButton("", "Fold all", FontAwesomeIcon.INDENT, Color.GREEN, "12px", true, _ -> foldAllHandler());
+        Button unfoldAllButton = UiUtil.createButton("", "Unfold all", FontAwesomeIcon.DEDENT, Color.GREEN, "12px", true, _ -> unfoldAllHandler());
+
+        toolBar = new ToolBar(formatButton, foldAllButton, unfoldAllButton);
 
         BorderPane root = new BorderPane();
         root.setCenter(editor.getNode());
-        setContent(root);
 
+        container = new VBox(toolBar, editor.getNode());
+        VBox.setVgrow(editor.getNode(), Priority.ALWAYS);
+        setContent(container);
         editor.setText(workspaceFile.getWorkspaceFileContent());
         editor.setCaretAtStart();
+
+        // Set styles
+        container.getStyleClass().add("editor-tab");
+        toolBar.getStyleClass().add("editor-toolbar");
     }
 
     public void setDataContextFile(Path contextFile) {
@@ -113,6 +129,18 @@ public final class EditorTab extends Tab {
         }
     }
 
+    private void formatHandler() {
+        editor.formatCode(2);
+    }
+
+    private void foldAllHandler() {
+        editor.foldAll();
+    }
+
+    private void unfoldAllHandler() {
+        editor.unfoldAll();
+    }
+
     /**
      * Refresh the context of the tab
      */
@@ -171,7 +199,7 @@ public final class EditorTab extends Tab {
     }
 
     public void openFindDialog() {
-        String fileName = workspaceFile!= null? workspaceFile.getBaseFileName() : "New File";
+        String fileName = workspaceFile != null ? workspaceFile.getBaseFileName() : "New File";
         editor.openFindDialog(fileName);
     }
 

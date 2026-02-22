@@ -58,8 +58,8 @@ public class CampaignStyler implements ISyntaxStyler {
             // Local workflow/global objects exposed by Campaign
             "instance",      // the current running workflow instance
             "task",          // the current workflow task
-            "event",         // the event that triggered the task
-            "events",        // list of invocation events
+            // "event",         // the event that triggered the task
+            // "events",        // list of invocation events
             "activity"
     };
 
@@ -70,8 +70,8 @@ public class CampaignStyler implements ISyntaxStyler {
     private static final String BRACKET_PATTERN = "\\[|\\]";
     private static final String SEMICOLON_PATTERN = "\\;";
     private static final String STRING_PATTERN =
-            "\"([^\"\\\\]|\\\\.)*\"" +    // double-quoted strings
-                    "|'([^'\\\\]|\\\\.)*'";       // single-quoted strings
+            "\"[^\"]*\"" +   // double-quoted strings
+                    "|'[^']*'";      // single-quoted strings
     private static final String COMMENT_PATTERN = "//[^\n]*" + "|" + "/\\*(.|\\R)*?\\*/"   // for whole text processing (text blocks)
             + "|" + "/\\*[^\\v]*" + "|" + "^\\h*\\*([^\\v]*|/)";  // for visible paragraph processing (line by line)
 
@@ -133,7 +133,7 @@ public class CampaignStyler implements ISyntaxStyler {
 
     @Override
     public String getStyleSheet(IDETheme theme) {
-        return theme.getCampaignStyleSheet();
+        return theme.getCampaignSyntaxStyleSheet();
     }
 
     private void completeStyleToEnd(String text) {

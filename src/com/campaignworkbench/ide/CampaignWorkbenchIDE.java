@@ -35,6 +35,7 @@ public class CampaignWorkbenchIDE extends Application implements IThemeable {
     private ErrorLogPanel errorLogPanel;
     private OutputTabPanel outputPanel;
     private EditorTab currentEditorTab;
+    private Scene scene;
 
     /**
      * Main entry point for the application
@@ -49,8 +50,6 @@ public class CampaignWorkbenchIDE extends Application implements IThemeable {
     @Override
     public void start(Stage primaryStage) {
         primaryStage.setTitle("Campaign Workbench");
-
-        ThemeManager.register(this);
 
         // Set the icon
         Image iconImage = new Image(
@@ -88,7 +87,7 @@ public class CampaignWorkbenchIDE extends Application implements IThemeable {
                 event -> runTemplate());
 
         // Workspace Explorer
-        workspaceExplorer = new WorkspaceExplorer("Workspace Explorer", currentWorkspace, this::openFileFromWorkspace);
+        workspaceExplorer = new WorkspaceExplorer("Workspace Explorer", currentWorkspace, this::openFileFromWorkspace, this::workspaceChanged);
 
         // Editor tabs
         editorTabPanel = new EditorTabPanel((obs, oldTab, newTab) -> tabPanelChanged(newTab));
@@ -135,7 +134,7 @@ public class CampaignWorkbenchIDE extends Application implements IThemeable {
                 workspaceExplorer.getNode(),
                 editorTabPanel.getNode()
         );
-        workspaceEditorSplit.setDividerPositions(0.25);
+        workspaceEditorSplit.setDividerPositions(0.28);
         SplitPane.setResizableWithParent(workspaceExplorer.getNode(), false);
 
         // --- Split: (Workspace+Editor) | Preview ---
@@ -145,7 +144,7 @@ public class CampaignWorkbenchIDE extends Application implements IThemeable {
                 workspaceEditorSplit,
                 outputPanel.getNode()
         );
-        editorPreviewSplit.setDividerPositions(0.75);
+        editorPreviewSplit.setDividerPositions(0.72);
         // SplitPane.setResizableWithParent(previewSplitPane, false);
 
         VBox topBar = new VBox(menuBar.getNode(), toolBar.getNode());
@@ -159,11 +158,11 @@ public class CampaignWorkbenchIDE extends Application implements IThemeable {
         BorderPane root = new BorderPane();
         root.setTop(topBar);
         root.setCenter(rootSplitPane);
-        Scene scene = new Scene(root, 1600, 900);
+        scene = new Scene(root, 1600, 900);
         primaryStage.setScene(scene);
         primaryStage.show();
-
-        appendLog("Welcome to Campaign workbench! Open a workspace, load a template, select an XML context, and hit run!");
+        ThemeManager.register(this);
+        appendLog("Welcome to Campaign workbench!");
     }
 
     /**
@@ -222,12 +221,12 @@ public class CampaignWorkbenchIDE extends Application implements IThemeable {
      */
     @Override
     public void applyTheme(IDETheme ideTheme) {
-        String stylesheet = switch (ideTheme) {
-            case DARK -> new CupertinoDark().getUserAgentStylesheet();
-            case LIGHT -> new CupertinoLight().getUserAgentStylesheet();
-        };
-        // Application.setUserAgentStylesheet(null);
-        Application.setUserAgentStylesheet(stylesheet);
+
+        // Set AtlantaFX styles
+        Application.setUserAgentStylesheet(ideTheme.getAtlantaFxStyleSheet());
+
+        // Set IDE theme styles
+        scene.getStylesheets().add(ideTheme.getIdeStyleSheet());
     }
 
     /**
@@ -316,6 +315,11 @@ public class CampaignWorkbenchIDE extends Application implements IThemeable {
      */
     private void openFileFromWorkspace(WorkspaceFile workspaceFile) {
         openFileInNewTab(workspaceFile);
+    }
+
+    private void workspaceChanged(Workspace newWorkspace) {
+        currentWorkspace = newWorkspace;
+        editorTabPanel.closeAllTabs();
     }
 
     /**

@@ -20,7 +20,7 @@
     -fx-fill: darkviolet;
 }
 .code-editor .avalue {
-    -fx-fill: black;
+    -fx-fill: #cE9178;
 }
 .code-editor .comment {
 	-fx-fill: 717171;

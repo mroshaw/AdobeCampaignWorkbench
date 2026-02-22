@@ -34,6 +34,7 @@ public class WorkspaceExplorer implements IJavaFxNode {
     private Workspace workspace;
     private final TreeView<Object> treeView;
     private final Consumer<WorkspaceFile> fileOpenHandler;
+    private final Consumer<Workspace> workspaceChangedHandler;
 
     private TreeItem<Object> root;
     private TreeItem<Object> templateRoot;
@@ -62,19 +63,23 @@ public class WorkspaceExplorer implements IJavaFxNode {
      * @param label           Label to use for the control in the UI
      * @param fileOpenHandler that handles double clicks of files in the Explorer
      */
-    public WorkspaceExplorer(String label, Workspace workspace, Consumer<WorkspaceFile> fileOpenHandler) {
+    public WorkspaceExplorer(String label,
+                             Workspace workspace,
+                             Consumer<WorkspaceFile> fileOpenHandler,
+                             Consumer<Workspace> workspaceChangedHandler) {
         this.workspace = workspace;
         treeView = new TreeView<>();
         setupDoubleClickHandler();
 
         this.fileOpenHandler = fileOpenHandler;
+        this.workspaceChangedHandler = workspaceChangedHandler;
 
         Label explorerLabel = new Label(label);
         explorerLabel.setPadding(new Insets(0, 0, 0, 5));
         // explorerLabel.setStyle("-fx-font-weight: bold;");
 
         // Create the toolbar
-        HBox toolbar = new HBox();
+
 
         createNewButton = UiUtil.createButton("", "Create new", FontAwesomeIcon.FILE, Color.YELLOW, "16px", true, _ -> createNewHandler());
         addExistingButton = UiUtil.createButton("", "Add existing", FontAwesomeIcon.PLUS_CIRCLE, Color.YELLOW, "16px", true, _ -> addExistingHandler());
@@ -83,8 +88,7 @@ public class WorkspaceExplorer implements IJavaFxNode {
         clearDataContextButton = UiUtil.createButton("", "Clear Data Context", FontAwesomeIcon.FILE_CODE_ALT, Color.RED, "16px", true, _ -> clearDataContextHandler());
         setMessageContextButton = UiUtil.createButton("", "Set Message Context", FontAwesomeIcon.ENVELOPE, Color.GREEN, "16px", true, _ -> setMessageContextHandler());
         clearMessageContextButton = UiUtil.createButton("", "Clear Message Context", FontAwesomeIcon.ENVELOPE, Color.RED, "16px", true, _ -> clearMessageContextHandler());
-
-        toolbar.getChildren().addAll(createNewButton, addExistingButton, removeButton, setDataContextButton, clearDataContextButton, setMessageContextButton, clearMessageContextButton);
+        ToolBar toolbar = new ToolBar(createNewButton, addExistingButton, removeButton, setDataContextButton, clearDataContextButton, setMessageContextButton, clearMessageContextButton);
 
         workspaceExplorerPanel = new VBox(5, explorerLabel, toolbar, treeView);
         workspaceExplorerPanel.setMinHeight(0);
@@ -97,6 +101,10 @@ public class WorkspaceExplorer implements IJavaFxNode {
 
         // Listen for selection changes, so we can add context to the toolbar buttons
         treeView.getSelectionModel().selectedItemProperty().addListener(this::selectionChangedHandler);
+
+        // Set style classes
+        workspaceExplorerPanel.getStyleClass().add("workspace-explorer");
+        toolbar.getStyleClass().add("workspace-explorer-toolbar");
 
         setToolbarContext();
     }
@@ -233,6 +241,8 @@ public class WorkspaceExplorer implements IJavaFxNode {
 
         // Populate initial content WITHOUT rebuilding roots:
         populateInitial();
+
+        workspaceChangedHandler.accept(workspace);
     }
 
     // Populate current workspace lists into the existing roots (no re-creation)

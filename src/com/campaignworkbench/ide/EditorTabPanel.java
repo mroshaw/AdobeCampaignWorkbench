@@ -29,6 +29,9 @@ public class EditorTabPanel implements IJavaFxNode {
         tabPane.getSelectionModel().selectedItemProperty().addListener((obs, oldTab, newTab) -> {
             refreshTabEditor(newTab);
         });
+
+        // Set style class
+        tabPane.getStyleClass().add("editor-tab-panel");
     }
 
     private void refreshTabEditor(Tab tab) {
@@ -182,6 +185,10 @@ public class EditorTabPanel implements IJavaFxNode {
      */
     public boolean isSelected() {
         return getSelected() != null;
+    }
+
+    public void closeAllTabs() {
+        tabPane.getTabs().clear();
     }
 
     @Override

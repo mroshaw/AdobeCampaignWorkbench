@@ -1,7 +1,7 @@
 <message>
-	<delivery>
-		<triggerMessage>
-			<eventType>com.specsavers.delivery.added-gb</eventType>
-		</triggerMessage>
-	</delivery>
+  <delivery>
+    <triggerMessage>
+      <eventType>com.specsavers.delivery.added-gb</eventType>
+    </triggerMessage>
+  </delivery>
 </message>
