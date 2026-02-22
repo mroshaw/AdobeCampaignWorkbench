@@ -39,10 +39,16 @@
 
 .editor-tab-panel .editor-tab .editor-toolbar {
     -fx-spacing: 4px;
+    -fx-max-height: 50px;
 }
 
 .editor-tab-panel .editor-tab .editor-toolbar .button {
     -fx-padding: 4px;
+}
+
+.code-editor .code-area .find-text {
+    -rtfx-background-color: yellow !important;
+    -fx-fill: black !important;
 }
 
 .code-editor .code-area {

@@ -7,15 +7,27 @@ import com.campaignworkbench.ide.ThemeManager;
 import com.campaignworkbench.ide.editor.ICodeEditor;
 import com.campaignworkbench.ide.editor.SyntaxType;
 import javafx.application.Platform;
+import javafx.geometry.Insets;
 import javafx.scene.Node;
+import javafx.scene.control.Button;
+import javafx.scene.control.Label;
+import javafx.scene.control.TextField;
 import javafx.scene.layout.BorderPane;
+import javafx.scene.layout.HBox;
+import javafx.scene.layout.Priority;
+import javafx.scene.layout.VBox;
 import org.fxmisc.richtext.CodeArea;
 import org.fxmisc.flowless.VirtualizedScrollPane;
 import javafx.scene.Cursor;
 import org.fxmisc.richtext.model.Paragraph;
 import org.fxmisc.richtext.model.StyleSpans;
+import org.fxmisc.richtext.model.StyleSpansBuilder;
 
+import java.util.ArrayList;
 import java.util.Collection;
+import java.util.Collections;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 /**
  * Implementation of ICodeEditor using the RichTextFX library
@@ -164,7 +176,28 @@ public class RichTextFXEditor implements ICodeEditor, IThemeable {
     }
 
     @Override
-    public void openFindDialog(String fileName) {
+    public void find(String text) {
+        if (text == null || text.isEmpty()) return;
 
+        String content = codeArea.getText();
+        Pattern pattern = Pattern.compile(Pattern.quote(text), Pattern.CASE_INSENSITIVE);
+        Matcher matcher = pattern.matcher(content);
+
+        while (matcher.find()) {
+            int start = matcher.start();
+            int end = matcher.end();
+            for (int i = start; i < end; i++) {
+                codeArea.setStyle(i, i + 1, mergeStyles(codeArea.getStyleOfChar(i), "find-text"));
+            }
+        }
+    }
+    /**
+     * Returns a new style collection containing the original styles plus the highlight
+     */
+    private Collection<String> mergeStyles(Collection<String> original, String newStyle) {
+        if (original.contains(newStyle)) return original; // already highlighted
+        ArrayList<String> merged = new ArrayList<>(original);
+        merged.add(newStyle);
+        return merged;
     }
 }

@@ -5,15 +5,15 @@ import com.campaignworkbench.ide.editor.*;
 import com.campaignworkbench.ide.editor.richtextfx.RichTextFXEditor;
 import com.campaignworkbench.util.UiUtil;
 import de.jensd.fx.glyphs.fontawesome.FontAwesomeIcon;
-import javafx.scene.control.Button;
-import javafx.scene.control.Tab;
-import javafx.scene.control.ToolBar;
+import javafx.scene.control.*;
 import javafx.scene.layout.BorderPane;
+import javafx.scene.layout.HBox;
 import javafx.scene.layout.Priority;
 import javafx.scene.layout.VBox;
 import javafx.scene.paint.Color;
 
 import java.nio.file.Path;
+import java.util.Objects;
 
 /**
  * Implements a Tab containing a code editor
@@ -21,9 +21,13 @@ import java.nio.file.Path;
 public final class EditorTab extends Tab {
 
     private final VBox container;
-    private final ToolBar toolBar;
+    private final HBox toolsContainer;
+    private final ToolBar formatToolBar;
+    private final ToolBar findReplaceToolBar;
     private final WorkspaceFile workspaceFile;
     private final ICodeEditor editor;
+
+    private final TextField findField;
 
     /**
      * Constructor
@@ -42,12 +46,21 @@ public final class EditorTab extends Tab {
         Button foldAllButton = UiUtil.createButton("", "Fold all", FontAwesomeIcon.INDENT, Color.GREEN, "12px", true, _ -> foldAllHandler());
         Button unfoldAllButton = UiUtil.createButton("", "Unfold all", FontAwesomeIcon.DEDENT, Color.GREEN, "12px", true, _ -> unfoldAllHandler());
 
-        toolBar = new ToolBar(formatButton, foldAllButton, unfoldAllButton);
+        formatToolBar = new ToolBar(formatButton, foldAllButton, unfoldAllButton);
 
         BorderPane root = new BorderPane();
         root.setCenter(editor.getNode());
 
-        container = new VBox(toolBar, editor.getNode());
+        toolsContainer = new HBox();
+
+        Label findLabel = new Label("Find:");
+        findField = new TextField();
+        Button findButton = UiUtil.createButton("", "Find all", FontAwesomeIcon.ARROW_CIRCLE_RIGHT, Color.GREEN, "12px", true, _ -> findHandler());
+        findReplaceToolBar = new ToolBar(findLabel, findField, findButton);
+        toolsContainer.getChildren().addAll(formatToolBar, findReplaceToolBar);
+        HBox.setHgrow(formatToolBar, Priority.ALWAYS);
+
+        container = new VBox(toolsContainer, editor.getNode());
         VBox.setVgrow(editor.getNode(), Priority.ALWAYS);
         setContent(container);
         editor.setText(workspaceFile.getWorkspaceFileContent());
@@ -55,7 +68,8 @@ public final class EditorTab extends Tab {
 
         // Set styles
         container.getStyleClass().add("editor-tab");
-        toolBar.getStyleClass().add("editor-toolbar");
+        formatToolBar.getStyleClass().add("editor-toolbar");
+        findReplaceToolBar.getStyleClass().add("editor-toolbar");
     }
 
     public void setDataContextFile(Path contextFile) {
@@ -141,6 +155,13 @@ public final class EditorTab extends Tab {
         editor.unfoldAll();
     }
 
+    private void findHandler() {
+        String textToFind = findField.getText();
+        if(!Objects.equals(textToFind, "")) {
+            editor.find(textToFind);
+        }
+    }
+
     /**
      * Refresh the context of the tab
      */
@@ -198,9 +219,15 @@ public final class EditorTab extends Tab {
         return workspaceFile.isMessageContextApplicable();
     }
 
-    public void openFindDialog() {
-        String fileName = workspaceFile != null ? workspaceFile.getBaseFileName() : "New File";
-        editor.openFindDialog(fileName);
+    public void toggleFind() {
+        findReplaceToolBar.setVisible(!findReplaceToolBar.isVisible());
     }
 
+    public void showFind() {
+        findReplaceToolBar.setVisible(true);
+    }
+
+    public void hideFind() {
+        findReplaceToolBar.setVisible(false);
+    }
 }

@@ -52,7 +52,7 @@ public interface ICodeEditor {
      */
     public void gotoLine(int line);
 
-    public void openFindDialog(String fileName);
+    public void find(String textToFind);
 
     public void formatCode(int indentSize);
 

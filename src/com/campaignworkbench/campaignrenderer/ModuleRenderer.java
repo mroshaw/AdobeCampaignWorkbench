@@ -25,6 +25,7 @@ public final class ModuleRenderer {
 
         String moduleSource = module.getWorkspaceFileContent();
         String moduleFileName = module.getBaseFileName();
+        String js = "";
         try {
             cx.evaluateString(
                     scope,
@@ -34,7 +35,7 @@ public final class ModuleRenderer {
                     null
             );
 
-            String js =
+            js =
                     "var out = new java.lang.StringBuilder();\n" +
                             transformModuleToJavaScript(moduleSource) +
                             "out.toString();";
@@ -46,7 +47,7 @@ public final class ModuleRenderer {
             throw new RendererExecutionException(
                     "Error executing module: " + rhinoException.getMessage(),
                     module,
-                    moduleSource,
+                    js,
                     rhinoException.lineNumber(),
                     rhinoException.details(),
                     "Check module source code for errors",

@@ -1,7 +1,5 @@
 package com.campaignworkbench.ide;
 
-import atlantafx.base.theme.CupertinoDark;
-import atlantafx.base.theme.CupertinoLight;
 import com.campaignworkbench.campaignrenderer.*;
 import javafx.application.Application;
 import javafx.application.Platform;
@@ -74,7 +72,7 @@ public class CampaignWorkbenchIDE extends Application implements IThemeable {
 
                 event -> saveCurrent(),
                 event -> saveCurrentAs(),
-                event -> openFind(),
+                event -> toggleFind(),
 
                 event -> applyTheme(IDETheme.LIGHT),
                 event -> applyTheme(IDETheme.DARK),
@@ -387,9 +385,9 @@ public class CampaignWorkbenchIDE extends Application implements IThemeable {
 
     }
 
-    private void openFind() {
+    private void toggleFind() {
         if (currentEditorTab != null) {
-            currentEditorTab.openFindDialog();
+            currentEditorTab.toggleFind();
         }
     }
 
