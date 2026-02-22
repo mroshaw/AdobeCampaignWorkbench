@@ -1,0 +1,30 @@
+// Campaign Syntax
+// Dark Mode
+
+.code-editor .plain-text {
+    -fx-fill: #111111;
+}
+.code-editor .keyword {
+    -fx-fill: #c586c0;
+}
+.code-editor .brace {
+    -fx-fill: #749da6;
+    -fx-font-weight: bold;
+}
+.code-editor .paren {
+    -fx-fill: #c5c5c5;
+    -fx-font-weight: bold;
+}
+.code-editor .bracket {
+    -fx-fill: #bfbfbf;
+}
+.code-editor .semicolon {
+    -fx-fill: #808080;
+}
+.code-editor .string {
+    -fx-fill: #cE9178;
+}
+
+.code-editor .comment {
+	-fx-fill: #6a9955;
+}

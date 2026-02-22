@@ -7,25 +7,15 @@ import com.campaignworkbench.ide.ThemeManager;
 import com.campaignworkbench.ide.editor.ICodeEditor;
 import com.campaignworkbench.ide.editor.SyntaxType;
 import javafx.application.Platform;
-import javafx.geometry.Insets;
 import javafx.scene.Node;
-import javafx.scene.control.Button;
-import javafx.scene.control.Label;
-import javafx.scene.control.TextField;
 import javafx.scene.layout.BorderPane;
-import javafx.scene.layout.HBox;
-import javafx.scene.layout.Priority;
-import javafx.scene.layout.VBox;
 import org.fxmisc.richtext.CodeArea;
 import org.fxmisc.flowless.VirtualizedScrollPane;
 import javafx.scene.Cursor;
-import org.fxmisc.richtext.model.Paragraph;
 import org.fxmisc.richtext.model.StyleSpans;
-import org.fxmisc.richtext.model.StyleSpansBuilder;
 
 import java.util.ArrayList;
 import java.util.Collection;
-import java.util.Collections;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -62,7 +52,7 @@ public class RichTextFXEditor implements ICodeEditor, IThemeable {
 
         GutterFactory gutterFactory = new GutterFactory(codeArea, foldParser);
         codeArea.setParagraphGraphicFactory(gutterFactory);
-        Platform.runLater(() -> ThemeManager.register(this));
+
 
         codeArea.textProperty().addListener((obs, oldText, newText) -> {
             StyleSpans<Collection<String>> computedStyleSpans = syntaxStyler.style(newText);
@@ -70,6 +60,7 @@ public class RichTextFXEditor implements ICodeEditor, IThemeable {
                 codeArea.setStyleSpans(0, computedStyleSpans);
             }
         });
+        Platform.runLater(() -> ThemeManager.register(this));
     }
 
     @Override
@@ -140,17 +131,13 @@ public class RichTextFXEditor implements ICodeEditor, IThemeable {
 
     @Override
     public void applyTheme(IDETheme theme) {
+        root.getStylesheets().clear();
 
-        if (theme == IDETheme.DARK) {
-            if (syntaxStyler != null) {
-                // String codeEditorCss = theme.getCodeEditorStyleSheet();
-                // root.getScene().getStylesheets().add(codeEditorCss);
-                String languageCss = syntaxStyler.getStyleSheet(theme);
-                // root.getScene().getStylesheets().add(languageCss);
-                // root.getStylesheets().add(codeEditorCss);
-                root.getStylesheets().add(languageCss);
-            }
+        if (syntaxStyler != null) {
+            String languageCss = syntaxStyler.getStyleSheet(theme);
+            root.getStylesheets().add(languageCss);
         }
+
     }
 
     public void formatCode(int indentSize) {
@@ -191,6 +178,7 @@ public class RichTextFXEditor implements ICodeEditor, IThemeable {
             }
         }
     }
+
     /**
      * Returns a new style collection containing the original styles plus the highlight
      */

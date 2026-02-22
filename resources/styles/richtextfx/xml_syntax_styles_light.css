@@ -1,0 +1,27 @@
+// XML Syntax
+
+.code-editor .plain-text {
+    -fx-fill: #111111;
+}
+
+.code-editor .tagmark {
+    -fx-fill: gray;
+}
+.code-editor .anytag {
+    -fx-fill: c792ea;
+}
+.code-editor .paren {
+    -fx-fill: firebrick;
+    -fx-font-weight: bold;
+}
+
+
+.code-editor .attribute {
+    -fx-fill: darkviolet;
+}
+.code-editor .avalue {
+    -fx-fill: #cE9178;
+}
+.code-editor .comment {
+	-fx-fill: 717171;
+}

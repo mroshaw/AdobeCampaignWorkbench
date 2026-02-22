@@ -74,8 +74,8 @@ public class CampaignWorkbenchIDE extends Application implements IThemeable {
                 event -> saveCurrentAs(),
                 event -> toggleFind(),
 
-                event -> applyTheme(IDETheme.LIGHT),
-                event -> applyTheme(IDETheme.DARK),
+                event -> setThemeHandler(IDETheme.LIGHT),
+                event -> setThemeHandler(IDETheme.DARK),
 
                 event -> showAbout(),
                 event -> exitApplication()
@@ -211,6 +211,10 @@ public class CampaignWorkbenchIDE extends Application implements IThemeable {
      */
     private String getWorkspaceModulePath() {
         return currentWorkspace.getModulesPath().toString();
+    }
+
+    private void setThemeHandler(IDETheme ideTheme) {
+        ThemeManager.setTheme(ideTheme);
     }
 
     /**
