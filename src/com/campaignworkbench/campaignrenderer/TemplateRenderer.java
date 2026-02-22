@@ -26,6 +26,16 @@ public final class TemplateRenderer {
         String js;
 
         // Get the template context
+        if(!template.isDataContextSet())
+        {
+            throw new IDEException("Data context is not set on template: " + template.getFileName(), null);
+        }
+
+        if(!template.isMessageContextSet())
+        {
+            throw new IDEException("Message context is not set on template: " + template.getFileName(), null);
+        }
+
         Path dataContextFile = template.getDataContextFilePath();
         String dataContextContent = template.getDataContextContent();
 

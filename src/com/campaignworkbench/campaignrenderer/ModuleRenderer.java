@@ -1,5 +1,6 @@
 package com.campaignworkbench.campaignrenderer;
 
+import com.campaignworkbench.ide.IDEException;
 import org.mozilla.javascript.Context;
 import org.mozilla.javascript.Scriptable;
 
@@ -20,6 +21,13 @@ public final class ModuleRenderer {
     ) {
 
         // Get the module context
+
+        // Get the template context
+        if(!module.isDataContextSet())
+        {
+            throw new IDEException("Data context is not set on module: " + module.getFileName(), null);
+        }
+
         Path xmlContextFile = module.getDataContextFilePath();
         String xmlContextContent = module.getDataContextContent();
 

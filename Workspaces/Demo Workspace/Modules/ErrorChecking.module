@@ -1,0 +1,20 @@
+<!-- Helper functions -->
+<%
+function perso(strPerso) {
+  var strStart = '<' + '%';
+  var strEnd = '%' + '>';
+  return strStart + strPerso + strEnd;
+}
+var begin = '&lt;' + '%';
+var end = '%' + '&gt;';
+
+function bloc(strPerso)
+{
+  var strStart = '<' + '%' + '@ include view="';
+  var strEnd = '" %' + '>';
+  return strStart + strPerso + strEnd;
+}
+%>
+Testing: 
+<%=  perso('var testing = 123') %>
+<%=  perso('= testing') %>

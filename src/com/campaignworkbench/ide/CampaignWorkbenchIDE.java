@@ -399,12 +399,6 @@ public class CampaignWorkbenchIDE extends Application implements IThemeable {
      * Runs the template in the currently selected editor tab
      */
     private void runTemplate() {
-        if (!editorTabPanel.isSelectedTemplateAndReady()) {
-            showAlert("No XML context file set!");
-            appendLog("No XML context file set!");
-            return;
-        }
-
         errorLogPanel.clearErrors();
         saveWorkspace();
         try {
@@ -425,10 +419,13 @@ public class CampaignWorkbenchIDE extends Application implements IThemeable {
                     appendLog("Template ran successfully: " + editorTabPanel.getSelectedFileName());
                 });
             }
-        } catch (RendererException ex) {
-            appendLog("An error occurred: " + ex.getMessage());
-            errorLogPanel.addError(ex);
-            outputPanel.setContent("", ex.getSourceCode());
+        } catch (IDEException ideEx) {
+            appendLog("An error occurred: " + ideEx.getMessage());
+            reportError(ideEx.getMessage(), ideEx, true);
+        } catch (RendererException renderEx) {
+            appendLog("An error occurred: " + renderEx.getMessage());
+            errorLogPanel.addError(renderEx);
+            outputPanel.setContent("", renderEx.getSourceCode());
         } catch (Exception ex) {
             ex.printStackTrace();
             showAlert("Error running template: " + ex.getMessage());

@@ -8,11 +8,15 @@ import com.campaignworkbench.ide.editor.ICodeEditor;
 import com.campaignworkbench.ide.editor.SyntaxType;
 import javafx.application.Platform;
 import javafx.scene.Node;
+import javafx.scene.control.IndexRange;
+import javafx.scene.input.KeyCode;
+import javafx.scene.input.KeyEvent;
 import javafx.scene.layout.BorderPane;
 import org.fxmisc.richtext.CodeArea;
 import org.fxmisc.flowless.VirtualizedScrollPane;
 import javafx.scene.Cursor;
 import org.fxmisc.richtext.model.StyleSpans;
+import org.fxmisc.richtext.model.TwoDimensional;
 
 import java.util.ArrayList;
 import java.util.Collection;
@@ -60,6 +64,40 @@ public class RichTextFXEditor implements ICodeEditor, IThemeable {
                 codeArea.setStyleSpans(0, computedStyleSpans);
             }
         });
+
+        codeArea.addEventFilter(KeyEvent.KEY_PRESSED, e -> {
+            if (e.getCode() == KeyCode.TAB) {
+                e.consume();
+
+                IndexRange selection = codeArea.getSelection();
+
+                // No selection → insert two spaces at caret
+                if (selection.getLength() == 0) {
+                    codeArea.replaceSelection("  ");
+                    return;
+                }
+
+                int startPar = codeArea.offsetToPosition(selection.getStart(), TwoDimensional.Bias.Forward).getMajor();
+                int endPar   = codeArea.offsetToPosition(selection.getEnd(), TwoDimensional.Bias.Backward).getMajor();
+
+                var multi = codeArea.createMultiChange();
+
+                    for (int i = startPar; i <= endPar; i++) {
+                        int lineStart = codeArea.getAbsolutePosition(i, 0);
+                        multi.insertText(lineStart, "  ");
+                    }
+
+                multi.commit();
+
+                // Restore selection expanded by 2 chars per line
+                int lines = endPar - startPar + 1;
+                codeArea.selectRange(
+                        selection.getStart(),
+                        selection.getEnd() + (lines * 2)
+                );
+            }
+        });
+
         Platform.runLater(() -> ThemeManager.register(this));
     }
 
@@ -76,7 +114,8 @@ public class RichTextFXEditor implements ICodeEditor, IThemeable {
     @Override
     public void setText(String text) {
         codeArea.clear();
-        codeArea.replaceText(text);
+        // Replace tab with 2 spaces
+        codeArea.replaceText(text.replaceAll("\t", "  "));
         StyleSpans<Collection<String>> computedStyleSpans = syntaxStyler.style(codeArea.getText());
         if (computedStyleSpans != null) {
             codeArea.setStyleSpans(0, computedStyleSpans);
