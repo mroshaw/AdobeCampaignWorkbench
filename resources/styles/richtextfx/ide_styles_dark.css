@@ -7,27 +7,57 @@
 
 /*
     ***************************************************
-    *** Main ToolBar                                ***
+    *** ToolBar buttons                             ***
     ***************************************************
 */
-.main-toolbar {
+.large-toolbar {
+    -fx-spacing: 8px;
+    -fx-padding: 4px 8px 4px 8px;
+}
+
+.large-toolbar .button {
+    -fx-padding: 8px;
+}
+
+.neutral-icon {
+    -fx-text-fill: #F2C14E;
+}
+
+.positive-icon {
+    -fx-text-fill: #9ECE6A;
+}
+
+.negative-icon {
+    -fx-text-fill: #F7768E;
+}
+
+.workspace-icon {
+    -fx-text-fill: #F2C14E;
+}
+
+.template-icon {
+    -fx-text-fill: #4FC1FF;
+}
+
+
+.block-icon {
+    -fx-text-fill: #FF6B6B;
+}
+
+.module-icon {
+    -fx-text-fill: #C586FF;
+}
+
+.context-icon {
+    -fx-text-fill: #4EC9B0;
+}
+
+.small-toolbar {
     -fx-spacing: 4px;
+    -fx-max-height: 50px;
 }
 
-.main-toolbar .button {
-    -fx-padding: 4px;
-}
-
-/*
-    ***************************************************
-    *** Workspace Explorer                          ***
-    ***************************************************
-*/
-.workspace-explorer .workspace-explorer-toolbar {
-    -fx-spacing: 4px;
-}
-
-.workspace-explorer .workspace-explorer-toolbar .button {
+.small-toolbar .button {
     -fx-padding: 4px;
 }
 
@@ -36,16 +66,6 @@
     *** Code Editor                                 ***
     ***************************************************
 */
-
-.editor-tab-panel .editor-tab .editor-toolbar {
-    -fx-spacing: 4px;
-    -fx-max-height: 50px;
-}
-
-.editor-tab-panel .editor-tab .editor-toolbar .button {
-    -fx-padding: 4px;
-}
-
 .code-editor .code-area .find-text {
     -rtfx-background-color: yellow !important;
     -fx-fill: black !important;
@@ -68,7 +88,7 @@
     -fx-stroke: -color-fg-default !important;
 }
 
-// Gutter
+/* Gutter */
 .code-editor .paragraph-box .gutter .line-number {
     -fx-text-fill: #d4d4d4;
     -fx-background-color: transparent;

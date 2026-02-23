@@ -1,19 +1,14 @@
 package com.campaignworkbench.ide;
 
-import de.jensd.fx.glyphs.fontawesome.FontAwesomeIcon;
-import de.jensd.fx.glyphs.fontawesome.utils.FontAwesomeIconFactory;
+import com.campaignworkbench.util.UiUtil;
 import javafx.event.ActionEvent;
 import javafx.event.EventHandler;
 import javafx.geometry.Orientation;
-import javafx.geometry.Pos;
 import javafx.scene.Node;
 import javafx.scene.control.Button;
 import javafx.scene.control.Separator;
 import javafx.scene.control.ToolBar;
-import javafx.scene.control.Tooltip;
-import javafx.scene.layout.HBox;
-import javafx.scene.paint.Color;
-import javafx.scene.text.Text;
+import org.controlsfx.glyphfont.FontAwesome;
 
 /**
  * Implements a button toolbar for use within the IDE User Interface
@@ -34,21 +29,8 @@ public class MainToolBar implements IJavaFxNode {
             EventHandler<ActionEvent> runHandler
     ) {
         // Open Template button
-        Text openWorkspaceIcon = FontAwesomeIconFactory.get().createIcon(FontAwesomeIcon.FOLDER_OPEN, "24px");
-        openWorkspaceIcon.setFill(Color.YELLOW);
-        Button openWorkspaceButton = new Button(); //("Open Workspace");
-        openWorkspaceButton.setTooltip(new Tooltip("Open Workspace"));
-        openWorkspaceButton.setGraphic(openWorkspaceIcon);
-        openWorkspaceButton.setOnAction(openWorkspaceHandler);
-
-        // Run Template button
-        Text runTemplateIcon = FontAwesomeIconFactory.get().createIcon(FontAwesomeIcon.PLAY, "24px");
-        runTemplateIcon.setFill(Color.GREEN);
-        runButton = new Button(); // ("Run Template");
-        runButton.setTooltip(new Tooltip("Run Template"));
-        runButton.setGraphic(runTemplateIcon);
-        runButton.setDisable(true);
-        runButton.setOnAction(runHandler);
+        Button openWorkspaceButton = UiUtil.createButton("", "Open Workspace", FontAwesome.Glyph.FOLDER_OPEN,  "workspace-icon",2, true, openWorkspaceHandler); // FontAwesomeIconFactory.get().createIcon(FontAwesomeIcon.FOLDER_OPEN, "24px");
+        runButton = UiUtil.createButton("", "Run template", FontAwesome.Glyph.PLAY,  "positive-icon",2, false, runHandler); // FontAwesomeIconFactory.get().createIcon(FontAwesomeIcon.FOLDER_OPEN, "24px");
 
         toolBar = new ToolBar(
                 openWorkspaceButton,
@@ -56,7 +38,7 @@ public class MainToolBar implements IJavaFxNode {
                 runButton
         );
 
-        toolBar.getStyleClass().add("main-toolbar");
+        toolBar.getStyleClass().add(".large-toolbar");
     }
 
     /**

@@ -1,23 +1,21 @@
 package com.campaignworkbench.util;
 
-import de.jensd.fx.glyphs.fontawesome.FontAwesomeIcon;
-import de.jensd.fx.glyphs.fontawesome.utils.FontAwesomeIconFactory;
+import org.controlsfx.glyphfont.FontAwesome;
+import org.controlsfx.glyphfont.Glyph;
+
 import javafx.event.EventHandler;
 import javafx.scene.control.Button;
 import javafx.scene.control.Tooltip;
-import javafx.scene.paint.Color;
-import javafx.scene.text.Text;
 
 public class UiUtil {
-    public static Button createButton(String buttonText, String toolTipText, FontAwesomeIcon icon, Color fillColor, String iconSize, boolean defaultState, EventHandler eventHandler) {
-        Button newButton = new Button();
-        Text buttonIcon = FontAwesomeIconFactory.get().createIcon(icon, iconSize);
-        buttonIcon.setFill(fillColor);
+
+    public static Button createButton(String buttonText, String toolTipText, FontAwesome.Glyph icon, String styleClass, Integer sizeFactor, boolean defaultState, EventHandler eventHandler) {
+        Glyph glyph = new Glyph("FontAwesome", icon).sizeFactor(sizeFactor);
+        glyph.getStyleClass().add(styleClass);
+        Button newButton = new Button(buttonText, glyph);
         newButton.setTooltip(new Tooltip(toolTipText));
-        newButton.setGraphic(buttonIcon);
         newButton.setOnAction(eventHandler);
         newButton.setDisable(!defaultState);
-
         return newButton;
     }
 }

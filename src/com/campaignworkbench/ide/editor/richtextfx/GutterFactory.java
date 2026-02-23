@@ -1,7 +1,5 @@
 package com.campaignworkbench.ide.editor.richtextfx;
 
-import de.jensd.fx.glyphs.fontawesome.FontAwesomeIcon;
-import de.jensd.fx.glyphs.fontawesome.utils.FontAwesomeIconFactory;
 import javafx.geometry.Pos;
 import javafx.scene.Cursor;
 import javafx.scene.Node;
@@ -18,8 +16,8 @@ public class GutterFactory implements IntFunction<Node> {
     private final IFoldParser foldParser;
     private FoldRegions foldRegions;
 
-    private final Text iconRight = FontAwesomeIconFactory.get().createIcon(FontAwesomeIcon.ARROW_CIRCLE_RIGHT, "12px");
-    private final Text iconDown = FontAwesomeIconFactory.get().createIcon(FontAwesomeIcon.ARROW_CIRCLE_DOWN, "12px");
+    // private final Text iconRight = FontAwesomeIconFactory.get().createIcon(FontAwesomeIcon.ARROW_CIRCLE_RIGHT, "12px");
+    // private final Text iconDown = FontAwesomeIconFactory.get().createIcon(FontAwesomeIcon.ARROW_CIRCLE_DOWN, "12px");
 
     public GutterFactory(CodeArea codeArea, IFoldParser foldParser) {
         this.codeArea = codeArea;

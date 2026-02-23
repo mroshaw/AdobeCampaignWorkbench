@@ -3,13 +3,11 @@ package com.campaignworkbench.ide;
 import com.campaignworkbench.campaignrenderer.*;
 import com.campaignworkbench.util.FileUtil;
 import com.campaignworkbench.util.UiUtil;
-import de.jensd.fx.glyphs.fontawesome.FontAwesomeIcon;
 import javafx.beans.value.ObservableValue;
 import javafx.collections.ListChangeListener;
 import javafx.scene.Node;
 import javafx.scene.control.*;
 import javafx.scene.input.MouseButton;
-import javafx.scene.layout.HBox;
 import javafx.scene.layout.Priority;
 import javafx.scene.layout.VBox;
 
@@ -17,10 +15,10 @@ import java.io.File;
 import java.util.function.Consumer;
 
 import javafx.geometry.Insets;
-import javafx.scene.paint.Color;
 import javafx.stage.FileChooser;
 import javafx.stage.Stage;
 import javafx.stage.Window;
+import org.controlsfx.glyphfont.FontAwesome;
 
 /**
  * User interface control to explore and navigate the files in a workspace
@@ -79,15 +77,13 @@ public class WorkspaceExplorer implements IJavaFxNode {
         // explorerLabel.setStyle("-fx-font-weight: bold;");
 
         // Create the toolbar
-
-
-        createNewButton = UiUtil.createButton("", "Create new", FontAwesomeIcon.FILE, Color.YELLOW, "16px", true, _ -> createNewHandler());
-        addExistingButton = UiUtil.createButton("", "Add existing", FontAwesomeIcon.PLUS_CIRCLE, Color.YELLOW, "16px", true, _ -> addExistingHandler());
-        removeButton = UiUtil.createButton("", "Remove", FontAwesomeIcon.MINUS_CIRCLE, Color.RED, "16px", true, evt -> removeHandler());
-        setDataContextButton = UiUtil.createButton("", "Set Data Context", FontAwesomeIcon.FILE_CODE_ALT, Color.GREEN, "16px", true, _ -> setDataContextHandler());
-        clearDataContextButton = UiUtil.createButton("", "Clear Data Context", FontAwesomeIcon.FILE_CODE_ALT, Color.RED, "16px", true, _ -> clearDataContextHandler());
-        setMessageContextButton = UiUtil.createButton("", "Set Message Context", FontAwesomeIcon.ENVELOPE, Color.GREEN, "16px", true, _ -> setMessageContextHandler());
-        clearMessageContextButton = UiUtil.createButton("", "Clear Message Context", FontAwesomeIcon.ENVELOPE, Color.RED, "16px", true, _ -> clearMessageContextHandler());
+        createNewButton = UiUtil.createButton("", "Create new", FontAwesome.Glyph.FILE, "neutral-icon", 1, true, _ -> createNewHandler());
+        addExistingButton = UiUtil.createButton("", "Add existing", FontAwesome.Glyph.PLUS_CIRCLE, "positive-icon", 1, true, _ -> addExistingHandler());
+        removeButton = UiUtil.createButton("", "Remove", FontAwesome.Glyph.MINUS_CIRCLE, "negative-icon", 1, true, evt -> removeHandler());
+        setDataContextButton = UiUtil.createButton("", "Set Data Context", FontAwesome.Glyph.FILE_CODE_ALT, "positive-icon", 1, true, _ -> setDataContextHandler());
+        clearDataContextButton = UiUtil.createButton("", "Clear Data Context", FontAwesome.Glyph.FILE_CODE_ALT, "negative-icon", 1, true, _ -> clearDataContextHandler());
+        setMessageContextButton = UiUtil.createButton("", "Set Message Context", FontAwesome.Glyph.ENVELOPE, "positive-icon", 1, true, _ -> setMessageContextHandler());
+        clearMessageContextButton = UiUtil.createButton("", "Clear Message Context", FontAwesome.Glyph.ENVELOPE, "negative-icon", 1, true, _ -> clearMessageContextHandler());
         ToolBar toolbar = new ToolBar(createNewButton, addExistingButton, removeButton, setDataContextButton, clearDataContextButton, setMessageContextButton, clearMessageContextButton);
 
         workspaceExplorerPanel = new VBox(5, explorerLabel, toolbar, treeView);
@@ -104,7 +100,7 @@ public class WorkspaceExplorer implements IJavaFxNode {
 
         // Set style classes
         workspaceExplorerPanel.getStyleClass().add("workspace-explorer");
-        toolbar.getStyleClass().add("workspace-explorer-toolbar");
+        toolbar.getStyleClass().add("small-toolbar");
 
         setToolbarContext();
     }
@@ -209,25 +205,25 @@ public class WorkspaceExplorer implements IJavaFxNode {
         this.workspace = workspace;
 
         root = WorkspaceExplorerItem.createHeaderTreeItem(
-                FontAwesomeIcon.FOLDER,
+                FontAwesome.Glyph.FOLDER,
                 workspace.getRootFolderPath().getFileName().toString(),
-                "16px", 5, Color.YELLOW, null
+                "16px", 5, "workspace-icon", null
         );
 
         templateRoot = WorkspaceExplorerItem.createHeaderTreeItem(
-                FontAwesomeIcon.ENVELOPE, "Templates", "16px", 5, Color.FORESTGREEN, WorkspaceFileType.TEMPLATE
+                FontAwesome.Glyph.ENVELOPE, "Templates", "16px", 5, "template-icon", WorkspaceFileType.TEMPLATE
         );
 
         moduleRoot = WorkspaceExplorerItem.createHeaderTreeItem(
-                FontAwesomeIcon.TASKS, "Modules", "16px", 5, Color.CORNFLOWERBLUE, WorkspaceFileType.MODULE
+                FontAwesome.Glyph.TASKS, "Modules", "16px", 5, "module-icon", WorkspaceFileType.MODULE
         );
 
         blockRoot = WorkspaceExplorerItem.createHeaderTreeItem(
-                FontAwesomeIcon.LIST, "Blocks", "16px", 5, Color.PALEVIOLETRED, WorkspaceFileType.BLOCK
+                FontAwesome.Glyph.LIST, "Blocks", "16px", 5, "block-icon", WorkspaceFileType.BLOCK
         );
 
         contextRoot = WorkspaceExplorerItem.createHeaderTreeItem(
-                FontAwesomeIcon.FILE_CODE_ALT, "Contexts", "16px", 5, Color.LIGHTCORAL, WorkspaceFileType.CONTEXT
+                FontAwesome.Glyph.FILE_CODE_ALT, "Contexts", "16px", 5, "context-icon", WorkspaceFileType.CONTEXT
         );
 
         root.getChildren().setAll(templateRoot, moduleRoot, blockRoot, contextRoot);

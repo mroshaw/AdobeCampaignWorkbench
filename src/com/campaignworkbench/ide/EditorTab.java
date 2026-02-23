@@ -4,13 +4,12 @@ import com.campaignworkbench.campaignrenderer.*;
 import com.campaignworkbench.ide.editor.*;
 import com.campaignworkbench.ide.editor.richtextfx.RichTextFXEditor;
 import com.campaignworkbench.util.UiUtil;
-import de.jensd.fx.glyphs.fontawesome.FontAwesomeIcon;
 import javafx.scene.control.*;
 import javafx.scene.layout.BorderPane;
 import javafx.scene.layout.HBox;
 import javafx.scene.layout.Priority;
 import javafx.scene.layout.VBox;
-import javafx.scene.paint.Color;
+import org.controlsfx.glyphfont.FontAwesome;
 
 import java.nio.file.Path;
 import java.util.Objects;
@@ -42,9 +41,9 @@ public final class EditorTab extends Tab {
         this.editor = new RichTextFXEditor(determineSyntax(workspaceFile.getFilePath()));
         updateTabText();
 
-        Button formatButton = UiUtil.createButton("", "Format code", FontAwesomeIcon.ALIGN_LEFT, Color.GREEN, "12px", true, _ -> formatHandler());
-        Button foldAllButton = UiUtil.createButton("", "Fold all", FontAwesomeIcon.INDENT, Color.GREEN, "12px", true, _ -> foldAllHandler());
-        Button unfoldAllButton = UiUtil.createButton("", "Unfold all", FontAwesomeIcon.DEDENT, Color.GREEN, "12px", true, _ -> unfoldAllHandler());
+        Button formatButton = UiUtil.createButton("", "Format code", FontAwesome.Glyph.ALIGN_LEFT, "positive-icon", 1, true, _ -> formatHandler());
+        Button foldAllButton = UiUtil.createButton("", "Fold all", FontAwesome.Glyph.INDENT, "positive-icon", 1, true, _ -> foldAllHandler());
+        Button unfoldAllButton = UiUtil.createButton("", "Unfold all", FontAwesome.Glyph.DEDENT, "positive-icon", 1, true, _ -> unfoldAllHandler());
 
         formatToolBar = new ToolBar(formatButton, foldAllButton, unfoldAllButton);
 
@@ -55,8 +54,8 @@ public final class EditorTab extends Tab {
 
         Label findLabel = new Label("Find:");
         findField = new TextField();
-        Button findButton = UiUtil.createButton("", "Find all", FontAwesomeIcon.ARROW_CIRCLE_RIGHT, Color.GREEN, "12px", true, _ -> findHandler());
-        Button clearFindButton = UiUtil.createButton("", "Clear", FontAwesomeIcon.TIMES_CIRCLE, Color.RED, "12px", true, _ -> clearFindHandler());
+        Button findButton = UiUtil.createButton("", "Find all", FontAwesome.Glyph.ARROW_CIRCLE_RIGHT, "positive-icon", 1, true, _ -> findHandler());
+        Button clearFindButton = UiUtil.createButton("", "Clear", FontAwesome.Glyph.TIMES_CIRCLE, "negative-icon", 1, true, _ -> clearFindHandler());
         findReplaceToolBar = new ToolBar(findLabel, findField, findButton, clearFindButton);
         toolsContainer.getChildren().addAll(formatToolBar, findReplaceToolBar);
         HBox.setHgrow(formatToolBar, Priority.ALWAYS);
@@ -69,8 +68,8 @@ public final class EditorTab extends Tab {
 
         // Set styles
         container.getStyleClass().add("editor-tab");
-        formatToolBar.getStyleClass().add("editor-toolbar");
-        findReplaceToolBar.getStyleClass().add("editor-toolbar");
+        formatToolBar.getStyleClass().add("small-toolbar");
+        findReplaceToolBar.getStyleClass().add("small-toolbar");
     }
 
     public void setDataContextFile(Path contextFile) {

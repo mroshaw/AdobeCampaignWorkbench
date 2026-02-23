@@ -14,8 +14,8 @@
     <orderEntry type="library" name="fifesoft.autocomplete" level="project" />
     <orderEntry type="library" name="fifesoft.languagesupport" level="project" />
     <orderEntry type="library" name="fifesoft.rstaui" level="project" />
-    <orderEntry type="library" name="de.jensd.fontawesomefx.fontawesome" level="project" />
     <orderEntry type="library" name="fxmisc.richtext.richtextfx" level="project" />
     <orderEntry type="library" name="io.github.mkpaz.atlantafx.base" level="project" />
+    <orderEntry type="library" name="controlsfx" level="project" />
   </component>
 </module>

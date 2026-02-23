@@ -2,31 +2,30 @@ package com.campaignworkbench.ide;
 
 import com.campaignworkbench.campaignrenderer.WorkspaceFile;
 import com.campaignworkbench.campaignrenderer.WorkspaceFileType;
-import de.jensd.fx.glyphs.fontawesome.FontAwesomeIcon;
-import de.jensd.fx.glyphs.fontawesome.utils.FontAwesomeIconFactory;
 import javafx.scene.control.TreeCell;
 import javafx.scene.control.TreeItem;
 import javafx.scene.control.TreeView;
 import javafx.scene.layout.HBox;
-import javafx.scene.paint.Color;
 import javafx.scene.text.Text;
+import org.controlsfx.glyphfont.FontAwesome;
+import org.controlsfx.glyphfont.Glyph;
 
 public class WorkspaceExplorerItem {
 
     public static class HeaderTreeItem {
-        public final FontAwesomeIcon icon;
+        public final FontAwesome.Glyph icon;
         public final String text;
         public final String iconSize;
         public final int spacing;
-        public final Color iconColor;
+        public final String iconStyleClass;
         public final WorkspaceFileType fileType;
 
-        public HeaderTreeItem(FontAwesomeIcon icon, String text, String iconSize, int spacing, Color iconColor, WorkspaceFileType fileType) {
+        public HeaderTreeItem(FontAwesome.Glyph icon, String text, String iconSize, int spacing, String iconStyleClass, WorkspaceFileType fileType) {
             this.icon = icon;
             this.text = text;
             this.iconSize = iconSize;
             this.spacing = spacing;
-            this.iconColor = iconColor;
+            this.iconStyleClass = iconStyleClass;
             this.fileType = fileType;
         }
     }
@@ -65,8 +64,8 @@ public class WorkspaceExplorerItem {
     }
 
     // TreeItem factory for icon+text
-    public static TreeItem<Object> createHeaderTreeItem(FontAwesomeIcon icon, String text, String iconSize, int spacing, Color iconColor, WorkspaceFileType fileType) {
-        return new TreeItem<>(new HeaderTreeItem(icon, text, iconSize, spacing, iconColor, fileType));
+    public static TreeItem<Object> createHeaderTreeItem(FontAwesome.Glyph icon, String text, String iconSize, int spacing, String iconStyleClass, WorkspaceFileType fileType) {
+        return new TreeItem<>(new HeaderTreeItem(icon, text, iconSize, spacing, iconStyleClass, fileType));
     }
 
     // Cell factory for mixed content
@@ -81,10 +80,11 @@ public class WorkspaceExplorerItem {
                     setGraphic(null);
                 } else if (item instanceof HeaderTreeItem iconText) {
                     // Create new HBox for this cell — do NOT reuse previous Node
-                    Text iconPart = FontAwesomeIconFactory.get().createIcon(iconText.icon, iconText.iconSize);
-                    iconPart.setFill(iconText.iconColor);
+
+                    Glyph glyph = new Glyph("FontAwesome", iconText.icon).sizeFactor(1);
+                    glyph.getStyleClass().add(iconText.iconStyleClass);
                     Text labelPart = new Text(iconText.text);
-                    HBox container = new HBox(iconText.spacing, iconPart, labelPart);
+                    HBox container = new HBox(iconText.spacing, glyph, labelPart);
 
                     setText(null);
                     setGraphic(container);
