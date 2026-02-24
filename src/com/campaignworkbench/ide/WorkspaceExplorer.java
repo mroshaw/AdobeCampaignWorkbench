@@ -293,7 +293,7 @@ public class WorkspaceExplorer implements IJavaFxNode {
     private void populateInitial() {
         templateRoot.getChildren().clear();
         for (Template template : workspace.getTemplates()) {
-            TreeItem<Object> item = WorkspaceExplorerItem.createWorkspaceFileTreeItem(template, insertIntoCodeHandler);
+            TreeItem<Object> item = WorkspaceExplorerItem.createWorkspaceFileTreeItem(template, insertIntoCodeHandler, this::deleteWorkspaceFile);
             item.getChildren().add(WorkspaceExplorerItem.createContextFileTreeItem(template.getDataContextFile(), "Data"));
             item.getChildren().add(WorkspaceExplorerItem.createContextFileTreeItem(template.getMessageContextFile(), "Message"));
             item.setExpanded(true);
@@ -303,19 +303,19 @@ public class WorkspaceExplorer implements IJavaFxNode {
 
         moduleRoot.getChildren().clear();
         for (EtmModule module : workspace.getModules()) {
-            TreeItem<Object> item = WorkspaceExplorerItem.createWorkspaceFileTreeItem(module, insertIntoCodeHandler);
+            TreeItem<Object> item = WorkspaceExplorerItem.createWorkspaceFileTreeItem(module, insertIntoCodeHandler, this::deleteWorkspaceFile);
             item.getChildren().add(WorkspaceExplorerItem.createContextFileTreeItem(module.getDataContextFile(), "Data"));
             Platform.runLater(() -> moduleRoot.getChildren().add(item));
         }
 
         blockRoot.getChildren().clear();
         for (PersonalisationBlock block : workspace.getBlocks()) {
-            Platform.runLater(() -> blockRoot.getChildren().add(WorkspaceExplorerItem.createWorkspaceFileTreeItem(block, insertIntoCodeHandler)));
+            Platform.runLater(() -> blockRoot.getChildren().add(WorkspaceExplorerItem.createWorkspaceFileTreeItem(block, insertIntoCodeHandler, this::deleteWorkspaceFile)));
         }
 
         contextRoot.getChildren().clear();
         for (ContextXml context : workspace.getContexts()) {
-            Platform.runLater(() -> contextRoot.getChildren().add(WorkspaceExplorerItem.createWorkspaceFileTreeItem(context, insertIntoCodeHandler)));
+            Platform.runLater(() -> contextRoot.getChildren().add(WorkspaceExplorerItem.createWorkspaceFileTreeItem(context, insertIntoCodeHandler, this::deleteWorkspaceFile)));
         }
     }
 
@@ -389,17 +389,20 @@ public class WorkspaceExplorer implements IJavaFxNode {
         addExistingFile(selectedFileType);
     }
 
-    private void removeHandler() {
-        if (selectedFile == null) {
-            return;
-        }
-        YesNoPopupDialog.YesNoCancel result = YesNoPopupDialog.show("Confirm Delete?", "Do you also want to delete the selected file (" + selectedFile.getBaseFileName() + ") from the file system?", (Stage) getNode().getScene().getWindow());
+    private void deleteWorkspaceFile(WorkspaceFile workspaceFile) {
+        YesNoPopupDialog.YesNoCancel result = YesNoPopupDialog.show("Confirm delete?", "Do you also want to delete the selected file (" + selectedFile.getBaseFileName() + ") from the file system?", (Stage) getNode().getScene().getWindow());
 
         if (result == YesNoPopupDialog.YesNoCancel.CANCEL) {
             return;
         }
-
         workspace.removeWorkspaceFile(selectedFile, result == YesNoPopupDialog.YesNoCancel.YES);
+    }
+
+    private void removeHandler() {
+        if (selectedFile == null) {
+            return;
+        }
+        deleteWorkspaceFile(selectedFile);
     }
 
     private void setDataContextHandler() {
@@ -577,7 +580,7 @@ public class WorkspaceExplorer implements IJavaFxNode {
             while (changedTemplate.next()) {
                 if (changedTemplate.wasAdded()) {
                     for (Template template : changedTemplate.getAddedSubList()) {
-                        TreeItem<Object> item = WorkspaceExplorerItem.createWorkspaceFileTreeItem(template, insertIntoCodeHandler);
+                        TreeItem<Object> item = WorkspaceExplorerItem.createWorkspaceFileTreeItem(template, insertIntoCodeHandler, this::deleteWorkspaceFile);
                         item.getChildren().add(
                                 WorkspaceExplorerItem.createContextFileTreeItem(template.getDataContextFile(), "Data")
                         );
@@ -601,7 +604,7 @@ public class WorkspaceExplorer implements IJavaFxNode {
             while (changedModule.next()) {
                 if (changedModule.wasAdded()) {
                     for (EtmModule module : changedModule.getAddedSubList()) {
-                        TreeItem<Object> item = WorkspaceExplorerItem.createWorkspaceFileTreeItem(module, insertIntoCodeHandler);
+                        TreeItem<Object> item = WorkspaceExplorerItem.createWorkspaceFileTreeItem(module, insertIntoCodeHandler, this::deleteWorkspaceFile);
                         item.getChildren().add(
                                 WorkspaceExplorerItem.createContextFileTreeItem(module.getDataContextFile(), "Data")
                         );
@@ -623,7 +626,7 @@ public class WorkspaceExplorer implements IJavaFxNode {
                 if (changedBlock.wasAdded()) {
                     for (PersonalisationBlock block : changedBlock.getAddedSubList()) {
                         Platform.runLater(() -> blockRoot.getChildren().add(
-                                WorkspaceExplorerItem.createWorkspaceFileTreeItem(block, insertIntoCodeHandler)
+                                WorkspaceExplorerItem.createWorkspaceFileTreeItem(block, insertIntoCodeHandler, this::deleteWorkspaceFile)
                         ));
                     }
                 }
@@ -642,7 +645,7 @@ public class WorkspaceExplorer implements IJavaFxNode {
                 if (changedContext.wasAdded()) {
                     for (ContextXml ctx : changedContext.getAddedSubList()) {
                         Platform.runLater(() -> contextRoot.getChildren().add(
-                                WorkspaceExplorerItem.createWorkspaceFileTreeItem(ctx, insertIntoCodeHandler)
+                                WorkspaceExplorerItem.createWorkspaceFileTreeItem(ctx, insertIntoCodeHandler, this::deleteWorkspaceFile)
                         ));
                     }
                 }

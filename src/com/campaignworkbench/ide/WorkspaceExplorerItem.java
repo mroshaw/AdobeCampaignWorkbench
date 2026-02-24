@@ -33,8 +33,8 @@ public class WorkspaceExplorerItem {
         public final Consumer<WorkspaceFileType> addNewHandler;
         public final Consumer<WorkspaceFileType> addExistingHandler;
 
-
-        public HeaderTreeItem(FontAwesome.Glyph icon, String text, String iconSize, int spacing, String iconStyleClass, WorkspaceFileType fileType, Consumer<WorkspaceFileType> addNewHandler, Consumer<WorkspaceFileType> addExistingHandler) {
+        public HeaderTreeItem(FontAwesome.Glyph icon, String text, String iconSize, int spacing, String iconStyleClass, WorkspaceFileType fileType,
+                              Consumer<WorkspaceFileType> addNewHandler, Consumer<WorkspaceFileType> addExistingHandler) {
             this.icon = icon;
             this.text = text;
             this.iconSize = iconSize;
@@ -68,10 +68,12 @@ public class WorkspaceExplorerItem {
 
         public final WorkspaceFile workspaceFile;
         public final Consumer<String> getFileNameContextHandler;
+        public final Consumer<WorkspaceFile> deleteHandler;
 
-        public WorkspaceFileTreeItem(WorkspaceFile workspaceFile, Consumer<String> getFileNameContextHandler) {
+        public WorkspaceFileTreeItem(WorkspaceFile workspaceFile, Consumer<String> getFileNameContextHandler, Consumer<WorkspaceFile> deleteHandler) {
             this.workspaceFile = workspaceFile;
             this.getFileNameContextHandler = getFileNameContextHandler;
+            this.deleteHandler = deleteHandler;
         }
     }
 
@@ -79,7 +81,7 @@ public class WorkspaceExplorerItem {
         public final String contextLabel;
 
         public ContextTreeItem(WorkspaceFile workspaceFile, String contextLabel) {
-            super(workspaceFile, null);
+            super(workspaceFile, null, null);
             this.contextLabel = contextLabel;
         }
     }
@@ -89,8 +91,9 @@ public class WorkspaceExplorerItem {
         return new TreeItem<>(text);
     }
 
-    public static TreeItem<Object> createWorkspaceFileTreeItem(WorkspaceFile workspaceFile, Consumer<String> getFileNameContextHandler) {
-        WorkspaceFileTreeItem newTreeItem = new WorkspaceFileTreeItem(workspaceFile, getFileNameContextHandler);
+    public static TreeItem<Object> createWorkspaceFileTreeItem(WorkspaceFile workspaceFile,
+                                                               Consumer<String> getFileNameContextHandler, Consumer<WorkspaceFile> deleteHandler) {
+        WorkspaceFileTreeItem newTreeItem = new WorkspaceFileTreeItem(workspaceFile, getFileNameContextHandler, deleteHandler);
         return new TreeItem<>(newTreeItem);
     }
 
@@ -136,8 +139,12 @@ public class WorkspaceExplorerItem {
                     setText(workspaceFileTreeItem.workspaceFile.getBaseFileName());
 
                     WorkspaceFileType fileType = workspaceFileTreeItem.workspaceFile.getWorkspaceFileType();
+                    ContextMenu menu = new ContextMenu();
+                        MenuItem delete = new MenuItem("Delete...");
+                        delete.setOnAction(e -> deleteFileEventHandler(workspaceFileTreeItem));
+                        menu.getItems().add(delete);
+                        setContextMenu(menu);
                     if (fileType == WorkspaceFileType.BLOCK || fileType == WorkspaceFileType.MODULE) {
-                        ContextMenu menu = new ContextMenu();
                         MenuItem insertIntoCode = new MenuItem("Insert into code...");
                         insertIntoCode.setOnAction(e -> insertIntoCodeHandler(workspaceFileTreeItem));
                         menu.getItems().add(insertIntoCode);
@@ -163,7 +170,6 @@ public class WorkspaceExplorerItem {
         headerTreeItem.addExistingHandler.accept(headerTreeItem.fileType);
     }
 
-
     private static void insertIntoCodeHandler(WorkspaceFileTreeItem workspaceFileTreeItem) {
         String includeType = workspaceFileTreeItem.workspaceFile.getWorkspaceFileType() == WorkspaceFileType.BLOCK ? "view" : "module";
         String fileName = workspaceFileTreeItem.workspaceFile.getBaseFileName();
@@ -171,4 +177,7 @@ public class WorkspaceExplorerItem {
         workspaceFileTreeItem.getFileNameContextHandler.accept(text);
     }
 
+    private static void deleteFileEventHandler(WorkspaceFileTreeItem workspaceFileTreeItem) {
+        workspaceFileTreeItem.deleteHandler.accept(workspaceFileTreeItem.workspaceFile);
+    }
 }

@@ -213,6 +213,11 @@ public class Workspace {
         System.out.println("Removing: " + fileToRemove.getBaseFileName());
         if (deleteFromFileSystem) {
             System.out.println("Deleting: " + fileToRemove.getFilePath());
+            try {
+                Files.delete(fileToRemove.getFilePath());
+            } catch (IOException ioe) {
+                throw new IDEException("An error occurred deleting the file from the file system: " + fileToRemove.getFilePath(), ioe.getCause());
+            }
         }
 
         switch(fileToRemove.getWorkspaceFileType()) {
