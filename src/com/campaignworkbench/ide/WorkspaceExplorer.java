@@ -3,6 +3,7 @@ package com.campaignworkbench.ide;
 import com.campaignworkbench.campaignrenderer.*;
 import com.campaignworkbench.util.FileUtil;
 import com.campaignworkbench.util.UiUtil;
+import javafx.application.Platform;
 import javafx.beans.value.ObservableValue;
 import javafx.collections.ListChangeListener;
 import javafx.geometry.Insets;
@@ -32,6 +33,7 @@ public class WorkspaceExplorer implements IJavaFxNode {
     private final TreeView<Object> treeView;
     private final Consumer<WorkspaceFile> fileOpenHandler;
     private final Consumer<Workspace> workspaceChangedHandler;
+    private final Consumer<String> insertIntoCodeHandler;
 
     private TreeItem<Object> templateRoot;
     private TreeItem<Object> moduleRoot;
@@ -62,13 +64,15 @@ public class WorkspaceExplorer implements IJavaFxNode {
     public WorkspaceExplorer(String label,
                              Workspace workspace,
                              Consumer<WorkspaceFile> fileOpenHandler,
-                             Consumer<Workspace> workspaceChangedHandler) {
+                             Consumer<Workspace> workspaceChangedHandler,
+                             Consumer<String> insertIntoCodeHandler) {
         this.workspace = workspace;
         treeView = new TreeView<>();
         setupDoubleClickHandler();
 
         this.fileOpenHandler = fileOpenHandler;
         this.workspaceChangedHandler = workspaceChangedHandler;
+        this.insertIntoCodeHandler = insertIntoCodeHandler;
 
         Label explorerLabel = new Label(label);
         explorerLabel.setPadding(new Insets(0, 0, 0, 5));
@@ -253,23 +257,23 @@ public class WorkspaceExplorer implements IJavaFxNode {
         TreeItem<Object> root = WorkspaceExplorerItem.createHeaderTreeItem(
                 FontAwesome.Glyph.FOLDER,
                 workspace.getRootFolderPath().getFileName().toString(),
-                "16px", 5, "workspace-icon", null
+                "16px", 5, "workspace-icon", null, this::createNewFile, this::addExistingFile
         );
 
         templateRoot = WorkspaceExplorerItem.createHeaderTreeItem(
-                FontAwesome.Glyph.ENVELOPE, "Templates", "16px", 5, "template-icon", WorkspaceFileType.TEMPLATE
+                FontAwesome.Glyph.ENVELOPE, "Templates", "16px", 5, "template-icon", WorkspaceFileType.TEMPLATE, this::createNewFile, this::addExistingFile
         );
 
         moduleRoot = WorkspaceExplorerItem.createHeaderTreeItem(
-                FontAwesome.Glyph.TASKS, "Modules", "16px", 5, "module-icon", WorkspaceFileType.MODULE
+                FontAwesome.Glyph.TASKS, "Modules", "16px", 5, "module-icon", WorkspaceFileType.MODULE, this::createNewFile, this::addExistingFile
         );
 
         blockRoot = WorkspaceExplorerItem.createHeaderTreeItem(
-                FontAwesome.Glyph.LIST, "Blocks", "16px", 5, "block-icon", WorkspaceFileType.BLOCK
+                FontAwesome.Glyph.LIST, "Blocks", "16px", 5, "block-icon", WorkspaceFileType.BLOCK, this::createNewFile, this::addExistingFile
         );
 
         contextRoot = WorkspaceExplorerItem.createHeaderTreeItem(
-                FontAwesome.Glyph.FILE_CODE_ALT, "Contexts", "16px", 5, "context-icon", WorkspaceFileType.CONTEXT
+                FontAwesome.Glyph.FILE_CODE_ALT, "Contexts", "16px", 5, "context-icon", WorkspaceFileType.CONTEXT, this::createNewFile, this::addExistingFile
         );
 
         root.getChildren().setAll(templateRoot, moduleRoot, blockRoot, contextRoot);
@@ -278,10 +282,8 @@ public class WorkspaceExplorer implements IJavaFxNode {
         treeView.setRoot(root);
         WorkspaceExplorerItem.enableMixedContent(treeView, 2, 6);
 
-        // IMPORTANT: bind AFTER roots exist and are set on the TreeView
         bindWorkspace();
 
-        // Populate initial content WITHOUT rebuilding roots:
         populateInitial();
 
         workspaceChangedHandler.accept(workspace);
@@ -290,37 +292,37 @@ public class WorkspaceExplorer implements IJavaFxNode {
     // Populate current workspace lists into the existing roots (no re-creation)
     private void populateInitial() {
         templateRoot.getChildren().clear();
-        for (Template t : workspace.getTemplates()) {
-            TreeItem<Object> item = WorkspaceExplorerItem.createWorkspaceFileTreeItem(t);
-            item.getChildren().add(WorkspaceExplorerItem.createContextFileTreeItem(t.getDataContextFile(), "Data"));
-            item.getChildren().add(WorkspaceExplorerItem.createContextFileTreeItem(t.getMessageContextFile(), "Message"));
+        for (Template template : workspace.getTemplates()) {
+            TreeItem<Object> item = WorkspaceExplorerItem.createWorkspaceFileTreeItem(template, insertIntoCodeHandler);
+            item.getChildren().add(WorkspaceExplorerItem.createContextFileTreeItem(template.getDataContextFile(), "Data"));
+            item.getChildren().add(WorkspaceExplorerItem.createContextFileTreeItem(template.getMessageContextFile(), "Message"));
             item.setExpanded(true);
             templateRoot.getChildren().add(item);
         }
         templateRoot.setExpanded(true);
 
         moduleRoot.getChildren().clear();
-        for (EtmModule m : workspace.getModules()) {
-            TreeItem<Object> item = WorkspaceExplorerItem.createWorkspaceFileTreeItem(m);
-            item.getChildren().add(WorkspaceExplorerItem.createContextFileTreeItem(m.getDataContextFile(), "Data"));
-            moduleRoot.getChildren().add(item);
+        for (EtmModule module : workspace.getModules()) {
+            TreeItem<Object> item = WorkspaceExplorerItem.createWorkspaceFileTreeItem(module, insertIntoCodeHandler);
+            item.getChildren().add(WorkspaceExplorerItem.createContextFileTreeItem(module.getDataContextFile(), "Data"));
+            Platform.runLater(() -> moduleRoot.getChildren().add(item));
         }
 
         blockRoot.getChildren().clear();
-        for (PersonalisationBlock b : workspace.getBlocks()) {
-            blockRoot.getChildren().add(WorkspaceExplorerItem.createWorkspaceFileTreeItem(b));
+        for (PersonalisationBlock block : workspace.getBlocks()) {
+            Platform.runLater(() -> blockRoot.getChildren().add(WorkspaceExplorerItem.createWorkspaceFileTreeItem(block, insertIntoCodeHandler)));
         }
 
         contextRoot.getChildren().clear();
-        for (ContextXml cx : workspace.getContexts()) {
-            contextRoot.getChildren().add(WorkspaceExplorerItem.createWorkspaceFileTreeItem(cx));
+        for (ContextXml context : workspace.getContexts()) {
+            Platform.runLater(() -> contextRoot.getChildren().add(WorkspaceExplorerItem.createWorkspaceFileTreeItem(context, insertIntoCodeHandler)));
         }
     }
 
     public void createNewFile(WorkspaceFileType workspaceFileType) {
         FileChooser fileChooser = new FileChooser();
 
-        FileChooserConfig chooserConfig = getFileChooserConfig(workspaceFileType);
+        FileChooserConfig chooserConfig = getFileChooserConfig(workspaceFileType, "Create new");
 
         fileChooser.setTitle(chooserConfig.title());
         fileChooser.setInitialDirectory(chooserConfig.defaultFolder());
@@ -339,7 +341,7 @@ public class WorkspaceExplorer implements IJavaFxNode {
 
     public void addExistingFile(WorkspaceFileType workspaceFileType) {
         FileChooser fileChooser = new FileChooser();
-        FileChooserConfig chooserConfig = getFileChooserConfig(workspaceFileType);
+        FileChooserConfig chooserConfig = getFileChooserConfig(workspaceFileType, "Add existing");
 
         fileChooser.setTitle(chooserConfig.title());
         fileChooser.setInitialDirectory(chooserConfig.defaultFolder());
@@ -364,6 +366,10 @@ public class WorkspaceExplorer implements IJavaFxNode {
                 throw new IDEException("Could not save workspace!", ideException.getCause());
             }
         }
+    }
+
+    public void insertIntoCode(String textToInsert) {
+        insertIntoCodeHandler.accept(textToInsert);
     }
 
     private void createNewHandler() {
@@ -482,28 +488,28 @@ public class WorkspaceExplorer implements IJavaFxNode {
         });
     }
 
-    private FileChooserConfig getFileChooserConfig(WorkspaceFileType fileType) {
+    private FileChooserConfig getFileChooserConfig(WorkspaceFileType fileType, String action) {
         return switch (fileType) {
             case TEMPLATE -> new FileChooserConfig(
-                    "Create new template file",
+                    action + " template file",
                     workspace.getTemplatesPath().toFile(),
                     "Template files",
                     "*.template"
             );
             case MODULE -> new FileChooserConfig(
-                    "Create new module file",
+                    action + " module file",
                     workspace.getModulesPath().toFile(),
                     "ETM Module files",
                     "*.module"
             );
             case BLOCK -> new FileChooserConfig(
-                    "Create new block file",
+                    action + " block file",
                     workspace.getBlocksPath().toFile(),
                     "Block files",
                     "*.block"
             );
             case CONTEXT -> new FileChooserConfig(
-                    "Create new context file",
+                    action + " context file",
                     workspace.getContextXmlPath().toFile(),
                     "Context XML files",
                     "*.xml"
@@ -567,85 +573,85 @@ public class WorkspaceExplorer implements IJavaFxNode {
 
     private void bindWorkspace() {
 
-        workspace.getTemplates().addListener((ListChangeListener<Template>) c -> {
-            while (c.next()) {
-                if (c.wasAdded()) {
-                    for (Template t : c.getAddedSubList()) {
-                        TreeItem<Object> item = WorkspaceExplorerItem.createWorkspaceFileTreeItem(t);
+        workspace.getTemplates().addListener((ListChangeListener<Template>) changedTemplate -> {
+            while (changedTemplate.next()) {
+                if (changedTemplate.wasAdded()) {
+                    for (Template template : changedTemplate.getAddedSubList()) {
+                        TreeItem<Object> item = WorkspaceExplorerItem.createWorkspaceFileTreeItem(template, insertIntoCodeHandler);
                         item.getChildren().add(
-                                WorkspaceExplorerItem.createContextFileTreeItem(t.getDataContextFile(), "Data")
+                                WorkspaceExplorerItem.createContextFileTreeItem(template.getDataContextFile(), "Data")
                         );
                         item.getChildren().add(
-                                WorkspaceExplorerItem.createContextFileTreeItem(t.getMessageContextFile(), "Message")
+                                WorkspaceExplorerItem.createContextFileTreeItem(template.getMessageContextFile(), "Message")
                         );
-                        templateRoot.getChildren().add(item);
+                        Platform.runLater(() -> templateRoot.getChildren().add(item));
                     }
                 }
-                if (c.wasRemoved()) {
+                if (changedTemplate.wasRemoved()) {
 
-                    templateRoot.getChildren().removeIf(ti ->
-                            c.getRemoved().contains(((WorkspaceExplorerItem.WorkspaceFileTreeItem) ti.getValue()).workspaceFile)
-                    );
+                    Platform.runLater(() ->templateRoot.getChildren().removeIf(ti ->
+                            changedTemplate.getRemoved().contains(((WorkspaceExplorerItem.WorkspaceFileTreeItem) ti.getValue()).workspaceFile)
+                    ));
 
                 }
             }
         });
 
-        workspace.getModules().addListener((ListChangeListener<EtmModule>) c -> {
-            while (c.next()) {
-                if (c.wasAdded()) {
-                    for (EtmModule m : c.getAddedSubList()) {
-                        TreeItem<Object> item = WorkspaceExplorerItem.createWorkspaceFileTreeItem(m);
+        workspace.getModules().addListener((ListChangeListener<EtmModule>) changedModule -> {
+            while (changedModule.next()) {
+                if (changedModule.wasAdded()) {
+                    for (EtmModule module : changedModule.getAddedSubList()) {
+                        TreeItem<Object> item = WorkspaceExplorerItem.createWorkspaceFileTreeItem(module, insertIntoCodeHandler);
                         item.getChildren().add(
-                                WorkspaceExplorerItem.createContextFileTreeItem(m.getDataContextFile(), "Data")
+                                WorkspaceExplorerItem.createContextFileTreeItem(module.getDataContextFile(), "Data")
                         );
-                        moduleRoot.getChildren().add(item);
+                        Platform.runLater(() -> moduleRoot.getChildren().add(item));
                     }
                 }
-                if (c.wasRemoved()) {
-                    moduleRoot.getChildren().removeIf(
-                            ti -> c.getRemoved().contains(
+                if (changedModule.wasRemoved()) {
+                    Platform.runLater(() ->moduleRoot.getChildren().removeIf(
+                            ti -> changedModule.getRemoved().contains(
                                     ((WorkspaceExplorerItem.WorkspaceFileTreeItem) ti.getValue()).workspaceFile
                             )
-                    );
+                    ));
                 }
             }
         });
 
-        workspace.getBlocks().addListener((ListChangeListener<PersonalisationBlock>) c -> {
-            while (c.next()) {
-                if (c.wasAdded()) {
-                    for (PersonalisationBlock b : c.getAddedSubList()) {
-                        blockRoot.getChildren().add(
-                                WorkspaceExplorerItem.createWorkspaceFileTreeItem(b)
-                        );
+        workspace.getBlocks().addListener((ListChangeListener<PersonalisationBlock>) changedBlock -> {
+            while (changedBlock.next()) {
+                if (changedBlock.wasAdded()) {
+                    for (PersonalisationBlock block : changedBlock.getAddedSubList()) {
+                        Platform.runLater(() -> blockRoot.getChildren().add(
+                                WorkspaceExplorerItem.createWorkspaceFileTreeItem(block, insertIntoCodeHandler)
+                        ));
                     }
                 }
-                if (c.wasRemoved()) {
-                    blockRoot.getChildren().removeIf(
-                            ti -> c.getRemoved().contains(
+                if (changedBlock.wasRemoved()) {
+                    Platform.runLater(() ->blockRoot.getChildren().removeIf(
+                            ti -> changedBlock.getRemoved().contains(
                                     ((WorkspaceExplorerItem.WorkspaceFileTreeItem) ti.getValue()).workspaceFile
                             )
-                    );
+                    ));
                 }
             }
         });
 
-        workspace.getContexts().addListener((ListChangeListener<ContextXml>) c -> {
-            while (c.next()) {
-                if (c.wasAdded()) {
-                    for (ContextXml ctx : c.getAddedSubList()) {
-                        contextRoot.getChildren().add(
-                                WorkspaceExplorerItem.createWorkspaceFileTreeItem(ctx)
-                        );
+        workspace.getContexts().addListener((ListChangeListener<ContextXml>) changedContext -> {
+            while (changedContext.next()) {
+                if (changedContext.wasAdded()) {
+                    for (ContextXml ctx : changedContext.getAddedSubList()) {
+                        Platform.runLater(() -> contextRoot.getChildren().add(
+                                WorkspaceExplorerItem.createWorkspaceFileTreeItem(ctx, insertIntoCodeHandler)
+                        ));
                     }
                 }
-                if (c.wasRemoved()) {
-                    contextRoot.getChildren().removeIf(
-                            ti -> c.getRemoved().contains(
+                if (changedContext.wasRemoved()) {
+                    Platform.runLater(() -> contextRoot.getChildren().removeIf(
+                            ti -> changedContext.getRemoved().contains(
                                     ((WorkspaceExplorerItem.WorkspaceFileTreeItem) ti.getValue()).workspaceFile
                             )
-                    );
+                    ));
                 }
             }
         });

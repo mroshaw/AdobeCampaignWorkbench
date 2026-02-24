@@ -87,7 +87,7 @@ public class CampaignWorkbenchIDE extends Application implements IThemeable {
                 _ -> runTemplate());
 
         // Workspace Explorer
-        workspaceExplorer = new WorkspaceExplorer("Workspace Explorer", null, this::openFileFromWorkspace, this::workspaceChanged);
+        workspaceExplorer = new WorkspaceExplorer("Workspace Explorer", null, this::openFileFromWorkspace, this::workspaceChanged, this::insertIntoCodeHandler);
 
         // Editor tabs
         editorTabPanel = new EditorTabPanel((_, _, newTab) -> tabPanelChanged(newTab));
@@ -258,6 +258,11 @@ public class CampaignWorkbenchIDE extends Application implements IThemeable {
 
     private void workspaceChanged(Workspace newWorkspace) {
         editorTabPanel.closeAllTabs();
+    }
+
+    private void insertIntoCodeHandler(String code) {
+        System.out.println("Insert into code: " + code);
+        editorTabPanel.insertTextIntoSelected(code);
     }
 
     /**

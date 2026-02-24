@@ -25,7 +25,6 @@ public class OutputTab extends Tab   {
     }
 
     public void refreshContent() {
-        System.out.println("Refreshing...");
         editor.refreshContent();
     }
 

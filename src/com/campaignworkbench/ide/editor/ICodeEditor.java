@@ -54,6 +54,8 @@ public interface ICodeEditor {
      */
     void gotoLine(int line);
 
+    void insertTextAtCaret(String text);
+
     void find(String textToFind);
 
     void formatCode(int indentSize);

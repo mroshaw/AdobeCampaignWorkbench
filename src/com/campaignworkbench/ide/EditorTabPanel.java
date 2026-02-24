@@ -163,6 +163,13 @@ public class EditorTabPanel implements IJavaFxNode {
         getSelected().saveFile();
     }
 
+    public void insertTextIntoSelected(String text) {
+        EditorTab selectedTab = getSelected();
+        if(selectedTab != null) {
+            getSelected().insertTextAtCaret(text);
+        }
+    }
+
     public void saveAllTabs() {
         for (Tab tab : tabPane.getTabs()) {
             if (tab instanceof EditorTab editorTab) {

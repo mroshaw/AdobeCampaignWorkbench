@@ -169,6 +169,25 @@ public class RichTextFXEditor implements ICodeEditor, IThemeable {
     }
 
     @Override
+    public void insertTextAtCaret(String text) {
+        if (text == null || text.isEmpty()) {
+            return;
+        }
+
+        int caretPos = codeArea.getCaretPosition();
+
+        // If there's a selection, replace it
+        if (codeArea.getSelection().getLength() > 0) {
+            codeArea.replaceText(codeArea.getSelection(), text);
+        } else {
+            codeArea.insertText(caretPos, text);
+        }
+
+        // Move caret to after inserted text
+        codeArea.moveTo(caretPos + text.length());
+    }
+
+    @Override
     public void applyTheme(IDETheme theme) {
         root.getStylesheets().clear();
 

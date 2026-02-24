@@ -146,6 +146,10 @@ public final class EditorTab extends Tab {
         return workspaceFile.getFilePath();
     }
 
+    public void insertTextAtCaret(String text) {
+        editor.insertTextAtCaret(text);
+    }
+
     public boolean isContextSet() {
         if (workspaceFile instanceof WorkspaceContextFile workspaceContextFile) {
             return workspaceContextFile.isDataContextSet();
