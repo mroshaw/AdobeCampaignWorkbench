@@ -33,3 +33,6 @@ bin/
 /Workspaces/*
 !/Workspaces/Demo Workspace/
 !/Workspaces/Demo Workspace/**
+
+# Installer
+/installer/

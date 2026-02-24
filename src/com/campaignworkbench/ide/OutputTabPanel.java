@@ -31,7 +31,9 @@ public class OutputTabPanel implements IJavaFxNode, IThemeable {
         Tab webViewTab = new Tab("Web View", webView);
         webViewTab.setClosable(false);
         sourceCodeTab = new OutputTab("HTML Source", SyntaxType.HTML);
+        sourceCodeTab.setEditable(false);
         preSourceCodeTab = new OutputTab("JS Pre Source", SyntaxType.JAVASCRIPT);
+        preSourceCodeTab.setEditable(false);
 
         tabPane.getTabs().addAll(webViewTab, sourceCodeTab, preSourceCodeTab);
 

@@ -29,6 +29,10 @@ public class OutputTab extends Tab   {
         editor.refreshContent();
     }
 
+    public void setEditable(boolean isEditable) {
+        editor.setEditable(isEditable);
+    }
+
     public void gotoLine(int lineNumber) {
         editor.gotoLine(lineNumber);
     }
