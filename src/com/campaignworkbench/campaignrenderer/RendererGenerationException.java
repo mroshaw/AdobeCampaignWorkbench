@@ -1,7 +1,7 @@
 package com.campaignworkbench.campaignrenderer;
 
 /**
- * JavaScript generation specific exceptions
+ * JavaScript generation-specific exceptions
  */
 public final class RendererGenerationException extends RendererException {
     /**

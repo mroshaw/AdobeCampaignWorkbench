@@ -1,5 +1,5 @@
 package com.campaignworkbench.ide;
-import javafx.application.Platform;
+
 import javafx.event.ActionEvent;
 import javafx.event.EventHandler;
 import javafx.scene.Node;
@@ -23,19 +23,20 @@ public class MainMenuBar implements IJavaFxNode {
 
     /**
      * Constructor
-     * @param openWorkspaceHandler action to run when open workspace menu is selected
-     * @param addTemplateFileHandler action to run when open template menu is selected
-     * @param addModuleFileHandler action to run when open module menu is selected
-     * @param addBlockFileHandler action to run when open block menu is selected
-     * @param addContextFileHandler action to run when open XML menu is selected
-     * @param saveCurrentFileHandler action to run when save current file menu is selected
-     * @param applyLightThemeHandler action to run when apply light theme menu is selected
-     * @param applyDarkThemeHandler action to run when apply dark theme menu is selected
+     * @param openWorkspaceHandler action to run when the 'open workspace' menu is selected
+     * @param addTemplateFileHandler action to run when the 'open template' menu is selected
+     * @param addModuleFileHandler action to run when the 'open module' menu is selected
+     * @param addBlockFileHandler action to run when the 'open block' menu is selected
+     * @param addContextFileHandler action to run when the 'open XML' menu is selected
+     * @param saveCurrentFileHandler action to run when the 'save current file' menu is selected
+     * @param applyLightThemeHandler action to run when the 'apply light theme' menu is selected
+     * @param applyDarkThemeHandler action to run when the 'apply dark theme' menu is selected
      */
     public MainMenuBar(
             EventHandler<ActionEvent> newWorkspaceHandler,
             EventHandler<ActionEvent> openWorkspaceHandler,
             EventHandler<ActionEvent> saveWorkspaceHandler,
+            EventHandler<ActionEvent> closeWorkspaceHandler,
 
             EventHandler<ActionEvent> newTemplateFileHandler,
             EventHandler<ActionEvent> newModuleFileHandler,
@@ -74,9 +75,9 @@ public class MainMenuBar implements IJavaFxNode {
         MenuItem saveWorkspaceMenu = new MenuItem("Save Workspace");
         MenuItem closeWorkspaceMenu = new MenuItem("Close Workspace");
 
-
         openWorkspaceMenu.setOnAction(openWorkspaceHandler);
         saveWorkspaceMenu.setOnAction(saveWorkspaceHandler);
+        closeWorkspaceMenu.setOnAction(closeWorkspaceHandler);
 
         // New sub menu
         MenuItem newWorkspaceMenu = new MenuItem("Workspace");
@@ -155,12 +156,6 @@ public class MainMenuBar implements IJavaFxNode {
 
         // Set styling
         menuBar.getStyleClass().add("main-menu-bar");
-    }
-
-    /**
-     * Temp dummy handle for new menu items/testing
-     */
-    private void dummyHandler() {
     }
 
     @Override

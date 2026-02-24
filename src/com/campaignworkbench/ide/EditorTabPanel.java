@@ -26,9 +26,7 @@ public class EditorTabPanel implements IJavaFxNode {
         tabPane.setMinHeight(0);
 
         tabPane.getSelectionModel().selectedItemProperty().addListener(tabChangedListener);
-        tabPane.getSelectionModel().selectedItemProperty().addListener((obs, oldTab, newTab) -> {
-            refreshTabEditor(newTab);
-        });
+        tabPane.getSelectionModel().selectedItemProperty().addListener((_, _, newTab) -> refreshTabEditor(newTab));
 
         // Set style class
         tabPane.getStyleClass().add("editor-tab-panel");
@@ -72,8 +70,7 @@ public class EditorTabPanel implements IJavaFxNode {
      */
     public boolean isOpened(Path path) {
         for (Tab tab : tabPane.getTabs()) {
-            if (tab instanceof EditorTab) {
-                EditorTab editorTab = (EditorTab) tab;
+            if (tab instanceof EditorTab editorTab) {
                 if (editorTab.getFile().equals(path)) {
                     return true;
                 }
@@ -84,8 +81,7 @@ public class EditorTabPanel implements IJavaFxNode {
 
     private EditorTab getExistingTab(Path path) {
         for (Tab tab : tabPane.getTabs()) {
-            if (tab instanceof EditorTab) {
-                EditorTab editorTab = (EditorTab) tab;
+            if (tab instanceof EditorTab editorTab) {
                 if (editorTab.getFile().equals(path)) {
                     return editorTab;
                 }
@@ -111,7 +107,7 @@ public class EditorTabPanel implements IJavaFxNode {
     public void addEditorTab(WorkspaceFile workspaceFile) {
         EditorTab existingTab = getExistingTab(workspaceFile.getFilePath());
         if(existingTab != null) {
-            // Set focus on tab
+            // Set focus on the tab
             tabPane.getSelectionModel().select(existingTab);
             return;
         }
@@ -124,30 +120,6 @@ public class EditorTabPanel implements IJavaFxNode {
 
     public WorkspaceFile getSelectedWorkspaceFile() {
         return getSelected().getWorkspaceFile();
-    }
-
-    public void clearSelectedDataContextFile() {
-        getSelected().clearDataContextFile();
-    }
-
-    public void setSelectedDataContextFile(Path contextFile) {
-        getSelected().setDataContextFile(contextFile);
-    }
-
-    public void clearSelectedMessageContextFile() {
-        getSelected().clearDataContextFile();
-    }
-
-    public void setSelectedMessageContextFile(Path contextFile) {
-        getSelected().setMessageContextFile(contextFile);
-    }
-
-    public Path getSelectedDataContextFile() {
-        return getSelected().getDataContextFilePath();
-    }
-
-    public String getSelectedDataContextFileContent() {
-        return getSelected().getDataContextFileContent();
     }
 
     /**
@@ -187,7 +159,20 @@ public class EditorTabPanel implements IJavaFxNode {
         return getSelected() != null;
     }
 
+    public void saveSelectedTab() {
+        getSelected().saveFile();
+    }
+
+    public void saveAllTabs() {
+        for (Tab tab : tabPane.getTabs()) {
+            if (tab instanceof EditorTab editorTab) {
+                editorTab.saveFile();
+            }
+        }
+    }
+
     public void closeAllTabs() {
+        saveAllTabs();
         tabPane.getTabs().clear();
     }
 

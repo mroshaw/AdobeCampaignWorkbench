@@ -1,0 +1,19 @@
+<component name="ArtifactManager">
+  <artifact name="AdobeCampaignWorkbench:jar">
+    <output-path>$PROJECT_DIR$/out/artifacts/AdobeCampaignWorkbench_jar</output-path>
+    <root id="root">
+      <element id="archive" name="AdobeCampaignWorkbench.jar">
+        <element id="module-output" name="AdobeCampaignWorkbench" />
+      </element>
+      <element id="library" level="project" name="fxmisc.richtext.richtextfx" />
+      <element id="library" level="project" name="cat.inspiracio.rhino.js.engine" />
+      <element id="library" level="project" name="fifesoft.autocomplete" />
+      <element id="library" level="project" name="fifesoft.rstaui" />
+      <element id="library" level="project" name="io.github.mkpaz.atlantafx.base" />
+      <element id="library" level="project" name="controlsfx" />
+      <element id="library" level="project" name="tools.jackson.core.databind" />
+      <element id="library" level="project" name="fifesoft.rsyntaxtextarea" />
+      <element id="library" level="project" name="fifesoft.languagesupport" />
+    </root>
+  </artifact>
+</component>

@@ -5,20 +5,19 @@ import com.campaignworkbench.util.FileUtil;
 import com.campaignworkbench.util.UiUtil;
 import javafx.beans.value.ObservableValue;
 import javafx.collections.ListChangeListener;
+import javafx.geometry.Insets;
 import javafx.scene.Node;
 import javafx.scene.control.*;
 import javafx.scene.input.MouseButton;
 import javafx.scene.layout.Priority;
 import javafx.scene.layout.VBox;
-
-import java.io.File;
-import java.util.function.Consumer;
-
-import javafx.geometry.Insets;
 import javafx.stage.FileChooser;
 import javafx.stage.Stage;
 import javafx.stage.Window;
 import org.controlsfx.glyphfont.FontAwesome;
+
+import java.io.File;
+import java.util.function.Consumer;
 
 /**
  * User interface control to explore and navigate the files in a workspace
@@ -34,7 +33,6 @@ public class WorkspaceExplorer implements IJavaFxNode {
     private final Consumer<WorkspaceFile> fileOpenHandler;
     private final Consumer<Workspace> workspaceChangedHandler;
 
-    private TreeItem<Object> root;
     private TreeItem<Object> templateRoot;
     private TreeItem<Object> moduleRoot;
     private TreeItem<Object> blockRoot;
@@ -74,22 +72,22 @@ public class WorkspaceExplorer implements IJavaFxNode {
 
         Label explorerLabel = new Label(label);
         explorerLabel.setPadding(new Insets(0, 0, 0, 5));
-        // explorerLabel.setStyle("-fx-font-weight: bold;");
+        explorerLabel.getStyleClass().add("ide-label");
 
         // Create the toolbar
         createNewButton = UiUtil.createButton("", "Create new", FontAwesome.Glyph.FILE, "neutral-icon", 1, true, _ -> createNewHandler());
         addExistingButton = UiUtil.createButton("", "Add existing", FontAwesome.Glyph.PLUS_CIRCLE, "positive-icon", 1, true, _ -> addExistingHandler());
-        removeButton = UiUtil.createButton("", "Remove", FontAwesome.Glyph.MINUS_CIRCLE, "negative-icon", 1, true, evt -> removeHandler());
+        removeButton = UiUtil.createButton("", "Remove", FontAwesome.Glyph.MINUS_CIRCLE, "negative-icon", 1, true, _ -> removeHandler());
         setDataContextButton = UiUtil.createButton("", "Set Data Context", FontAwesome.Glyph.FILE_CODE_ALT, "positive-icon", 1, true, _ -> setDataContextHandler());
         clearDataContextButton = UiUtil.createButton("", "Clear Data Context", FontAwesome.Glyph.FILE_CODE_ALT, "negative-icon", 1, true, _ -> clearDataContextHandler());
         setMessageContextButton = UiUtil.createButton("", "Set Message Context", FontAwesome.Glyph.ENVELOPE, "positive-icon", 1, true, _ -> setMessageContextHandler());
         clearMessageContextButton = UiUtil.createButton("", "Clear Message Context", FontAwesome.Glyph.ENVELOPE, "negative-icon", 1, true, _ -> clearMessageContextHandler());
         ToolBar toolbar = new ToolBar(createNewButton, addExistingButton, removeButton, setDataContextButton, clearDataContextButton, setMessageContextButton, clearMessageContextButton);
 
-        workspaceExplorerPanel = new VBox(5, explorerLabel, toolbar, treeView);
+        // Create the main explorer container
+        workspaceExplorerPanel = new VBox(explorerLabel, toolbar, treeView);
         workspaceExplorerPanel.setMinHeight(0);
         VBox.setVgrow(treeView, Priority.ALWAYS);
-        workspaceExplorerPanel.setPadding(new Insets(0, 0, 0, 5));
 
         if (workspace != null) {
             setWorkspace(workspace);
@@ -105,6 +103,13 @@ public class WorkspaceExplorer implements IJavaFxNode {
         setToolbarContext();
     }
 
+    public Workspace getWorkspace() {
+        return workspace;
+    }
+
+    public boolean isWorkspaceOpen() {
+        return workspace != null;
+    }
 
     private void selectionChangedHandler(ObservableValue obs, TreeItem oldItem, TreeItem newItem) {
         if (newItem != null) {
@@ -129,12 +134,6 @@ public class WorkspaceExplorer implements IJavaFxNode {
                 selectedFile = null;
                 selectedContextFile = null;
             }
-
-            // Debug
-            System.out.println("Selected Folder Type: " + selectedFileType);
-            System.out.println("Workspace File: " + (selectedFile == null ? "None" : selectedFile.getBaseFileName()));
-            System.out.println("Selected Context File: " + (selectedContextFile == null ? "None" : selectedContextFile.getBaseFileName()));
-
             setToolbarContext();
         }
     }
@@ -158,12 +157,11 @@ public class WorkspaceExplorer implements IJavaFxNode {
         createNewButton.setTooltip(new Tooltip(createNewButtonText + " " + selectedFileType.toString().toLowerCase()));
         addExistingButton.setTooltip(new Tooltip(addExistingButtonText + " " + selectedFileType.toString().toLowerCase()));
         removeButton.setTooltip(new Tooltip(removeButtonText + " " + selectedFileType.toString().toLowerCase()));
-        Boolean inFolder = selectedFile == null;
 
-        Boolean isWorkspaceFileSelected = selectedFile != null;
-        Boolean isTemplateSelected = selectedFileType == WorkspaceFileType.TEMPLATE && isWorkspaceFileSelected;
-        Boolean isModuleSelected = selectedFileType == WorkspaceFileType.MODULE && isWorkspaceFileSelected;
-        Boolean isBlockSelected = selectedFileType == WorkspaceFileType.BLOCK && isWorkspaceFileSelected;
+        boolean isWorkspaceFileSelected = selectedFile != null;
+        boolean isTemplateSelected = selectedFileType == WorkspaceFileType.TEMPLATE && isWorkspaceFileSelected;
+        boolean isModuleSelected = selectedFileType == WorkspaceFileType.MODULE && isWorkspaceFileSelected;
+        boolean isBlockSelected = selectedFileType == WorkspaceFileType.BLOCK && isWorkspaceFileSelected;
 
         addExistingButton.setDisable(false);
         createNewButton.setDisable(false);
@@ -194,17 +192,65 @@ public class WorkspaceExplorer implements IJavaFxNode {
         }
     }
 
-    /**
-     * @return the TreeView associated with the Explorer
-     */
-    public TreeView<Object> getTreeView() {
-        return treeView;
+    public void createNewWorkspace() {
+        FileChooser fileChooser = new FileChooser();
+        fileChooser.setTitle("Save Workspace JSON file");
+        fileChooser.setInitialDirectory(
+                Workspace.getWorkspacesRootPath().toFile()
+        );
+        fileChooser.setInitialFileName("workspace.json");
+        fileChooser.getExtensionFilters().addAll(
+                new FileChooser.ExtensionFilter("Workbench JSON files", "*.json")
+        );
+
+        File selectedFile = fileChooser.showSaveDialog(getWindow());
+
+        if (selectedFile == null) {
+            return;
+        }
+
+        workspace = new Workspace(selectedFile.toPath(), true);
+    }
+
+    public void openWorkspace() {
+        FileChooser fileChooser = new FileChooser();
+        fileChooser.setTitle("Open Workspace JSON file");
+        fileChooser.setInitialDirectory(
+                Workspace.getWorkspacesRootPath().toFile()
+        );
+        fileChooser.getExtensionFilters().addAll(
+                new FileChooser.ExtensionFilter("Workbench JSON files", "*.json")
+        );
+
+        File selectedFile = fileChooser.showOpenDialog(getWindow());
+
+        if (selectedFile == null) return;
+
+        if (selectedFile.getName().endsWith(".json")) {
+
+            Workspace newWorkspace = new Workspace(selectedFile.toPath(), false);
+            newWorkspace.openWorkspace(selectedFile.toPath());
+            setWorkspace(newWorkspace);
+            return;
+        }
+
+        // Not a valid workspace file
+        throw new IDEException("Selected file is not a valid workspace JSON file.", null);
+    }
+
+    public void closeWorkspace() {
+        setWorkspace(null);
     }
 
     public void setWorkspace(Workspace workspace) {
         this.workspace = workspace;
 
-        root = WorkspaceExplorerItem.createHeaderTreeItem(
+        if (this.workspace == null) {
+            treeView.setRoot(null);
+            return;
+        }
+
+        TreeItem<Object> root = WorkspaceExplorerItem.createHeaderTreeItem(
                 FontAwesome.Glyph.FOLDER,
                 workspace.getRootFolderPath().getFileName().toString(),
                 "16px", 5, "workspace-icon", null
@@ -297,7 +343,7 @@ public class WorkspaceExplorer implements IJavaFxNode {
 
         fileChooser.setTitle(chooserConfig.title());
         fileChooser.setInitialDirectory(chooserConfig.defaultFolder());
-        ;
+
         fileChooser.getExtensionFilters().addAll(
                 new FileChooser.ExtensionFilter(chooserConfig.description(), chooserConfig.extension())
         );
@@ -308,6 +354,16 @@ public class WorkspaceExplorer implements IJavaFxNode {
         }
 
         workspace.addExistingWorkspaceFile(selectedFile.toPath(), workspaceFileType);
+    }
+
+    public void saveWorkspace() {
+        if (workspace != null) {
+            try {
+                workspace.writeToJson();
+            } catch (IDEException ideException) {
+                throw new IDEException("Could not save workspace!", ideException.getCause());
+            }
+        }
     }
 
     private void createNewHandler() {
@@ -391,10 +447,10 @@ public class WorkspaceExplorer implements IJavaFxNode {
 
                 Object selectedObject = selectedItem.getValue();
 
-                // Action depends on the type of underlying item double clicked
+                // Action depends on the type of the underlying item double-clicked
 
                 // Folder header item
-                if (selectedObject instanceof WorkspaceExplorerItem.HeaderTreeItem parentFolder) {
+                if (selectedObject instanceof WorkspaceExplorerItem.HeaderTreeItem) {
                     // Allow the double click to fold/unfolder
                     return;
                 }
@@ -421,7 +477,6 @@ public class WorkspaceExplorer implements IJavaFxNode {
                 if (selectedObject instanceof WorkspaceExplorerItem.WorkspaceFileTreeItem workspaceFileTreeItem) {
                     fileOpenHandler.accept(workspaceFileTreeItem.workspaceFile);
                     evt.consume();
-                    return;
                 }
             }
         });

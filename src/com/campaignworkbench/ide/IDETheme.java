@@ -1,7 +1,7 @@
 package com.campaignworkbench.ide;
 
 import atlantafx.base.theme.CupertinoDark;
-import atlantafx.base.theme.CupertinoLight;
+import atlantafx.base.theme.NordLight;
 
 import java.net.URL;
 
@@ -18,7 +18,7 @@ public enum IDETheme {
             "/styles/richtextfx/html_syntax_styles_dark.css"
     ),
     LIGHT (
-            new CupertinoLight().getUserAgentStylesheet(),
+            new NordLight().getUserAgentStylesheet(),
             "/styles/richtextfx/ide_styles_light.css",
             "/styles/richtextfx/campaign_syntax_styles_light.css",
             "/styles/richtextfx/xml_syntax_styles_light.css",

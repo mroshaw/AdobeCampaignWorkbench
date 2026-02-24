@@ -1,0 +1,14 @@
+Manifest-Version: 1.0
+Main-Class: com.campaignworkbench.ide.CampaignWorkbenchIDE
+Class-Path: richtextfx-0.11.7.jar reactfx-2.0-M5.jar undofx-2.1.1.jar fl
+ owless-0.7.4.jar wellbehavedfx-0.3.3.jar rhino-js-engine-1.7.14.jar rhi
+ no-1.7.14.jar autocomplete-3.3.3.jar rsyntaxtextarea-3.6.1.jar rstaui-3
+ .3.2.jar rsyntaxtextarea-3.6.1.jar autocomplete-3.3.3.jar atlantafx-bas
+ e-2.1.0.jar javafx-controls-23.jar javafx-controls-23-win.jar javafx-gr
+ aphics-23.jar javafx-graphics-23-win.jar javafx-base-23.jar javafx-base
+ -23-win.jar controlsfx-11.2.3.jar jackson-databind-3.0.4.jar jackson-an
+ notations-2.20.jar jackson-core-3.0.4.jar rsyntaxtextarea-3.6.0.jar lan
+ guagesupport-3.4.1.jar rsyntaxtextarea-3.6.1.jar autocomplete-3.3.3.jar
+  rhino-all-1.9.0.jar rhino-1.9.0.jar rhino-tools-1.9.0.jar rhino-xml-1.
+ 9.0.jar
+

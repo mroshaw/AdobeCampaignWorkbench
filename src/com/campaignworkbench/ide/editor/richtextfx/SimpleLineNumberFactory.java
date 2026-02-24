@@ -7,7 +7,6 @@ import javafx.scene.Node;
 import javafx.scene.control.Label;
 import javafx.scene.layout.Background;
 import javafx.scene.layout.BackgroundFill;
-import javafx.scene.layout.CornerRadii;
 import javafx.scene.paint.Color;
 import javafx.scene.paint.Paint;
 import javafx.scene.text.Font;
@@ -18,6 +17,9 @@ import org.reactfx.value.Val;
 
 import java.util.function.IntFunction;
 
+/**
+ * JavaFX node factory that creates a line number label for each paragraph in the CodeArea.
+ */
 public class SimpleLineNumberFactory<PS> implements IntFunction<Node> {
 
     private static final Insets DEFAULT_INSETS =
@@ -33,8 +35,8 @@ public class SimpleLineNumberFactory<PS> implements IntFunction<Node> {
             new Background(
                     new BackgroundFill(
                             Color.web("#ddd"),
-                            (CornerRadii) null,
-                            (Insets) null
+                            null,
+                            null
                     )
             );
 

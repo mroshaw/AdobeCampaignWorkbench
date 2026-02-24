@@ -1,9 +1,11 @@
 package com.campaignworkbench.campaignrenderer;
 
 import com.fasterxml.jackson.annotation.JsonAutoDetect;
-
 import java.nio.file.Path;
 
+/**
+ * Class representing a context XML workspace file.
+ */
 @JsonAutoDetect(
         fieldVisibility = JsonAutoDetect.Visibility.ANY,
         getterVisibility = JsonAutoDetect.Visibility.NONE,

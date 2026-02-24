@@ -8,6 +8,9 @@ import java.util.HashMap;
 import java.util.Iterator;
 import java.util.Set;
 
+/**
+ * Class implementing a set of fold regions
+ */
 public class FoldRegions implements Iterable<FoldRegion> {
 
     // CodeArea is needed here to translate line numbers into paragraph indexes

@@ -8,9 +8,12 @@ import java.util.Collection;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.Map;
-import java.util.regex.Pattern;
 import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
+/**
+ * An implementation of ISyntaxStyler that provides syntax highlighting for Adobe Campaign template code
+ */
 public class CampaignStyler implements ISyntaxStyler {
 
     // ECMAScript 3 keywords

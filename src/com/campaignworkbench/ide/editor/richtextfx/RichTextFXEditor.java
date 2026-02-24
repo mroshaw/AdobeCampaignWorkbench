@@ -7,20 +7,23 @@ import com.campaignworkbench.ide.ThemeManager;
 import com.campaignworkbench.ide.editor.ICodeEditor;
 import com.campaignworkbench.ide.editor.SyntaxType;
 import javafx.application.Platform;
+import javafx.scene.Cursor;
 import javafx.scene.Node;
 import javafx.scene.control.IndexRange;
 import javafx.scene.input.KeyCode;
 import javafx.scene.input.KeyEvent;
 import javafx.scene.layout.BorderPane;
-import org.fxmisc.richtext.CodeArea;
 import org.fxmisc.flowless.VirtualizedScrollPane;
-import javafx.scene.Cursor;
+import org.fxmisc.richtext.CodeArea;
 import org.fxmisc.richtext.model.StyleSpans;
 import org.fxmisc.richtext.model.TwoDimensional;
+import org.reactfx.Subscription;
 
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
+import java.util.Objects;
+import java.util.function.Consumer;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -30,7 +33,6 @@ import java.util.regex.Pattern;
 public class RichTextFXEditor implements ICodeEditor, IThemeable {
 
     private final CodeArea codeArea;
-    private final VirtualizedScrollPane<CodeArea> scrollPane;
     private final BorderPane root;
 
     // Syntax highlighting
@@ -49,7 +51,7 @@ public class RichTextFXEditor implements ICodeEditor, IThemeable {
         codeArea = new CodeArea();
         codeArea.setCursor(Cursor.TEXT);
 
-        scrollPane = new VirtualizedScrollPane<>(codeArea);
+        VirtualizedScrollPane<CodeArea> scrollPane = new VirtualizedScrollPane<>(codeArea);
         root = new BorderPane(scrollPane);
         root.getStyleClass().add("code-editor");
 
@@ -59,7 +61,7 @@ public class RichTextFXEditor implements ICodeEditor, IThemeable {
         codeArea.setParagraphGraphicFactory(gutterFactory);
 
 
-        codeArea.textProperty().addListener((obs, oldText, newText) -> {
+        codeArea.textProperty().addListener((_, _, newText) -> {
             StyleSpans<Collection<String>> computedStyleSpans = syntaxStyler.style(newText);
             if (computedStyleSpans != null) {
                 codeArea.setStyleSpans(0, computedStyleSpans);
@@ -129,18 +131,15 @@ public class RichTextFXEditor implements ICodeEditor, IThemeable {
     }
 
     private void setLanguageHelpers(SyntaxType syntax) {
-        // Set folding class instance
-        switch (syntax) {
-            case XML:
-                codeFormatter = new XmlFormatter();
-                syntaxStyler = new XmlStyler();
-                foldParser = new XmlFoldParser(codeArea);
-                break;
-            default:
-                codeFormatter = null;
-                syntaxStyler = new CampaignStyler();
-                foldParser = new CampaignFoldParser(codeArea);
-                break;
+        // Set the folding class instance
+        if (Objects.requireNonNull(syntax) == SyntaxType.XML) {
+            codeFormatter = new XmlFormatter();
+            syntaxStyler = new XmlStyler();
+            foldParser = new XmlFoldParser(codeArea);
+        } else {
+            codeFormatter = null;
+            syntaxStyler = new CampaignStyler();
+            foldParser = new CampaignFoldParser(codeArea);
         }
     }
 
@@ -203,6 +202,12 @@ public class RichTextFXEditor implements ICodeEditor, IThemeable {
     }
 
     @Override
+    public Subscription addTextChangeListener(Consumer<String> listener) {
+        return codeArea.multiPlainChanges()
+                .subscribe(change -> listener.accept(codeArea.getText()));
+    }
+
+    @Override
     public void find(String text) {
         if (text == null || text.isEmpty()){
             clearFindHighlight();
@@ -217,7 +222,7 @@ public class RichTextFXEditor implements ICodeEditor, IThemeable {
             int start = matcher.start();
             int end = matcher.end();
             for (int i = start; i < end; i++) {
-                codeArea.setStyle(i, i + 1, mergeStyles(codeArea.getStyleOfChar(i), "find-text"));
+                codeArea.setStyle(i, i + 1, mergeStyles(codeArea.getStyleOfChar(i)));
             }
         }
     }
@@ -245,10 +250,10 @@ public class RichTextFXEditor implements ICodeEditor, IThemeable {
     /**
      * Returns a new style collection containing the original styles plus the highlight
      */
-    private Collection<String> mergeStyles(Collection<String> original, String newStyle) {
-        if (original.contains(newStyle)) return original; // already highlighted
+    private Collection<String> mergeStyles(Collection<String> original) {
+        if (original.contains("find-text")) return original; // already highlighted
         ArrayList<String> merged = new ArrayList<>(original);
-        merged.add(newStyle);
+        merged.add("find-text");
         return merged;
     }
 }

@@ -1,8 +1,5 @@
 package com.campaignworkbench.test;
 
-import com.campaignworkbench.campaignrenderer.ModuleRenderer;
-import com.campaignworkbench.campaignrenderer.TemplateRenderResult;
-import com.campaignworkbench.campaignrenderer.TemplateRenderer;
 import com.campaignworkbench.util.FileUtil;
 import org.mozilla.javascript.Context;
 import org.mozilla.javascript.Scriptable;

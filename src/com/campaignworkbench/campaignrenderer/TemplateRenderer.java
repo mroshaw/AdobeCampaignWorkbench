@@ -8,7 +8,7 @@ import org.mozilla.javascript.Scriptable;
 import java.nio.file.Path;
 
 /**
- * Main renderer class, responsible for parsing templates, modules, blocks and XML context
+ * Main renderer class, responsible for parsing templates, modules, blocks, and XML context
  * to generate an HTML page
  */
 public final class TemplateRenderer {
@@ -39,7 +39,7 @@ public final class TemplateRenderer {
         Path dataContextFile = template.getDataContextFilePath();
         String dataContextContent = template.getDataContextContent();
 
-        // Add 'rtEvent' wrapper if give <ctx> root
+        // Add 'rtEvent' wrapper if given <ctx> root
         if (dataContextContent.startsWith("<ctx>")) {
             dataContextContent = "<rtEvent>" + dataContextContent + "</rtEvent>";
         }
@@ -116,8 +116,6 @@ public final class TemplateRenderer {
             // EXECUTE
             Object result = cx.evaluateString(scope, js, sourceName, 1, null);
             return new TemplateRenderResult(js, Context.toString(result));
-        } catch (RendererParseException rendererParseException) {
-            throw rendererParseException;
         } catch (org.mozilla.javascript.EvaluatorException evaluatorException) {
             throw new RendererParseException(
                     "JavaScript evaluator error: " + evaluatorException.getMessage(),
@@ -273,6 +271,17 @@ public final class TemplateRenderer {
         }
 
         int quotePos = keyPos + key.length() + 1;
+        int end = getEnd(directive, key, quotePos);
+        if (end == -1) {
+            throw new IllegalArgumentException(
+                    "Unterminated quoted value for '" + key + "' in directive: " + directive
+            );
+        }
+
+        return directive.substring(quotePos + 1, end);
+    }
+
+    private static int getEnd(String directive, String key, int quotePos) {
         if (quotePos >= directive.length()) {
             throw new IllegalArgumentException(
                     "Malformed attribute '" + key + "' in directive: " + directive
@@ -286,14 +295,7 @@ public final class TemplateRenderer {
             );
         }
 
-        int end = directive.indexOf(quote, quotePos + 1);
-        if (end == -1) {
-            throw new IllegalArgumentException(
-                    "Unterminated quoted value for '" + key + "' in directive: " + directive
-            );
-        }
-
-        return directive.substring(quotePos + 1, end);
+        return directive.indexOf(quote, quotePos + 1);
     }
 
 

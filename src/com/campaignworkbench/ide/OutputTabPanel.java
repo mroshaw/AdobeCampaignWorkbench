@@ -3,7 +3,6 @@ package com.campaignworkbench.ide;
 import com.campaignworkbench.ide.editor.SyntaxType;
 import javafx.scene.Cursor;
 import javafx.scene.Node;
-import javafx.scene.control.Label;
 import javafx.scene.control.Tab;
 import javafx.scene.control.TabPane;
 import javafx.scene.web.WebView;
@@ -14,36 +13,29 @@ import javafx.scene.web.WebView;
 public class OutputTabPanel implements IJavaFxNode, IThemeable {
 
     private final TabPane tabPane;
-    private final Tab webViewTab;
     private final OutputTab sourceCodeTab;
     private final OutputTab preSourceCodeTab;
 
     private final WebView webView;
 
     /**
-     * The label for the preview panel
-     */
-    Label outputLabel;
-
-    /**
      * Constructor
-     * @param label The label for the preview panel
      */
-    public OutputTabPanel(String label) {
+    public OutputTabPanel() {
         tabPane = new TabPane();
 
         // Web View
         webView = new WebView();
         webView.setCursor(Cursor.TEXT);
 
-        webViewTab = new Tab("Web View", webView);
+        Tab webViewTab = new Tab("Web View", webView);
         webViewTab.setClosable(false);
         sourceCodeTab = new OutputTab("HTML Source", SyntaxType.HTML);
         preSourceCodeTab = new OutputTab("JS Pre Source", SyntaxType.JAVASCRIPT);
 
         tabPane.getTabs().addAll(webViewTab, sourceCodeTab, preSourceCodeTab);
 
-        tabPane.getSelectionModel().selectedItemProperty().addListener((obs, oldTab, selectedTab) -> refreshTab(selectedTab));
+        tabPane.getSelectionModel().selectedItemProperty().addListener((_, _, selectedTab) -> refreshTab(selectedTab));
 
         ThemeManager.register(this);
     }

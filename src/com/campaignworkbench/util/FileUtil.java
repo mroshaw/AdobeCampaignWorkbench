@@ -34,7 +34,7 @@ public final class FileUtil {
     public static File openFile(Workspace workspace, WorkspaceFileType fileType, Window owner) {
 
         FileChooser fileChooser = new FileChooser();
-        fileChooser.setTitle(fileType.title());
+        fileChooser.setTitle(fileType.getFileOpenWindowTitle());
         fileChooser.setInitialDirectory(fileType.initialDirectory(workspace).toFile());
         fileChooser.getExtensionFilters().addAll(
                 new FileChooser.ExtensionFilter(fileType.extensionFilterDescription(), fileType.extensionFilter())

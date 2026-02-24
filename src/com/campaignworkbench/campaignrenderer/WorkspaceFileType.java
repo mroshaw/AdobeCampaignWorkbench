@@ -3,51 +3,55 @@ package com.campaignworkbench.campaignrenderer;
 import java.nio.file.Path;
 import java.util.function.Function;
 
+/**
+ * ENUM that contains meta-data about each type of workspace file.
+ */
 public enum WorkspaceFileType {
     TEMPLATE(
-        "Open Template File",
+        "Template File",
         Workspace::getTemplatesPath,
         "Template Files",
                 "*.template"
     ),
     MODULE(
-        "Open Module File",
+        "Module File",
         Workspace::getModulesPath,
         "Module Files",
                 "*.module"
     ),
     BLOCK(
-        "Open Perso Block File",
+        "Personalization Block File",
         Workspace::getBlocksPath,
         "Block Files",
                 "*.block"
     ),
     CONTEXT(
-        "Open Context XML File",
+        "Context XML File",
         Workspace::getContextXmlPath,
         "XML Files",
                 "*.xml"
     );
 
-    private final String title;
+    /* Used to determine text to use in an 'Open File' dialog window */
+    private final String fileOpenWindowTitle;
     private final Function<Workspace, Path> initialDirectoryProvider;
-    private final String extensionFilterDescription;
-    private final String extensionFilter;
+    private final String fileOpenExtensionFilterDescription;
+    private final String fileOpenExtensionFilter;
 
     WorkspaceFileType(
-            String title,
+            String fileOpenWindowTitle,
             Function<Workspace, Path> initialDirectoryProvider,
-            String extensionFilterDescription,
-            String extensionFilter) {
+            String fileOpenExtensionFilterDescription,
+            String fileOpenExtensionFilter) {
 
-        this.title = title;
+        this.fileOpenWindowTitle = fileOpenWindowTitle;
         this.initialDirectoryProvider = initialDirectoryProvider;
-        this.extensionFilterDescription = extensionFilterDescription;
-        this.extensionFilter = extensionFilter;
+        this.fileOpenExtensionFilterDescription = fileOpenExtensionFilterDescription;
+        this.fileOpenExtensionFilter = fileOpenExtensionFilter;
     }
 
-    public String title() {
-        return title;
+    public String getFileOpenWindowTitle() {
+        return fileOpenWindowTitle;
     }
 
     public Path initialDirectory(Workspace workspace) {
@@ -55,11 +59,11 @@ public enum WorkspaceFileType {
     }
 
     public String extensionFilterDescription() {
-        return extensionFilterDescription;
+        return fileOpenExtensionFilterDescription;
     }
 
     public String extensionFilter() {
-        return extensionFilter;
+        return fileOpenExtensionFilter;
     }
 
 }

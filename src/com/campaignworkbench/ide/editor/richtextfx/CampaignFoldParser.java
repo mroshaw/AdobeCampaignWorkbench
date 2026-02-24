@@ -1,10 +1,15 @@
 package com.campaignworkbench.ide.editor.richtextfx;
 
 import org.fxmisc.richtext.CodeArea;
-import java.util.*;
+
+import java.util.ArrayDeque;
+import java.util.Deque;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
+/**
+ * An implementation of IFoldParser that identifies fold regions in Adobe Campaign template code
+ */
 public class CampaignFoldParser extends FoldParser implements IFoldParser {
 
     // Matches {, }, <% or %>

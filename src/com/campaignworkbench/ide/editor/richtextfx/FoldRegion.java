@@ -1,5 +1,8 @@
 package com.campaignworkbench.ide.editor.richtextfx;
 
+/**
+ * Class representing the start and end paragraph of a region of foldable code
+ */
 public class FoldRegion {
 
     private final int startParagraphIndex;

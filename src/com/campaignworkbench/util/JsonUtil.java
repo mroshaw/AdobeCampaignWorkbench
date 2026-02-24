@@ -3,7 +3,6 @@ package com.campaignworkbench.util;
 import tools.jackson.databind.ObjectMapper;
 import tools.jackson.databind.json.JsonMapper;
 
-
 import java.io.IOException;
 import java.nio.file.Path;
 

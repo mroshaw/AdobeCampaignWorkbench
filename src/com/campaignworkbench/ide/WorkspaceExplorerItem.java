@@ -10,6 +10,10 @@ import javafx.scene.text.Text;
 import org.controlsfx.glyphfont.FontAwesome;
 import org.controlsfx.glyphfont.Glyph;
 
+/**
+ * Class to represent items in the Workspace Explorer TreeeView. Adds support for mixed content (text and icon)
+ * and workspace files.
+ */
 public class WorkspaceExplorerItem {
 
     public static class HeaderTreeItem {
@@ -70,7 +74,7 @@ public class WorkspaceExplorerItem {
 
     // Cell factory for mixed content
     public static void enableMixedContent(TreeView<Object> treeView, int paddingTB, int paddingLR) {
-        treeView.setCellFactory(tv -> new TreeCell<>() {
+        treeView.setCellFactory(_ -> new TreeCell<>() {
             @Override
             protected void updateItem(Object item, boolean empty) {
                 super.updateItem(item, empty);
@@ -79,8 +83,6 @@ public class WorkspaceExplorerItem {
                     setText(null);
                     setGraphic(null);
                 } else if (item instanceof HeaderTreeItem iconText) {
-                    // Create new HBox for this cell — do NOT reuse previous Node
-
                     Glyph glyph = new Glyph("FontAwesome", iconText.icon).sizeFactor(1);
                     glyph.getStyleClass().add(iconText.iconStyleClass);
                     Text labelPart = new Text(iconText.text);

@@ -1,14 +1,9 @@
-/*
-    ***************************************************
-    *** Main Menu                                ***
-    ***************************************************
-*/
-.main-menu-bar {}
+@import "ide_general_styles.css";
 
 /*
-    ***************************************************
-    *** ToolBar buttons                             ***
-    ***************************************************
+***************************************************
+*** ToolBar buttons                             ***
+***************************************************
 */
 .large-toolbar {
     -fx-spacing: 8px;
@@ -39,7 +34,6 @@
     -fx-text-fill: #4FC1FF;
 }
 
-
 .block-icon {
     -fx-text-fill: #FF6B6B;
 }
@@ -62,30 +56,13 @@
 }
 
 /*
-    ***************************************************
-    *** Code Editor                                 ***
-    ***************************************************
+***************************************************
+*** Code Editor                                 ***
+***************************************************
 */
 .code-editor .code-area .find-text {
     -rtfx-background-color: yellow !important;
     -fx-fill: black !important;
-}
-
-.code-editor .code-area {
-    /* -fx-background-color: linear-gradient(to right, -color-bg-subtle 0%, -color-bg-subtle 60px, -color-bg-default 60px, -color-bg-default 100%); */
-    -fx-background-color: -color-bg-subtle, linear-gradient(to right, -color-bg-default, -color-bg-default)!important ;
-    -fx-background-insets: 0, 0 0 0 50;
-    -fx-tab-size: 4;
-    -fx-font-family: 'Consolas';
-    -fx-font-size: 11pt;
-}
-
-.code-editor .code-area .paragraph-box .text {
-    -fx-tab-size: 4;
-}
-
-.code-editor .caret {
-    -fx-stroke: -color-fg-default !important;
 }
 
 /* Gutter */

@@ -15,14 +15,17 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.function.BiConsumer;
 
+/**
+ * Implements a TreeView containing a list of errors with details as TreeItems.
+ */
 public class ErrorLogPanel implements IJavaFxNode {
 
-    private TreeView<String> errorTreeView;
+    private final TreeView<String> errorTreeView;
     /**
      * The panel containing the error log
      */
     VBox logPanel;
-    private Map<TreeItem<String>, RendererException> errorData = new HashMap<>();
+    private final Map<TreeItem<String>, RendererException> errorData = new HashMap<>();
     private BiConsumer<WorkspaceFile, Integer> onErrorDoubleClicked;
 
     /**

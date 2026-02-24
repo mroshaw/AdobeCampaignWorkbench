@@ -5,17 +5,16 @@ import javafx.application.Application;
 import javafx.application.Platform;
 import javafx.geometry.Orientation;
 import javafx.scene.Scene;
-import javafx.scene.control.*;
+import javafx.scene.control.Alert;
+import javafx.scene.control.ButtonType;
+import javafx.scene.control.SplitPane;
+import javafx.scene.control.Tab;
 import javafx.scene.image.Image;
 import javafx.scene.layout.BorderPane;
 import javafx.scene.layout.VBox;
-import javafx.stage.FileChooser;
 import javafx.stage.Stage;
 
-import java.io.File;
-import java.io.IOException;
-import java.nio.file.Files;
-import java.nio.file.Path;
+import java.util.Objects;
 
 /**
  * Builds a User Interface for the Campaign Workbench IDE
@@ -25,7 +24,6 @@ public class CampaignWorkbenchIDE extends Application implements IThemeable {
     /**
      * The current active workspace
      */
-    private Workspace currentWorkspace;
     private WorkspaceExplorer workspaceExplorer;
     private MainToolBar toolBar;
     private EditorTabPanel editorTabPanel;
@@ -34,13 +32,14 @@ public class CampaignWorkbenchIDE extends Application implements IThemeable {
     private OutputTabPanel outputPanel;
     private EditorTab currentEditorTab;
     private Scene scene;
+    private Image iconImage;
 
     /**
      * Main entry point for the application
      *
      * @param args command line arguments
      */
-    public static void main(String[] args) {
+    static void main(String[] args) {
         launch(args);
     }
 
@@ -50,76 +49,58 @@ public class CampaignWorkbenchIDE extends Application implements IThemeable {
         primaryStage.setTitle("Campaign Workbench");
 
         // Set the icon
-        Image iconImage = new Image(
-                getClass().getResourceAsStream("/app.png"));
+        iconImage = new Image(
+                Objects.requireNonNull(getClass().getResourceAsStream("/app.png")));
         primaryStage.getIcons().add(iconImage);
 
         // Menu and toolbar
         MainMenuBar menuBar = new MainMenuBar(
-                event -> newWorkspace(),
-                event -> openWorkspace(),
-                event -> saveWorkspace(),
+                _ -> newWorkspaceHandler(),
+                _ -> openWorkspaceHandler(),
+                _ -> saveWorkspaceHandler(),
+                _ -> closeWorkspaceHandler(),
+                _ -> createNewFileHandler(WorkspaceFileType.TEMPLATE),
+                _ -> createNewFileHandler(WorkspaceFileType.MODULE),
+                _ -> createNewFileHandler(WorkspaceFileType.BLOCK),
+                _ -> createNewFileHandler(WorkspaceFileType.CONTEXT),
 
-                event -> createNewFile(WorkspaceFileType.TEMPLATE),
-                event -> createNewFile(WorkspaceFileType.MODULE),
-                event -> createNewFile(WorkspaceFileType.BLOCK),
-                event -> createNewFile(WorkspaceFileType.CONTEXT),
+                _ -> addExistingFileHandler(WorkspaceFileType.TEMPLATE),
+                _ -> addExistingFileHandler(WorkspaceFileType.MODULE),
+                _ -> addExistingFileHandler(WorkspaceFileType.BLOCK),
+                _ -> addExistingFileHandler(WorkspaceFileType.CONTEXT),
 
-                event -> addExistingFile(WorkspaceFileType.TEMPLATE),
-                event -> addExistingFile(WorkspaceFileType.MODULE),
-                event -> addExistingFile(WorkspaceFileType.BLOCK),
-                event -> addExistingFile(WorkspaceFileType.CONTEXT),
+                _ -> saveCurrentFileHandler(),
+                _ -> saveCurrentFileAsHandler(),
+                _ -> toggleFindHandler(),
 
-                event -> saveCurrent(),
-                event -> saveCurrentAs(),
-                event -> toggleFind(),
+                _ -> setThemeHandler(IDETheme.LIGHT),
+                _ -> setThemeHandler(IDETheme.DARK),
 
-                event -> setThemeHandler(IDETheme.LIGHT),
-                event -> setThemeHandler(IDETheme.DARK),
-
-                event -> showAbout(),
-                event -> exitApplication()
+                _ -> showAbout(),
+                _ -> exitApplication()
         );
 
-        toolBar = new MainToolBar(event -> openWorkspace(),
-                event -> runTemplate());
+        toolBar = new MainToolBar(_ -> openWorkspaceHandler(),
+                _ -> newWorkspaceHandler(),
+                _ -> closeWorkspaceHandler(),
+                _ -> closeEditorTabsHandler(),
+                _ -> runTemplate());
 
         // Workspace Explorer
-        workspaceExplorer = new WorkspaceExplorer("Workspace Explorer", currentWorkspace, this::openFileFromWorkspace, this::workspaceChanged);
+        workspaceExplorer = new WorkspaceExplorer("Workspace Explorer", null, this::openFileFromWorkspace, this::workspaceChanged);
 
         // Editor tabs
-        editorTabPanel = new EditorTabPanel((obs, oldTab, newTab) -> tabPanelChanged(newTab));
+        editorTabPanel = new EditorTabPanel((_, _, newTab) -> tabPanelChanged(newTab));
 
         // Output panes
-        outputPanel = new OutputTabPanel("Preview WebView");
+        outputPanel = new OutputTabPanel();
 
         // Log pane
         logPanel = new LogPanel("Logs");
         errorLogPanel = new ErrorLogPanel("Errors");
 
-        errorLogPanel.setOnErrorDoubleClicked((workspaceFile, line) -> {
-            outputPanel.highlightJsLine(line);
-        });
+        errorLogPanel.setOnErrorDoubleClicked((workspaceFile, line) -> outputPanel.highlightJsLine(line));
 
-        /*
-        errorLogPanel.setOnErrorDoubleClicked((workspaceFile, line) -> {
-            // Find the file in the workspace
-            Path filePath = workspaceFile.getFilePath();
-            if (filePath != null) {
-                if (editorTabPanel.isOpened(filePath)) {
-                    editorTabPanel.openFileAndGoToLine(filePath, line);
-                } else {
-                    openFileInNewTab(workspaceFile);
-                    // Wait a bit for the tab to be created and editor to be ready
-                    Platform.runLater(() -> editorTabPanel.openFileAndGoToLine(filePath, line));
-                }
-            } else {
-                // If it's not a physical file, it might be the "RenderedTemplate" (the preprocessed staging source)
-                // in which case we don't open a file, but we might want to log it.
-                appendLog("Could not find file: " + filePath);
-            }
-        });
-        */
         SplitPane logSplitPane = new SplitPane();
         logSplitPane.setOrientation(Orientation.HORIZONTAL);
         logSplitPane.getItems().addAll(logPanel.getNode(), errorLogPanel.getNode());
@@ -160,6 +141,7 @@ public class CampaignWorkbenchIDE extends Application implements IThemeable {
         primaryStage.setScene(scene);
         primaryStage.show();
         ThemeManager.register(this);
+        Workspace.createWorkspaceRootFolder();
         appendLog("Welcome to Campaign workbench!");
     }
 
@@ -172,6 +154,8 @@ public class CampaignWorkbenchIDE extends Application implements IThemeable {
     }
 
     private void exitApplication() {
+        workspaceExplorer.saveWorkspace();
+        editorTabPanel.closeAllTabs();
         Platform.exit();
         System.exit(0);
     }
@@ -183,34 +167,6 @@ public class CampaignWorkbenchIDE extends Application implements IThemeable {
      */
     private void appendLog(String logMessage) {
         logPanel.appendLog(logMessage);
-    }
-
-    /**
-     * @return the path to the templates folder in the current workspace
-     */
-    private String getWorkspaceTemplatePath() {
-        return currentWorkspace.getTemplatesPath().toString();
-    }
-
-    /**
-     * @return the path to the blocks folder in the current workspace
-     */
-    private String getWorkspaceBlockPath() {
-        return currentWorkspace.getBlocksPath().toString();
-    }
-
-    /**
-     * @return the path to the context XML folder in the current workspace
-     */
-    private String getWorkspaceContextPath() {
-        return currentWorkspace.getContextXmlPath().toString();
-    }
-
-    /**
-     * @return the path to the modules folder in the current workspace
-     */
-    private String getWorkspaceModulePath() {
-        return currentWorkspace.getModulesPath().toString();
     }
 
     private void setThemeHandler(IDETheme ideTheme) {
@@ -243,71 +199,52 @@ public class CampaignWorkbenchIDE extends Application implements IThemeable {
         }
     }
 
-    private void newWorkspace() {
-        FileChooser fileChooser = new FileChooser();
-        fileChooser.setTitle("Save Workspace JSON file");
-        fileChooser.setInitialDirectory(
-                Workspace.getWorkspacesRootPath().toFile()
-        );
-        fileChooser.setInitialFileName("workspace.json");
-        fileChooser.getExtensionFilters().addAll(
-                new FileChooser.ExtensionFilter("Workbench JSON files", "*.json")
-        );
-
-        File selectedFile = fileChooser.showSaveDialog(editorTabPanel.getWindow());
-
-        if (selectedFile == null) {
-            return;
-        }
-
-        currentWorkspace = new Workspace(selectedFile.toPath(), true);
-        workspaceExplorer.setWorkspace(currentWorkspace);
-    }
-
-    private void saveWorkspace() {
-        if (currentWorkspace != null) {
-            try {
-                currentWorkspace.writeToJson();
-                logPanel.appendLog("Workspace saved successfully!");
-            } catch (IDEException ideException) {
-                reportError("Could not save workspace!", ideException, true);
-            }
-        }
-    }
-
-    private void saveWorkspaceAs() {
-
-    }
-
     /**
      * Opens a workspace directory
      */
-    private void openWorkspace() {
-
-        FileChooser fileChooser = new FileChooser();
-        fileChooser.setTitle("Open Workspace JSON file");
-        fileChooser.setInitialDirectory(
-                Workspace.getWorkspacesRootPath().toFile()
-        );
-        fileChooser.getExtensionFilters().addAll(
-                new FileChooser.ExtensionFilter("Workbench JSON files", "*.json")
-        );
-
-        File selectedFile = fileChooser.showOpenDialog(editorTabPanel.getWindow());
-
-        if (selectedFile == null) return;
-
-        if (selectedFile.getName().endsWith(".json")) {
-
-            currentWorkspace = new Workspace(selectedFile.toPath(), false);
-
-            currentWorkspace.openWorkspace(selectedFile.toPath());
-            workspaceExplorer.setWorkspace(currentWorkspace);
-            return;
+    private void openWorkspaceHandler() {
+        try {
+            workspaceExplorer.openWorkspace();
+        } catch (IDEException ideEx) {
+            reportError("An error occurred while opening the workspace: " + ideEx.getMessage(), ideEx, true);
         }
+    }
 
-        showAlert("Selected file is not a valid workspace JSON file.");
-        appendLog("Workspace opened: " + selectedFile.getAbsolutePath());
+    private void newWorkspaceHandler() {
+        try {
+            workspaceExplorer.createNewWorkspace();
+        } catch (IDEException ideEx) {
+            reportError("An error occurred while creating a new workspace: " + ideEx.getMessage(), ideEx, true);
+        }
+    }
+
+    private void saveWorkspaceHandler() {
+        try {
+            workspaceExplorer.saveWorkspace();
+        } catch (IDEException ideEx) {
+            reportError("An error occurred while saving the workspace: " + ideEx.getMessage(), ideEx, true);
+        }
+    }
+
+    private void closeWorkspaceHandler() {
+        try {
+            editorTabPanel.closeAllTabs();
+            workspaceExplorer.closeWorkspace();
+        } catch (IDEException ideEx) {
+            reportError("An error occurred while closing the workspace: " + ideEx.getMessage(), ideEx, true);
+        }
+    }
+
+    private void closeEditorTabsHandler() {
+        editorTabPanel.closeAllTabs();
+    }
+
+    private void saveWorkspaceAs() {
+        try {
+            workspaceExplorer.saveWorkspace();
+        } catch (IDEException ideEx) {
+            reportError("An error occurred while saving the workspace: " + ideEx.getMessage(), ideEx, true);
+        }
     }
 
     /**
@@ -320,7 +257,6 @@ public class CampaignWorkbenchIDE extends Application implements IThemeable {
     }
 
     private void workspaceChanged(Workspace newWorkspace) {
-        currentWorkspace = newWorkspace;
         editorTabPanel.closeAllTabs();
     }
 
@@ -328,11 +264,7 @@ public class CampaignWorkbenchIDE extends Application implements IThemeable {
      * Opens a file from the file system
      *
      */
-    private void addExistingFile(WorkspaceFileType fileType) {
-        if (currentWorkspace == null) {
-            return;
-        }
-
+    private void addExistingFileHandler(WorkspaceFileType fileType) {
         try {
             workspaceExplorer.addExistingFile(fileType);
         } catch (IDEException ideEx) {
@@ -340,13 +272,10 @@ public class CampaignWorkbenchIDE extends Application implements IThemeable {
         }
     }
 
-    private void createNewFile(WorkspaceFileType fileType) {
-        if (currentWorkspace == null) {
-            return;
-        }
+    private void createNewFileHandler(WorkspaceFileType fileType) {
         try {
             workspaceExplorer.createNewFile(fileType);
-            saveWorkspace();
+            saveWorkspaceHandler();
         } catch (IDEException ideEx) {
             reportError("An error occurred while creating an new file of type: " + fileType, ideEx, true);
         }
@@ -364,32 +293,21 @@ public class CampaignWorkbenchIDE extends Application implements IThemeable {
     /**
      * Saves the content of the currently selected editor tab
      */
-    private void saveCurrent() {
+    private void saveCurrentFileHandler() {
 
         if (!editorTabPanel.isSelected()) {
             appendLog("No editor tab selected to save.");
             showAlert("No editor tab selected.");
             return;
         }
-
-        Path file = editorTabPanel.getSelectedFile();
-        String content = editorTabPanel.getSelectedText();
-
-        try {
-            Files.writeString(file, content);
-            appendLog("Saved file: " + editorTabPanel.getSelectedFileName());
-        } catch (IOException e) {
-            appendLog("Failed to save file: " + editorTabPanel.getSelectedFileName());
-            appendLog(e.getMessage());
-            showAlert("Failed to save file: " + e.getMessage());
-        }
+        editorTabPanel.saveSelectedTab();
     }
 
-    private void saveCurrentAs() {
+    private void saveCurrentFileAsHandler() {
 
     }
 
-    private void toggleFind() {
+    private void toggleFindHandler() {
         if (currentEditorTab != null) {
             currentEditorTab.toggleFind();
         }
@@ -399,15 +317,20 @@ public class CampaignWorkbenchIDE extends Application implements IThemeable {
      * Runs the template in the currently selected editor tab
      */
     private void runTemplate() {
+        if(!workspaceExplorer.isWorkspaceOpen()) {
+            reportError("No workspace is open. Please open a workspace before running a template.", true);
+            return;
+        }
+
         errorLogPanel.clearErrors();
-        saveWorkspace();
+        saveWorkspaceHandler();
         try {
             WorkspaceFile selectedWorkspaceFile = editorTabPanel.getSelectedWorkspaceFile();
 
             if (selectedWorkspaceFile instanceof Template workspaceContextFile) {
 
                 TemplateRenderResult renderResult = TemplateRenderer.render(
-                        currentWorkspace,
+                        workspaceExplorer.getWorkspace(),
                         workspaceContextFile
                 );
 
@@ -420,16 +343,14 @@ public class CampaignWorkbenchIDE extends Application implements IThemeable {
                 });
             }
         } catch (IDEException ideEx) {
-            appendLog("An error occurred: " + ideEx.getMessage());
+            appendLog("An IDE error occurred: " + ideEx.getMessage());
             reportError(ideEx.getMessage(), ideEx, true);
         } catch (RendererException renderEx) {
-            appendLog("An error occurred: " + renderEx.getMessage());
+            appendLog("A Renderer error occurred: " + renderEx.getMessage());
             errorLogPanel.addError(renderEx);
             outputPanel.setContent("", renderEx.getSourceCode());
         } catch (Exception ex) {
-            ex.printStackTrace();
-            showAlert("Error running template: " + ex.getMessage());
-            appendLog("Error running template: " + ex.getMessage());
+            appendLog("An unexpected error occurred: " + ex.getMessage());
         }
     }
 
@@ -463,6 +384,6 @@ public class CampaignWorkbenchIDE extends Application implements IThemeable {
     }
 
     private void showAbout() {
-
+        AboutBox.show(scene.getWindow(), "Campaign Workbench", "v1.0.0", "Powerful IDE to build and test Campaign Classic template code", "©2026 Specsavers", iconImage);
     }
 }

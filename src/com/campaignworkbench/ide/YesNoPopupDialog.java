@@ -7,6 +7,9 @@ import javafx.stage.Stage;
 
 import java.util.Optional;
 
+/**
+ * Simple Yes No Cancel dialog box implementation.
+ */
 public final class YesNoPopupDialog {
 
     public enum YesNoCancel {

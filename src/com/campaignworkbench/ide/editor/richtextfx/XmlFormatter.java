@@ -1,5 +1,6 @@
 package com.campaignworkbench.ide.editor.richtextfx;
 
+import org.w3c.dom.Document;
 import org.w3c.dom.Node;
 import org.w3c.dom.NodeList;
 import org.xml.sax.InputSource;
@@ -15,8 +16,10 @@ import javax.xml.xpath.XPathConstants;
 import javax.xml.xpath.XPathFactory;
 import java.io.ByteArrayInputStream;
 import java.io.StringWriter;
-import org.w3c.dom.Document;
 
+/**
+ * Implements an ICodeFormatter for XML files
+ */
 public class XmlFormatter implements ICodeFormatter {
 
     public String format(String xml, int indent) {

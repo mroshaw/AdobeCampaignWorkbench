@@ -2,9 +2,9 @@ package com.campaignworkbench.ide.editor.richtextfx;
 
 import org.fxmisc.richtext.CodeArea;
 
-import java.util.List;
-import java.util.Set;
-
+/**
+ * Interface describing a class that folds and unfolds regions of code
+ */
 public interface IFoldParser {
     /**
      * Returns foldable regions as (startParagraph, endParagraph) pairs.
@@ -14,9 +14,6 @@ public interface IFoldParser {
     boolean isParagraphFolded(int paragraphIndex);
     void foldParagraph(int startParagraphIndex);
     void unfoldParagraph(int startParagraphIndex);
-
-    void addFoldedParagraph(int paragraphIndex);
-    void removeFoldedParagraph(int paragraphIndex);
 
     void foldAll();
 

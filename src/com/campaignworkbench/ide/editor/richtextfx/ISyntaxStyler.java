@@ -2,11 +2,13 @@ package com.campaignworkbench.ide.editor.richtextfx;
 
 import com.campaignworkbench.ide.IDETheme;
 import org.fxmisc.richtext.model.StyleSpans;
-
 import java.util.Collection;
 
+/**
+ * Interface describing a class that generates syntax highlighting for a given text
+ */
 public interface ISyntaxStyler {
-    public StyleSpans<Collection<String>> style(String text);
+    StyleSpans<Collection<String>> style(String text);
 
-    public String getStyleSheet(IDETheme theme);
+    String getStyleSheet(IDETheme theme);
 }

@@ -21,8 +21,6 @@ public final class ModuleRenderer {
     ) {
 
         // Get the module context
-
-        // Get the template context
         if(!module.isDataContextSet())
         {
             throw new IDEException("Data context is not set on module: " + module.getFileName(), null);

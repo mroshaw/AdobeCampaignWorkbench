@@ -2,14 +2,16 @@ package com.campaignworkbench.campaignrenderer;
 
 import org.mozilla.javascript.Context;
 
-import java.time.*;
+import java.time.Instant;
+import java.time.OffsetDateTime;
+import java.time.ZonedDateTime;
 import java.time.format.DateTimeFormatter;
 import java.time.format.DateTimeParseException;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 /**
- * Provides implementations of bespoke Adobe Campaign functions, that can then be included in template, block, and
+ * Provides implementations of bespoke Adobe Campaign functions that can then be included in template, block, and
  * module code
  */
 public class CampaignFunctions {
@@ -21,7 +23,7 @@ public class CampaignFunctions {
      * Accepts a simplified ISO 8601 style string with optional time/timezone.
      *
      * @param timestamp as an ISO 8601 string
-     * @return Object with corresponding instant (UTC based)
+     * @return Object with corresponding instance (UTC based)
      */
     public static Object parseTimeStamp(String timestamp) {
         try {
@@ -50,11 +52,11 @@ public class CampaignFunctions {
             Pattern fracPattern = Pattern.compile("\\.(\\d{1,3})Z$");
             Matcher matcher = fracPattern.matcher(dateStr);
             if (matcher.find()) {
-                String frac = matcher.group(1);
+                StringBuilder frac = new StringBuilder(matcher.group(1));
                 while (frac.length() < 3) {
-                    frac += "0"; // pad to 3 digits
+                    frac.append("0"); // pad to 3 digits
                 }
-                // replace only the matched part with normalized fraction
+                // Replace only the matched part with a normalized fraction
                 dateStr = matcher.replaceFirst("." + frac + "Z");
             }
 
@@ -62,7 +64,7 @@ public class CampaignFunctions {
             OffsetDateTime odt = OffsetDateTime.parse(dateStr);
             ZonedDateTime zdt = odt.toZonedDateTime(); // system default zone
 
-            // Translate Adobe Campaign format to Java pattern
+            // Translate an Adobe Campaign format to a Java pattern
             String javaFormat = translateACCFormat(formatStr);
             return zdt.format(DateTimeFormatter.ofPattern(javaFormat));
 
@@ -74,8 +76,7 @@ public class CampaignFunctions {
 
     /**
      * Convert Adobe Campaign date format strings into Java DateTimeFormatter patterns.
-     *
-     * Preserves the correct handling of %Bl, %B, %b and other ACC quirks.
+     * Preserves the correct handling of %Bl, %B, %b, and other ACC quirks.
      *
      * @param accFormat ACC format string
      * @return Java date format pattern

@@ -4,12 +4,14 @@ import com.fasterxml.jackson.annotation.JsonAutoDetect;
 
 import java.nio.file.Path;
 
+/**
+ * Class representing a workspace file that has a data XML context file associated with it.
+ */
 @JsonAutoDetect(
         fieldVisibility = JsonAutoDetect.Visibility.ANY,
         getterVisibility = JsonAutoDetect.Visibility.NONE,
         setterVisibility = JsonAutoDetect.Visibility.NONE,
         isGetterVisibility = JsonAutoDetect.Visibility.NONE)
-
 public class WorkspaceContextFile extends WorkspaceFile {
     private WorkspaceFile dataContextFile;
 

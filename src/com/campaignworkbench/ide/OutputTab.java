@@ -1,10 +1,13 @@
 package com.campaignworkbench.ide;
 
 import com.campaignworkbench.ide.editor.ICodeEditor;
-import com.campaignworkbench.ide.editor.richtextfx.RichTextFXEditor;
 import com.campaignworkbench.ide.editor.SyntaxType;
+import com.campaignworkbench.ide.editor.richtextfx.RichTextFXEditor;
 import javafx.scene.control.Tab;
 
+/**
+ * Class representing a tab in the output panel.
+ */
 public class OutputTab extends Tab   {
     private final ICodeEditor editor;
 

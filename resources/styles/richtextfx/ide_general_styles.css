@@ -1,0 +1,60 @@
+/*
+***************************************************
+*** Top Level IDE                               ***
+***************************************************
+*/
+.workspace-explorer {
+    -fx-background-color: -color-bg-subtle;
+}
+
+/**************************************************
+*** ToolBar buttons                             ***
+***************************************************
+*/
+.large-toolbar {
+    -fx-spacing: 8px;
+    -fx-padding: 4px 8px 4px 8px;
+}
+
+.large-toolbar .button {
+    -fx-padding: 8px;
+}
+
+/*
+***************************************************
+*** Code Editor                                 ***
+***************************************************
+*/
+/* Find input text */
+.code-editor .text-input {
+    -fx-font-family: 'Consolas';
+    -fx-font-size: 11pt;
+    -fx-max-height: 30px;
+}
+
+.code-editor .code-area {
+    /* -fx-background-color: linear-gradient(to right, -color-bg-subtle 0%, -color-bg-subtle 60px, -color-bg-default 60px, -color-bg-default 100%); */
+    -fx-background-color: -color-bg-subtle, linear-gradient(to right, -color-bg-default, -color-bg-default)!important ;
+    -fx-background-insets: 0, 0 0 0 50;
+    -fx-tab-size: 4;
+    -fx-font-family: 'Consolas';
+    -fx-font-size: 11pt;
+}
+
+.code-editor .code-area .paragraph-box .text {
+    -fx-tab-size: 4;
+}
+
+.code-editor .caret {
+    -fx-stroke: -color-fg-default !important;
+}
+
+/*
+***************************************************
+*** Workspace Explorer                          ***
+***************************************************
+*/
+.workspace-explorer {
+    -fx-padding: 4px;
+}
+

@@ -9,6 +9,9 @@ import java.util.Collections;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
+/**
+ * Implementation of ISyntaxStyler that provides syntax highlighting for XML code
+ */
 public class XmlStyler implements ISyntaxStyler {
 
     private static final Pattern XML_TAG = Pattern.compile(

@@ -5,11 +5,13 @@ import javafx.scene.Cursor;
 import javafx.scene.Node;
 import javafx.scene.control.Label;
 import javafx.scene.layout.HBox;
-import javafx.scene.text.Text;
 import org.fxmisc.richtext.CodeArea;
 
 import java.util.function.IntFunction;
 
+/**
+ * A JavaFX node factory that creates a gutter for each paragraph in the CodeArea.
+ */
 public class GutterFactory implements IntFunction<Node> {
 
     private final CodeArea codeArea;

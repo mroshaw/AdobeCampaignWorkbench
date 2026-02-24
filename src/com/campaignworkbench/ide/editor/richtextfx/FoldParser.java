@@ -7,6 +7,9 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 
+/**
+ * Base class for implementing code folding solutions for various languages
+ */
 public abstract class FoldParser {
 
     protected FoldRegions foldRegions;

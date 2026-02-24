@@ -1,7 +1,10 @@
 package com.campaignworkbench.ide;
 
-import com.campaignworkbench.campaignrenderer.*;
-import com.campaignworkbench.ide.editor.*;
+import com.campaignworkbench.campaignrenderer.Template;
+import com.campaignworkbench.campaignrenderer.WorkspaceContextFile;
+import com.campaignworkbench.campaignrenderer.WorkspaceFile;
+import com.campaignworkbench.ide.editor.ICodeEditor;
+import com.campaignworkbench.ide.editor.SyntaxType;
 import com.campaignworkbench.ide.editor.richtextfx.RichTextFXEditor;
 import com.campaignworkbench.util.UiUtil;
 import javafx.scene.control.*;
@@ -10,7 +13,10 @@ import javafx.scene.layout.HBox;
 import javafx.scene.layout.Priority;
 import javafx.scene.layout.VBox;
 import org.controlsfx.glyphfont.FontAwesome;
+import org.reactfx.Subscription;
 
+import java.io.IOException;
+import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.Objects;
 
@@ -19,14 +25,12 @@ import java.util.Objects;
  */
 public final class EditorTab extends Tab {
 
-    private final VBox container;
-    private final HBox toolsContainer;
-    private final ToolBar formatToolBar;
     private final ToolBar findReplaceToolBar;
     private final WorkspaceFile workspaceFile;
     private final ICodeEditor editor;
-
     private final TextField findField;
+
+    private boolean isTextDirty;
 
     /**
      * Constructor
@@ -37,39 +41,58 @@ public final class EditorTab extends Tab {
 
         this.workspaceFile = workspaceFile;
 
-        SyntaxType syntaxType = determineSyntax(workspaceFile.getFilePath());
-        this.editor = new RichTextFXEditor(determineSyntax(workspaceFile.getFilePath()));
+        // Set the tab title
         updateTabText();
 
+        // Create the toolbar
+        // Format toolbar
         Button formatButton = UiUtil.createButton("", "Format code", FontAwesome.Glyph.ALIGN_LEFT, "positive-icon", 1, true, _ -> formatHandler());
         Button foldAllButton = UiUtil.createButton("", "Fold all", FontAwesome.Glyph.INDENT, "positive-icon", 1, true, _ -> foldAllHandler());
         Button unfoldAllButton = UiUtil.createButton("", "Unfold all", FontAwesome.Glyph.DEDENT, "positive-icon", 1, true, _ -> unfoldAllHandler());
+        ToolBar formatToolBar = new ToolBar(formatButton, foldAllButton, unfoldAllButton);
+        formatToolBar.getStyleClass().add("small-toolbar");
 
-        formatToolBar = new ToolBar(formatButton, foldAllButton, unfoldAllButton);
-
-        BorderPane root = new BorderPane();
-        root.setCenter(editor.getNode());
-
-        toolsContainer = new HBox();
-
+        // Find toolbar
         Label findLabel = new Label("Find:");
         findField = new TextField();
         Button findButton = UiUtil.createButton("", "Find all", FontAwesome.Glyph.ARROW_CIRCLE_RIGHT, "positive-icon", 1, true, _ -> findHandler());
         Button clearFindButton = UiUtil.createButton("", "Clear", FontAwesome.Glyph.TIMES_CIRCLE, "negative-icon", 1, true, _ -> clearFindHandler());
         findReplaceToolBar = new ToolBar(findLabel, findField, findButton, clearFindButton);
+        findReplaceToolBar.getStyleClass().add("small-toolbar");
+
+        // Combine the toolbars
+        HBox toolsContainer = new HBox();
         toolsContainer.getChildren().addAll(formatToolBar, findReplaceToolBar);
         HBox.setHgrow(formatToolBar, Priority.ALWAYS);
 
-        container = new VBox(toolsContainer, editor.getNode());
-        VBox.setVgrow(editor.getNode(), Priority.ALWAYS);
-        setContent(container);
+        // Create the code editor
+        this.editor = new RichTextFXEditor(determineSyntax(workspaceFile.getFilePath()));
+        BorderPane root = new BorderPane();
+        root.setCenter(editor.getNode());
         editor.setText(workspaceFile.getWorkspaceFileContent());
         editor.setCaretAtStart();
 
-        // Set styles
+        // Attach listener to set file dirty status
+        Subscription sub = editor.addTextChangeListener(this::editorTextChangedHandler);
+
+        // Create an assign the main 'container'
+        VBox container = new VBox(toolsContainer, editor.getNode());
+        VBox.setVgrow(editor.getNode(), Priority.ALWAYS);
+        setContent(container);
         container.getStyleClass().add("editor-tab");
-        formatToolBar.getStyleClass().add("small-toolbar");
-        findReplaceToolBar.getStyleClass().add("small-toolbar");
+    }
+
+    public void saveFile() {
+        Path file = getFile();
+        String content = editor.getText();
+
+        try {
+            Files.writeString(file, content);
+            isTextDirty = false;
+            updateTabText();
+        } catch (IOException e) {
+            throw new IDEException("Failed to save file: " + file, e);
+        }
     }
 
     public void setDataContextFile(Path contextFile) {
@@ -79,6 +102,11 @@ public final class EditorTab extends Tab {
         } else {
             throw new IDEException("Attempted to set context on a non-context based EditorTab!", null);
         }
+    }
+
+    private void editorTextChangedHandler(String newText) {
+        isTextDirty = true;
+        updateTabText();
     }
 
     public void clearDataContextFile() {
@@ -94,12 +122,11 @@ public final class EditorTab extends Tab {
         }
     }
 
-    public void clearMessageContextFile() {
-        setMessageContextFile(null);
-    }
-
     private void updateTabText() {
         String tabName = workspaceFile.getFileName().toString();
+        if(isTextDirty) {
+            tabName += "*";
+        }
         setText(tabName);
     }
 
@@ -210,29 +237,14 @@ public final class EditorTab extends Tab {
     /**
      * Helper for quick check for template type editor
      *
-     * @return boolean true if editor has a template file open
+     * @return boolean true if the editor has a template file open
      */
     public boolean isTemplateTab() {
         return workspaceFile.isTemplate();
-    }
-
-    public boolean isDataContextApplicable() {
-        return workspaceFile.isDataContextApplicable();
-    }
-
-    public boolean isMessageContextApplicable() {
-        return workspaceFile.isMessageContextApplicable();
     }
 
     public void toggleFind() {
         findReplaceToolBar.setVisible(!findReplaceToolBar.isVisible());
     }
 
-    public void showFind() {
-        findReplaceToolBar.setVisible(true);
-    }
-
-    public void hideFind() {
-        findReplaceToolBar.setVisible(false);
-    }
 }
