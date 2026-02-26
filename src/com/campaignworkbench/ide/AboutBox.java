@@ -11,16 +11,17 @@ import javafx.scene.layout.HBox;
 import javafx.scene.layout.VBox;
 import javafx.stage.Window;
 
+import java.time.Year;
+
 public class AboutBox {
 
-    public static void show(
-            Window owner,
-            String appName,
-            String version,
-            String description,
-            String copyright,
-            Image icon
-    ) {
+    private static final String appName = "Campaign Workbench";
+    private static final String description = "Powerful IDE to build and test Campaign Classic template code";
+    private static final String version = Version.VERSION;
+    private static final String copyright = "©" + Year.now().getValue() + " Specsavers";
+    private static final Image icon = new Image(CampaignWorkbenchIDE.class.getResourceAsStream("/images/icon.png"));
+
+    public static void show(Window owner) {
 
         Dialog<Void> dialog = new Dialog<>();
         dialog.setTitle("About " + appName);
@@ -37,12 +38,10 @@ public class AboutBox {
         HBox header = new HBox(15);
         header.setAlignment(Pos.CENTER_LEFT);
 
-        if (icon != null) {
-            ImageView imageView = new ImageView(icon);
-            imageView.setFitWidth(64);
-            imageView.setFitHeight(64);
-            header.getChildren().add(imageView);
-        }
+        ImageView imageView = new ImageView(icon);
+        imageView.setFitWidth(64);
+        imageView.setFitHeight(64);
+        header.getChildren().add(imageView);
 
         VBox titleBox = new VBox(5);
         Label nameLabel = new Label(appName);

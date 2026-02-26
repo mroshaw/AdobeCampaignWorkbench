@@ -58,3 +58,11 @@
     -fx-padding: 4px;
 }
 
+/*
+***************************************************
+*** Error Log                                   ***
+***************************************************
+*/
+.error-log .tree-view .tree-cell {
+    -fx-padding: 2px;   /* top right bottom left */
+}

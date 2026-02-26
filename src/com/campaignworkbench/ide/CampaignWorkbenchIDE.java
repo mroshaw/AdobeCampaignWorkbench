@@ -389,6 +389,6 @@ public class CampaignWorkbenchIDE extends Application implements IThemeable {
     }
 
     private void showAbout() {
-        AboutBox.show(scene.getWindow(), "Campaign Workbench", "v1.0.0", "Powerful IDE to build and test Campaign Classic template code", "©2026 Specsavers", iconImage);
+        AboutBox.show(scene.getWindow());
     }
 }

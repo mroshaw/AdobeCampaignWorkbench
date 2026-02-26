@@ -63,6 +63,9 @@ public class ErrorLogPanel implements IJavaFxNode {
         logPanel = new VBox(5, logLabel, errorTreeView);
         logPanel.setPadding(new Insets(0,0, 0,5));
         logPanel.setMinHeight(0);
+
+        // Set style class
+        logPanel.getStyleClass().add("error-log");
         VBox.setVgrow(errorTreeView, Priority.ALWAYS);
     }
 

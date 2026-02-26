@@ -15,11 +15,11 @@ import javafx.scene.text.Font;
  */
 public class LogPanel implements IJavaFxNode {
 
-    private final TextArea logArea;
+    private static TextArea logArea;
     /**
      * The panel containing the log
      */
-    VBox logPanel;
+    static VBox logPanel;
 
     /**
      * Constructor
@@ -49,7 +49,7 @@ public class LogPanel implements IJavaFxNode {
      * Adds a line of content to the log
      * @param msg text containing content of the log line to add
      */
-    public void appendLog(String msg) {
+    public static void appendLog(String msg) {
         Platform.runLater(() -> logArea.appendText(msg + "\n"));
     }
 

@@ -1,6 +1,7 @@
 package com.campaignworkbench.campaignrenderer;
 
 import com.campaignworkbench.ide.IDEException;
+import com.campaignworkbench.ide.LogPanel;
 import com.campaignworkbench.util.JsonUtil;
 import com.fasterxml.jackson.annotation.JsonAutoDetect;
 import com.fasterxml.jackson.annotation.JsonIgnore;
@@ -308,6 +309,7 @@ public class Workspace {
     public void writeToJson(Path jsonFilePath) {
         try {
             JsonUtil.writeToJson(jsonFilePath, this);
+            // LogPanel.appendLog("Saved workspace JSON file: " + jsonFilePath);
         } catch (IOException ioe) {
             throw new IDEException("An error occurred saving the workspace JSON file: " + jsonFilePath, ioe.getCause());
         } catch (Exception e) {
