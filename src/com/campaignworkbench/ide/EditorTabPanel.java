@@ -1,6 +1,6 @@
 package com.campaignworkbench.ide;
 
-import com.campaignworkbench.campaignrenderer.WorkspaceFile;
+import com.campaignworkbench.workspace.WorkspaceFile;
 import javafx.beans.value.ChangeListener;
 import javafx.scene.Node;
 import javafx.scene.control.Tab;
@@ -79,10 +79,10 @@ public class EditorTabPanel implements IJavaFxNode {
         return false;
     }
 
-    private EditorTab getExistingTab(Path path) {
+    private EditorTab getExistingTab(WorkspaceFile workspaceFile) {
         for (Tab tab : tabPane.getTabs()) {
             if (tab instanceof EditorTab editorTab) {
-                if (editorTab.getFile().equals(path)) {
+                if (editorTab.getFile().equals(workspaceFile)) {
                     return editorTab;
                 }
             }
@@ -105,7 +105,7 @@ public class EditorTabPanel implements IJavaFxNode {
      * @param workspaceFile workspace file to be edited in the tab
      */
     public void addEditorTab(WorkspaceFile workspaceFile) {
-        EditorTab existingTab = getExistingTab(workspaceFile.getFilePath());
+        EditorTab existingTab = getExistingTab(workspaceFile);
         if(existingTab != null) {
             // Set focus on the tab
             tabPane.getSelectionModel().select(existingTab);
@@ -125,7 +125,7 @@ public class EditorTabPanel implements IJavaFxNode {
     /**
      * @return the file from the currently selected tab
      */
-    public Path getSelectedFile() {
+    public WorkspaceFile getSelectedFile() {
         return getSelected().getFile();
     }
 

@@ -1,51 +1,49 @@
-package com.campaignworkbench.campaignrenderer;
-
-import java.nio.file.Path;
-import java.util.function.Function;
+package com.campaignworkbench.workspace;
 
 /**
  * ENUM that contains meta-data about each type of workspace file.
  */
 public enum WorkspaceFileType {
     TEMPLATE(
-        "Template File",
-        Workspace::getTemplatesPath,
-        "Template Files",
-                "*.template"
+            "Templates",
+            "Template File",
+            "Template Files",
+            "*.template"
     ),
     MODULE(
-        "Module File",
-        Workspace::getModulesPath,
-        "Module Files",
-                "*.module"
+            "Modules",
+            "Module File",
+            "Module Files",
+            "*.module"
     ),
     BLOCK(
-        "Personalization Block File",
-        Workspace::getBlocksPath,
-        "Block Files",
-                "*.block"
+            "Blocks",
+            "Personalization Block File",
+            "Block Files",
+            "*.block"
     ),
     CONTEXT(
-        "Context XML File",
-        Workspace::getContextXmlPath,
-        "XML Files",
-                "*.xml"
+            "ContextXML",
+            "Contexts",
+            "XML Files",
+            "*.xml"
     );
 
-    /* Used to determine text to use in an 'Open File' dialog window */
+    // Used to derive paths
+    private final String folderName;
+    // Used to determine text to use in an 'Open File' dialog window
     private final String fileOpenWindowTitle;
-    private final Function<Workspace, Path> initialDirectoryProvider;
     private final String fileOpenExtensionFilterDescription;
     private final String fileOpenExtensionFilter;
 
     WorkspaceFileType(
+            String folderName,
             String fileOpenWindowTitle,
-            Function<Workspace, Path> initialDirectoryProvider,
             String fileOpenExtensionFilterDescription,
             String fileOpenExtensionFilter) {
 
         this.fileOpenWindowTitle = fileOpenWindowTitle;
-        this.initialDirectoryProvider = initialDirectoryProvider;
+        this.folderName = folderName;
         this.fileOpenExtensionFilterDescription = fileOpenExtensionFilterDescription;
         this.fileOpenExtensionFilter = fileOpenExtensionFilter;
     }
@@ -54,8 +52,8 @@ public enum WorkspaceFileType {
         return fileOpenWindowTitle;
     }
 
-    public Path initialDirectory(Workspace workspace) {
-        return initialDirectoryProvider.apply(workspace);
+    public String getFolderName() {
+        return folderName;
     }
 
     public String extensionFilterDescription() {

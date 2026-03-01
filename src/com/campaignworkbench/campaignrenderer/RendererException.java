@@ -1,5 +1,7 @@
 package com.campaignworkbench.campaignrenderer;
 
+import com.campaignworkbench.workspace.WorkspaceFile;
+
 /**
  * Top level exception with detailed information about the process that caused the exception
  */

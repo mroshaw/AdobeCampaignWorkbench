@@ -1,4 +1,4 @@
-package com.campaignworkbench.campaignrenderer;
+package com.campaignworkbench.workspace;
 
 import com.fasterxml.jackson.annotation.JsonAutoDetect;
 
@@ -14,8 +14,8 @@ import java.nio.file.Path;
         isGetterVisibility = JsonAutoDetect.Visibility.NONE
 )
 public class EtmModule extends WorkspaceContextFile {
-    public EtmModule(Path filePath) {
-        super(filePath, WorkspaceFileType.MODULE);
+    public EtmModule(String fileName, Workspace workspace) {
+        super(fileName, WorkspaceFileType.MODULE, workspace);
     }
 
     public EtmModule() {}

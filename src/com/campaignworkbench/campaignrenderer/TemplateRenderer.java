@@ -1,6 +1,7 @@
 package com.campaignworkbench.campaignrenderer;
 
-import com.campaignworkbench.ide.IDEException;
+import com.campaignworkbench.ide.IdeException;
+import com.campaignworkbench.workspace.*;
 import org.mozilla.javascript.Context;
 import org.mozilla.javascript.RhinoException;
 import org.mozilla.javascript.Scriptable;
@@ -26,17 +27,15 @@ public final class TemplateRenderer {
         String js;
 
         // Get the template context
-        if(!template.isDataContextSet())
-        {
-            throw new IDEException("Data context is not set on template: " + template.getFileName(), null);
+        if (!template.isDataContextSet()) {
+            throw new IdeException("Data context is not set on template: " + template.getFileName(), null);
         }
 
-        if(!template.isMessageContextSet())
-        {
-            throw new IDEException("Message context is not set on template: " + template.getFileName(), null);
+        if (!template.isMessageContextSet()) {
+            throw new IdeException("Message context is not set on template: " + template.getFileName(), null);
         }
 
-        Path dataContextFile = template.getDataContextFilePath();
+        Path dataContextFile = template.getDataContextAbsoluteFilePath();
         String dataContextContent = template.getDataContextContent();
 
         // Add 'rtEvent' wrapper if given <ctx> root
@@ -44,11 +43,11 @@ public final class TemplateRenderer {
             dataContextContent = "<rtEvent>" + dataContextContent + "</rtEvent>";
         }
 
-        Path messageContextFile = template.getMessageContextFilePath();
+        Path messageContextFile = template.getMessageContextAbsoluteFilePath();
         String messageContextContent = template.getMessageContextContent();
 
         String templateSource = template.getWorkspaceFileContent();
-        String sourceName = template.getFileName().toString();
+        String sourceName = template.getFileName();
 
         Context cx;
         Scriptable scope;
@@ -181,33 +180,34 @@ public final class TemplateRenderer {
             if (directive.startsWith("include")) {
                 if (directive.contains("module=")) {
                     String name = extractQuoted(directive, "module");
-                    EtmModule module = workspace.getEtmModuleByName(name).orElseThrow(() ->
-                            new RendererParseException("Module not found in workspace: " + name,
-                                    null,
-                                    source,
-                                    -1,
-                                    "Module not found in workspace",
-                                    "Check module name and check module is added to the workspace",
-                                    null)
-                    );
+                    EtmModule module = (EtmModule) workspace.getWorkspaceFile(name, WorkspaceFileType.MODULE);
+                    if (module == null) {
+                        throw new RendererParseException("Module not found in workspace: " + name,
+                                null,
+                                source,
+                                -1,
+                                "Module not found in workspace",
+                                "Check module name and check module is added to the workspace",
+                                null);
+                    }
                     String moduleOutput =
-                            ModuleRenderer.renderModule(module, cx, scope);
+                            ModuleRenderer.renderModule(workspace, module, cx, scope);
                     out.append(preprocess(workspace, workspaceFile, moduleOutput, cx, scope));
                 } else if (directive.contains("view=")) {
                     String name = extractQuoted(directive, "view");
-                    PersonalisationBlock block = workspace.getBlockByName(name).orElseThrow(() ->
-                            new RendererParseException("Block not found in workspace: " + name,
-                                    null,
-                                    source,
-                                    -1,
-                                    "Block not found in workspace",
-                                    "Check block name and check block is added to the workspace",
-                                    null)
-                    );
+                    PersoBlock block = (PersoBlock) workspace.getWorkspaceFile(name, WorkspaceFileType.BLOCK);
+                    if (block == null) {
+                        throw new RendererParseException("Block not found in workspace: " + name,
+                                null,
+                                source,
+                                -1,
+                                "Block not found in workspace",
+                                "Check block name and check block is added to the workspace",
+                                null);
+                    }
                     out.append(preprocess(workspace, block, block.getWorkspaceFileContent(), cx, scope));
                 }
             }
-
             pos = end + 2;
         }
 

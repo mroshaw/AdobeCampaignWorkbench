@@ -1,7 +1,7 @@
 package com.campaignworkbench.ide;
 
 import com.campaignworkbench.campaignrenderer.RendererException;
-import com.campaignworkbench.campaignrenderer.WorkspaceFile;
+import com.campaignworkbench.workspace.WorkspaceFile;
 import javafx.geometry.Insets;
 import javafx.scene.Node;
 import javafx.scene.control.Label;

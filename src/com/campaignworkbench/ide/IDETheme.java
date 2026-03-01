@@ -65,7 +65,7 @@ public enum IDETheme {
             return styleSheetUrl.toExternalForm();
         }
         else {
-            throw new IDEException("Unable to locate style sheet: " + styleSheet, null);
+            throw new IdeException("Unable to locate style sheet: " + styleSheet, null);
         }
     }
 }

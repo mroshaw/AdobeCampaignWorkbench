@@ -1,7 +1,8 @@
 package com.campaignworkbench.util;
 
-import com.campaignworkbench.campaignrenderer.Workspace;
-import com.campaignworkbench.campaignrenderer.WorkspaceFileType;
+import com.campaignworkbench.ide.FileChooserConfig;
+import com.campaignworkbench.workspace.Workspace;
+import com.campaignworkbench.workspace.WorkspaceFileType;
 import javafx.stage.FileChooser;
 import javafx.stage.Window;
 
@@ -31,11 +32,20 @@ public final class FileUtil {
         }
     }
 
-    public static File openFile(Workspace workspace, WorkspaceFileType fileType, Window owner) {
+    public static void write(Path path, String contentText) {
+        try {
+            byte[] strToBytes = contentText.getBytes();
+            Files.write(path, strToBytes);
+        } catch (IOException e) {
+            throw new RuntimeException("Failed to write file: " + path, e);
+        }
+    }
+
+    public static File openFile(Workspace workspace, WorkspaceFileType fileType, String action,  Window owner) {
 
         FileChooser fileChooser = new FileChooser();
-        fileChooser.setTitle(fileType.getFileOpenWindowTitle());
-        fileChooser.setInitialDirectory(fileType.initialDirectory(workspace).toFile());
+        fileChooser.setTitle(action + " " + fileType.getFileOpenWindowTitle());
+        fileChooser.setInitialDirectory(workspace.getRootFolderPath().resolve(fileType.getFolderName()).toFile());
         fileChooser.getExtensionFilters().addAll(
                 new FileChooser.ExtensionFilter(fileType.extensionFilterDescription(), fileType.extensionFilter())
         );
@@ -50,5 +60,34 @@ public final class FileUtil {
         }
         return null;
 
+    }
+
+    public static FileChooserConfig getFileChooserConfig(WorkspaceFileType fileType, Path workspaceRootPath, String action) {
+        return switch (fileType) {
+            case TEMPLATE -> new FileChooserConfig(
+                    action + " template file",
+                    workspaceRootPath.resolve(fileType.getFolderName()).toFile(),
+                    "Template files",
+                    "*.template"
+            );
+            case MODULE -> new FileChooserConfig(
+                    action + " module file",
+                    workspaceRootPath.resolve(fileType.getFolderName()).toFile(),
+                    "ETM Module files",
+                    "*.module"
+            );
+            case BLOCK -> new FileChooserConfig(
+                    action + " block file",
+                    workspaceRootPath.resolve(fileType.getFolderName()).toFile(),
+                    "Block files",
+                    "*.block"
+            );
+            case CONTEXT -> new FileChooserConfig(
+                    action + " context file",
+                    workspaceRootPath.resolve(fileType.getFolderName()).toFile(),
+                    "Context XML files",
+                    "*.xml"
+            );
+        };
     }
 }

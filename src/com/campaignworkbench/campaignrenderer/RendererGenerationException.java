@@ -1,5 +1,7 @@
 package com.campaignworkbench.campaignrenderer;
 
+import com.campaignworkbench.workspace.WorkspaceFile;
+
 /**
  * JavaScript generation-specific exceptions
  */

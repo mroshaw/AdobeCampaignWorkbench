@@ -1,6 +1,8 @@
 package com.campaignworkbench.campaignrenderer;
 
-import com.campaignworkbench.ide.IDEException;
+import com.campaignworkbench.ide.IdeException;
+import com.campaignworkbench.workspace.EtmModule;
+import com.campaignworkbench.workspace.Workspace;
 import org.mozilla.javascript.Context;
 import org.mozilla.javascript.Scriptable;
 
@@ -15,6 +17,7 @@ public final class ModuleRenderer {
     private ModuleRenderer() {}
 
     public static String renderModule(
+            Workspace workspace,
             EtmModule module,
             Context cx,
             Scriptable scope
@@ -23,10 +26,10 @@ public final class ModuleRenderer {
         // Get the module context
         if(!module.isDataContextSet())
         {
-            throw new IDEException("Data context is not set on module: " + module.getFileName(), null);
+            throw new IdeException("Data context is not set on module: " + module.getFileName(), null);
         }
 
-        Path xmlContextFile = module.getDataContextFilePath();
+        Path xmlContextFile = module.getAbsoluteFilePath();
         String xmlContextContent = module.getDataContextContent();
 
         String moduleSource = module.getWorkspaceFileContent();

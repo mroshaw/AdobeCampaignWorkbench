@@ -1,6 +1,6 @@
 package com.campaignworkbench.ide.editor.richtextfx;
 
-import com.campaignworkbench.ide.IDEException;
+import com.campaignworkbench.ide.IdeException;
 import com.campaignworkbench.ide.IDETheme;
 import com.campaignworkbench.ide.IThemeable;
 import com.campaignworkbench.ide.ThemeManager;
@@ -206,7 +206,7 @@ public class RichTextFXEditor implements ICodeEditor, IThemeable {
             String formattedCode = codeFormatter.format(getText(), indentSize);
             setText(formattedCode);
         } catch (Exception ex) {
-            throw new IDEException("Error formatting code", ex);
+            throw new IdeException("Error formatting code", ex);
         }
     }
 

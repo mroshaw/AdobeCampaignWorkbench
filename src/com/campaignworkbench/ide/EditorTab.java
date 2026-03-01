@@ -1,12 +1,12 @@
 package com.campaignworkbench.ide;
 
-import com.campaignworkbench.campaignrenderer.Template;
-import com.campaignworkbench.campaignrenderer.WorkspaceContextFile;
-import com.campaignworkbench.campaignrenderer.WorkspaceFile;
 import com.campaignworkbench.ide.editor.ICodeEditor;
 import com.campaignworkbench.ide.editor.SyntaxType;
 import com.campaignworkbench.ide.editor.richtextfx.RichTextFXEditor;
 import com.campaignworkbench.util.UiUtil;
+import com.campaignworkbench.workspace.ContextXml;
+import com.campaignworkbench.workspace.WorkspaceContextFile;
+import com.campaignworkbench.workspace.WorkspaceFile;
 import javafx.scene.control.*;
 import javafx.scene.layout.BorderPane;
 import javafx.scene.layout.HBox;
@@ -15,9 +15,6 @@ import javafx.scene.layout.VBox;
 import org.controlsfx.glyphfont.FontAwesome;
 import org.reactfx.Subscription;
 
-import java.io.IOException;
-import java.nio.file.Files;
-import java.nio.file.Path;
 import java.util.Objects;
 
 /**
@@ -66,7 +63,7 @@ public final class EditorTab extends Tab {
         HBox.setHgrow(formatToolBar, Priority.ALWAYS);
 
         // Create the code editor
-        this.editor = new RichTextFXEditor(determineSyntax(workspaceFile.getFilePath()));
+        this.editor = new RichTextFXEditor(determineSyntax(workspaceFile));
         BorderPane root = new BorderPane();
         root.setCenter(editor.getNode());
         editor.setText(workspaceFile.getWorkspaceFileContent());
@@ -82,44 +79,26 @@ public final class EditorTab extends Tab {
         container.getStyleClass().add("editor-tab");
     }
 
-    public void saveFile() {
-        Path file = getFile();
+    public void saveFile() throws IdeException {
         String content = editor.getText();
-
-        try {
-            Files.writeString(file, content);
-            isTextDirty = false;
-            updateTabText();
-        } catch (IOException e) {
-            throw new IDEException("Failed to save file: " + file, e);
-        }
+        workspaceFile.saveWorkspaceFileContent(content);
+        isTextDirty = false;
+        updateTabText();
     }
 
-    public void setDataContextFile(Path contextFile) {
+    public void setDataContextFile(ContextXml contextFile) {
         if (workspaceFile instanceof WorkspaceContextFile workspaceContextFile) {
+
             workspaceContextFile.setDataContextFile(contextFile);
             updateTabText();
         } else {
-            throw new IDEException("Attempted to set context on a non-context based EditorTab!", null);
+            throw new IdeException("Attempted to set context on a non-context based EditorTab!", null);
         }
     }
 
     private void editorTextChangedHandler(String newText) {
         isTextDirty = true;
         updateTabText();
-    }
-
-    public void clearDataContextFile() {
-        setDataContextFile(null);
-    }
-
-    public void setMessageContextFile(Path contextFile) {
-        if (workspaceFile instanceof Template template) {
-            template.setMessageContextFile(contextFile);
-            updateTabText();
-        } else {
-            throw new IDEException("Attempted to set context on a non-context based EditorTab!", null);
-        }
     }
 
     private void updateTabText() {
@@ -142,8 +121,8 @@ public final class EditorTab extends Tab {
      *
      * @return the file associated with this editor tab
      */
-    public Path getFile() {
-        return workspaceFile.getFilePath();
+    public WorkspaceFile getFile() {
+        return workspaceFile;
     }
 
     public void insertTextAtCaret(String text) {
@@ -155,22 +134,6 @@ public final class EditorTab extends Tab {
             return workspaceContextFile.isDataContextSet();
         } else {
             return false;
-        }
-    }
-
-    public Path getDataContextFilePath() {
-        if (workspaceFile instanceof WorkspaceContextFile workspaceContextFile) {
-            return workspaceContextFile.getFilePath();
-        } else {
-            throw new IDEException("Attempted to get context from a non-context based EditorTab!", null);
-        }
-    }
-
-    public String getDataContextFileContent() {
-        if (workspaceFile instanceof WorkspaceContextFile workspaceContextFile) {
-            return workspaceContextFile.getDataContextContent();
-        } else {
-            throw new IDEException("Attempted to get context from a non-context based EditorTab!", null);
         }
     }
 
@@ -224,16 +187,12 @@ public final class EditorTab extends Tab {
     /**
      * Derive the underlying SyntaxType for the editor
      *
-     * @param file the path to the file to determine syntax for
-     * @return the determined syntax type
      */
-    private SyntaxType determineSyntax(Path file) {
-        String name = file.getFileName().toString().toLowerCase();
+    private SyntaxType determineSyntax(WorkspaceFile workspaceFile) {
 
-        return switch (name) {
-            case String s when s.endsWith(".template") || s.endsWith(".module") -> SyntaxType.CAMPAIGN;
-            case String s when s.endsWith(".block") -> SyntaxType.CAMPAIGN;
-            case String s when s.endsWith(".xml") -> SyntaxType.XML;
+        return switch (workspaceFile.getFileType()) {
+            case TEMPLATE, BLOCK, MODULE -> SyntaxType.CAMPAIGN;
+            case CONTEXT -> SyntaxType.XML;
             default -> SyntaxType.PLAIN;
         };
     }

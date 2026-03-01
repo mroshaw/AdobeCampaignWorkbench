@@ -1,6 +1,11 @@
 package com.campaignworkbench.ide;
 
 import com.campaignworkbench.campaignrenderer.*;
+import com.campaignworkbench.ide.workspaceexplorer.WorkspaceExplorer;
+import com.campaignworkbench.workspace.Template;
+import com.campaignworkbench.workspace.Workspace;
+import com.campaignworkbench.workspace.WorkspaceFile;
+import com.campaignworkbench.workspace.WorkspaceFileType;
 import javafx.application.Application;
 import javafx.application.Platform;
 import javafx.geometry.Orientation;
@@ -24,7 +29,7 @@ public class CampaignWorkbenchIDE extends Application implements IThemeable {
     /**
      * The current active workspace
      */
-    private WorkspaceExplorer workspaceExplorer;
+        private WorkspaceExplorer workspaceExplorer;
     private MainToolBar toolBar;
     private EditorTabPanel editorTabPanel;
     private LogPanel logPanel;
@@ -87,7 +92,7 @@ public class CampaignWorkbenchIDE extends Application implements IThemeable {
                 _ -> runTemplate());
 
         // Workspace Explorer
-        workspaceExplorer = new WorkspaceExplorer("Workspace Explorer", null, this::openFileFromWorkspace, this::workspaceChanged, this::insertIntoCodeHandler);
+        workspaceExplorer = new WorkspaceExplorer("Workspace Explorer", this::openFileFromWorkspace, this::workspaceChanged, this::insertIntoCodeHandler);
 
         // Editor tabs
         editorTabPanel = new EditorTabPanel((_, _, newTab) -> tabPanelChanged(newTab));
@@ -205,7 +210,7 @@ public class CampaignWorkbenchIDE extends Application implements IThemeable {
     private void openWorkspaceHandler() {
         try {
             workspaceExplorer.openWorkspace();
-        } catch (IDEException ideEx) {
+        } catch (IdeException ideEx) {
             reportError("An error occurred while opening the workspace: " + ideEx.getMessage(), ideEx, true);
         }
     }
@@ -213,7 +218,7 @@ public class CampaignWorkbenchIDE extends Application implements IThemeable {
     private void newWorkspaceHandler() {
         try {
             workspaceExplorer.createNewWorkspace();
-        } catch (IDEException ideEx) {
+        } catch (IdeException ideEx) {
             reportError("An error occurred while creating a new workspace: " + ideEx.getMessage(), ideEx, true);
         }
     }
@@ -221,7 +226,7 @@ public class CampaignWorkbenchIDE extends Application implements IThemeable {
     private void saveWorkspaceHandler() {
         try {
             workspaceExplorer.saveWorkspace();
-        } catch (IDEException ideEx) {
+        } catch (IdeException ideEx) {
             reportError("An error occurred while saving the workspace: " + ideEx.getMessage(), ideEx, true);
         }
     }
@@ -230,7 +235,7 @@ public class CampaignWorkbenchIDE extends Application implements IThemeable {
         try {
             editorTabPanel.closeAllTabs();
             workspaceExplorer.closeWorkspace();
-        } catch (IDEException ideEx) {
+        } catch (IdeException ideEx) {
             reportError("An error occurred while closing the workspace: " + ideEx.getMessage(), ideEx, true);
         }
     }
@@ -242,7 +247,7 @@ public class CampaignWorkbenchIDE extends Application implements IThemeable {
     private void saveWorkspaceAs() {
         try {
             workspaceExplorer.saveWorkspace();
-        } catch (IDEException ideEx) {
+        } catch (IdeException ideEx) {
             reportError("An error occurred while saving the workspace: " + ideEx.getMessage(), ideEx, true);
         }
     }
@@ -272,7 +277,7 @@ public class CampaignWorkbenchIDE extends Application implements IThemeable {
     private void addExistingFileHandler(WorkspaceFileType fileType) {
         try {
             workspaceExplorer.addExistingFile(fileType);
-        } catch (IDEException ideEx) {
+        } catch (IdeException ideEx) {
             reportError("An error occurred while adding an existing file of type: " + fileType, ideEx, true);
         }
     }
@@ -281,7 +286,7 @@ public class CampaignWorkbenchIDE extends Application implements IThemeable {
         try {
             workspaceExplorer.createNewFile(fileType);
             saveWorkspaceHandler();
-        } catch (IDEException ideEx) {
+        } catch (IdeException ideEx) {
             reportError("An error occurred while creating an new file of type: " + fileType, ideEx, true);
         }
     }
@@ -347,7 +352,7 @@ public class CampaignWorkbenchIDE extends Application implements IThemeable {
                     appendLog("Template ran successfully: " + editorTabPanel.getSelectedFileName());
                 });
             }
-        } catch (IDEException ideEx) {
+        } catch (IdeException ideEx) {
             appendLog("An IDE error occurred: " + ideEx.getMessage());
             reportError(ideEx.getMessage(), ideEx, true);
         } catch (RendererException renderEx) {

@@ -58,11 +58,24 @@
     -fx-padding: 4px;
 }
 
+.workspace-explorer .workspace-explorer-treeview {
+
+}
+
+.workspace-explorer .workspace-explorer-treeview .tree-cell {
+    -fx-min-height: 14px;
+    -fx-padding: 2px;
+}
+
+.workspace-explorer .workspace-explorer-treeview .tree-item-container {
+    -fx-spacing: 8;
+}
+
 /*
 ***************************************************
 *** Error Log                                   ***
 ***************************************************
 */
 .error-log .tree-view .tree-cell {
-    -fx-padding: 2px;   /* top right bottom left */
+    -fx-padding: 2px;
 }
