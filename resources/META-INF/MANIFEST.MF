@@ -11,5 +11,5 @@ Class-Path: richtextfx-0.11.7.jar reactfx-2.0-M5.jar undofx-2.1.1.jar fl
  guagesupport-3.4.1.jar rsyntaxtextarea-3.6.1.jar autocomplete-3.3.3.jar
   rhino-all-1.9.0.jar rhino-1.9.0.jar rhino-tools-1.9.0.jar rhino-xml-1.
  9.0.jar
-Implementation-Version: 1.0.0.61
+Implementation-Version: 1.0.0.62
 

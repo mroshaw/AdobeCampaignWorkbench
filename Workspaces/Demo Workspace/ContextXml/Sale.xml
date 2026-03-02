@@ -1,6 +1,6 @@
 <ctx>
   <customer>
-    <firstName>Bob</firstName>
+    <firstName/>
     <lastName>Smith</lastName>
   </customer>
   <store>

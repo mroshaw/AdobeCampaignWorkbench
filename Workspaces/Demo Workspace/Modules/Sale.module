@@ -17,10 +17,10 @@
 %>
 
 <!-- Main Body -->
-<h3><%= ctx.@HEADER %></h3>
-<p>
+<h3 style="margin: 24px 32px 16px;"><%= ctx.@HEADER %></h3>
+<p style="margin: 24px 32px 16px;">
   <%= perso('for each (item in rtEvent.ctx.sale.items.item) {') %>
-  <strong><%= ctx.@ITEM %></strong>: <%=perso('=item.name') %>, <%= perso('=item.displayPrice') %> <br>
+  <strong><%= ctx.@ITEM %></strong>: <%=perso('=item.name') %>, <strong><%= ctx.@PRICE %></strong>: <%= perso('=item.displayPrice') %> <br>
   <%= perso('}') %>
 </p>
-<h4><%= ctx.@TOTAL_PRICE %>: <%=perso('=rtEvent.ctx.sale.totalPrice') %></h4>
+<h4 style="margin: 24px 32px 16px;"><%= ctx.@TOTAL_PRICE %>: <%=perso('=rtEvent.ctx.sale.totalPrice') %></h4>

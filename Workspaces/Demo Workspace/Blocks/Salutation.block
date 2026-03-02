@@ -1,0 +1,1 @@
+<p style="margin: 24px 32px 16px;">Hi<%= String(rtEvent.ctx.customer.firstName).length > 0 ? " " + rtEvent.ctx.customer.firstName : "" %>,</p>

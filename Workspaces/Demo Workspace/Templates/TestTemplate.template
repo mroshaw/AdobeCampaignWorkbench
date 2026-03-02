@@ -1,0 +1,7 @@
+<html>
+<body>
+<%@ include view='Greeting' %>
+<%@ include module='Sale' %>
+<%@ include view='SignOff' %>
+</body>
+</html>

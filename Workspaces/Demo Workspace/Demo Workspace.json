@@ -1,0 +1,148 @@
+{
+  "blocks" : [ {
+    "fileName" : "Greeting.block",
+    "fileType" : "BLOCK"
+  }, {
+    "fileName" : "SignOff.block",
+    "fileType" : "BLOCK"
+  }, {
+    "fileName" : "Salutation.block",
+    "fileType" : "BLOCK"
+  } ],
+  "contexts" : [ {
+    "fileName" : "Sale.xml",
+    "fileType" : "CONTEXT"
+  }, {
+    "fileName" : "SaleMessage.xml",
+    "fileType" : "CONTEXT"
+  }, {
+    "fileName" : "EmptyContext.xml",
+    "fileType" : "CONTEXT"
+  }, {
+    "fileName" : "SaleModuleContext.xml",
+    "fileType" : "CONTEXT"
+  } ],
+  "modules" : [ {
+    "dataContextFile" : {
+      "fileName" : "EmptyContext.xml",
+      "fileType" : "CONTEXT"
+    },
+    "dataContextFileProperty" : {
+      "bean" : null,
+      "bound" : false,
+      "name" : "",
+      "value" : null
+    },
+    "fileName" : "Start.module",
+    "fileType" : "MODULE"
+  }, {
+    "dataContextFile" : {
+      "fileName" : "EmptyContext.xml",
+      "fileType" : "CONTEXT"
+    },
+    "dataContextFileProperty" : {
+      "bean" : null,
+      "bound" : false,
+      "name" : "",
+      "value" : null
+    },
+    "fileName" : "End.module",
+    "fileType" : "MODULE"
+  }, {
+    "dataContextFile" : {
+      "fileName" : "EmptyContext.xml",
+      "fileType" : "CONTEXT"
+    },
+    "dataContextFileProperty" : {
+      "bean" : null,
+      "bound" : false,
+      "name" : "",
+      "value" : null
+    },
+    "fileName" : "ErrorChecking.module",
+    "fileType" : "MODULE"
+  }, {
+    "dataContextFile" : {
+      "fileName" : "SaleModuleContext.xml",
+      "fileType" : "CONTEXT"
+    },
+    "dataContextFileProperty" : {
+      "bean" : null,
+      "bound" : false,
+      "name" : "",
+      "value" : null
+    },
+    "fileName" : "Sale.module",
+    "fileType" : "MODULE"
+  } ],
+  "templates" : [ {
+    "dataContextFile" : {
+      "fileName" : "Sale.xml",
+      "fileType" : "CONTEXT"
+    },
+    "dataContextFileProperty" : {
+      "bean" : null,
+      "bound" : false,
+      "name" : "",
+      "value" : null
+    },
+    "fileName" : "Sale.template",
+    "fileType" : "TEMPLATE",
+    "messageContextFile" : {
+      "fileName" : "SaleMessage.xml",
+      "fileType" : "CONTEXT"
+    },
+    "messageContextFileProperty" : {
+      "bean" : null,
+      "bound" : false,
+      "name" : "",
+      "value" : null
+    }
+  }, {
+    "dataContextFile" : {
+      "fileName" : "Sale.xml",
+      "fileType" : "CONTEXT"
+    },
+    "dataContextFileProperty" : {
+      "bean" : null,
+      "bound" : false,
+      "name" : "",
+      "value" : {
+        "fileName" : "Sale.xml",
+        "fileType" : "CONTEXT"
+      }
+    },
+    "fileName" : "Basic.template",
+    "fileType" : "TEMPLATE",
+    "messageContextFile" : {
+      "fileName" : "SaleMessage.xml",
+      "fileType" : "CONTEXT"
+    },
+    "messageContextFileProperty" : {
+      "bean" : null,
+      "bound" : false,
+      "name" : "",
+      "value" : {
+        "fileName" : "SaleMessage.xml",
+        "fileType" : "CONTEXT"
+      }
+    }
+  }, {
+    "dataContextFile" : null,
+    "dataContextFileProperty" : {
+      "bean" : null,
+      "bound" : false,
+      "name" : "",
+      "value" : null
+    },
+    "fileName" : "SalutationTest.template",
+    "fileType" : "TEMPLATE",
+    "messageContextFile" : null,
+    "messageContextFileProperty" : {
+      "bean" : null,
+      "bound" : false,
+      "name" : "",
+      "value" : null
+    }
+  } ]
+}
