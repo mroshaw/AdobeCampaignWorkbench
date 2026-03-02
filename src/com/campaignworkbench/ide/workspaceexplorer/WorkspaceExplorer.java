@@ -388,7 +388,7 @@ public class WorkspaceExplorer implements IJavaFxNode {
     }
 
     public void createNewFile(WorkspaceFileType workspaceFileType) {
-        File selectedFile = FileUtil.openFile(getWorkspace(), workspaceFileType, "Create new", getWindow());
+        File selectedFile = FileUtil.createFile(getWorkspace(), workspaceFileType, getWindow());
 
         if (selectedFile == null) {
             return;
@@ -398,7 +398,7 @@ public class WorkspaceExplorer implements IJavaFxNode {
     }
 
     public void addExistingFile(WorkspaceFileType workspaceFileType) {
-        File selectedFile = FileUtil.openFile(getWorkspace(), workspaceFileType, "Select existing", getWindow());
+        File selectedFile = FileUtil.openFile(getWorkspace(), workspaceFileType,  getWindow());
 
         if (selectedFile == null) {
             return;

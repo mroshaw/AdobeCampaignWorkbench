@@ -17,6 +17,22 @@ import java.nio.file.Path;
  */
 public final class FileUtil {
 
+    private enum FileAction {
+        CREATE ("Create new "),
+        OPEN ("Open existing "),
+        SAVE ("Save as");
+
+        private final String actionText;
+
+        FileAction(String actionText) {
+            this.actionText = actionText;
+        }
+
+        String getActionText() {
+            return actionText;
+        }
+    }
+
     private FileUtil() {}
 
     /**
@@ -41,17 +57,19 @@ public final class FileUtil {
         }
     }
 
-    public static File openFile(Workspace workspace, WorkspaceFileType fileType, String action,  Window owner) {
-
+    private static File showFileDialog(FileAction fileAction, Workspace workspace, WorkspaceFileType fileType, Window owner) {
         FileChooser fileChooser = new FileChooser();
-        fileChooser.setTitle(action + " " + fileType.getFileOpenWindowTitle());
+        fileChooser.setTitle(fileAction.getActionText() + " " + fileType.getFileOpenWindowTitle());
         fileChooser.setInitialDirectory(workspace.getRootFolderPath().resolve(fileType.getFolderName()).toFile());
         fileChooser.getExtensionFilters().addAll(
                 new FileChooser.ExtensionFilter(fileType.extensionFilterDescription(), fileType.extensionFilter())
         );
-
-        File selectedFile = fileChooser.showOpenDialog(owner);
-
+        File selectedFile;
+        if(fileAction == FileAction.OPEN) {
+            selectedFile = fileChooser.showOpenDialog(owner);
+        } else {
+            selectedFile = fileChooser.showSaveDialog(owner);
+            }
         String verifyFileExtension = fileType.extensionFilter().substring(1);
 
         if (selectedFile != null && selectedFile.getName().endsWith(verifyFileExtension)) {
@@ -60,6 +78,18 @@ public final class FileUtil {
         }
         return null;
 
+    }
+
+    public static File openFile(Workspace workspace, WorkspaceFileType fileType, Window owner) {
+        return showFileDialog(FileAction.OPEN, workspace, fileType, owner);
+    }
+
+    public static File createFile(Workspace workspace, WorkspaceFileType fileType, Window owner) {
+        return showFileDialog(FileAction.CREATE, workspace, fileType, owner);
+    }
+
+    public static File saveFile(Workspace workspace, WorkspaceFileType fileType, Window owner) {
+        return showFileDialog(FileAction.SAVE, workspace, fileType, owner);
     }
 
     public static FileChooserConfig getFileChooserConfig(WorkspaceFileType fileType, Path workspaceRootPath, String action) {
